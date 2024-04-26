@@ -1,0 +1,39 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+<style>
+</style>
+</%block>
+
+<%block name="pagetitle">${_("Online Exam")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+  <div class="container">
+      <div class="row">
+          <div class="col-md-12">
+              <div class="exam text-center">
+                  <h1><span class="las la la-check-circle text-success"></span></h1>
+                  <h3>${_("Exam submitted")} !!</h2>
+                  <h4>${_("You have already submitted the exam.")}
+                  <div class="mt-2">
+                      <a href="/" class="btn btn-primary">
+                          <span class="las la la-home"></span>
+                          ${_("Dashboard")}
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</main>
+
+<%block name="js_extra">
+</%block>

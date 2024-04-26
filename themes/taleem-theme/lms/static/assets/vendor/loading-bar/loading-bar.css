@@ -1,0 +1,29 @@
+progress.mack-progress {
+  text-align: center;
+  height: 1em;
+  margin-top: 10px;
+  -webkit-appearance: none;
+  border: none;
+  
+  /* Set the progressbar to relative */
+  position:relative;
+}
+progress.mack-progress:before {
+  content: attr(data-label);
+  font-size: 0.8em;
+  vertical-align: 0;
+  
+  /*Position text over the progress bar */
+  position:absolute;
+  left:0;
+  right:0;
+}
+progress.mack-progress::-webkit-progress-bar {
+  background-color: #c9c9c9;
+}
+progress.mack-progress::-webkit-progress-value {
+  background-color: #7cc4ff;
+}
+progress.mack-progress::-moz-progress-bar {
+  background-color: #7cc4ff;
+}

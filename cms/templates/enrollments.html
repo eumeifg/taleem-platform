@@ -1,0 +1,230 @@
+<%page expression_filter="h"/>
+<%inherit file="base.html" />
+<%def name="online_help_token()"><% return "files" %></%def>
+<%!
+  import six
+
+  from django.urls import reverse
+  from openedx.custom.utils import utc_datetime_to_local_datetime
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.markup import HTML, Text
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%block name="title">${_("Enrollments")}</%block>
+<%block name="bodyclass">is-signedin course view-enrollments</%block>
+
+<%namespace name='static' file='static_content.html'/>
+
+<%block name="header_extras">
+    <style type="text/css">
+        .btn {border-radius: 5px;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {color: #fff !important; background: #2c1c59 !important;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {background: #2c1c59 !important;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {background: transparent !important;}
+    </style>
+</%block>
+
+<%block name="content">
+
+<div class="wrapper-mast wrapper">
+    <header class="mast has-actions has-subtitle">
+        <h2 class="page-header">
+            <small class="subtitle">${_("Tools")}</small>
+            <span class="sr">- </span>${_("Enrollments")}
+        </h2>
+        <nav class="nav-actions" aria-label="Page Actions">
+            <h3 class="sr">Page Actions</h3>
+            <ul>
+                <li class="nav-item">
+                    <a href="#" class="button new-button new-enrollment-button">
+                    <span class="icon fa fa-plus icon-inline" aria-hidden="true"></span>
+                    ${_("New Enrollment")}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+</div>
+
+<div class="wrapper-content wrapper">
+    <div class="content">
+        <div class="container">
+            <div class="wrapper-create-element wrapper-enroll-users">
+                <form class="form-create enroll-users-form" id="enroll-users-form" name="enroll-users-form">
+                    <div class="wrap-error">
+                        <div id="user-enrollment-error" class="message message-status message-status error" role="alert">
+                            <p>${_("Please correct the highlighted fields below.")}</p>
+                        </div>
+                    </div>
+                    <div class="wrapper-form">
+                        <h3 class="title">${_("Enroll Users")}</h3>
+                        <fieldset>
+                            <legend class="sr">${_("Required Information to Enroll a New User")}</legend>
+                            <ol class="list-input">
+                                <li class="field text required" id="field-email">
+                                    <label for="email">${_("Email")}</label>
+                                    <input class="email" id="email" type="text" name="email" placeholder="${_('e.g. staff@example.com')}" aria-describedby="tip-email tip-error-email" />
+                                    <span class="tip" id="tip-email">${_("The email of the user, you want to enroll.")}</span>
+                                    <span class="tip tip-error is-hiding" id="tip-error-email"></span>
+                                </li>
+                                <li class="field text required" id="field-csv">
+                                    <label for="csv">${_("CSV")}</label>
+                                    <input class="file_field csv" id="csv" name="csv" type="file" accept=".csv" aria-describedby="tip-csv tip-error-csv"/>
+                                    <span class="tip" id="tip-csv">${_("The CSV containing emails you want to enroll.")}</span>
+                                    <span class="tip tip-error is-hiding" id="tip-error-csv"></span>
+                                </li>
+                            </ol>
+                            <input type="hidden" value="true" class="allow-unicode-enroll-users" />
+                            <input type="hidden" value="honor" name="mode" />
+                            <input type="hidden" value="${course_id}" name="course_key_string" />
+                        </fieldset>
+                    </div>
+                    <div class="actions">
+                        <input type="submit" value="${_('Enroll')}" class="action action-primary enroll-users" />
+                        <a class="action action-primary right" href="${reverse('taleem_organization:csv_samples', args=('enrollments',))}" target="_blank">${_('Download Sample CSV')}</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="display text-center" id="tbl-enrollments">
+                    <thead>
+                        <tr>
+                            <th>${_("Email")}</th>
+                            <th>${_("Enrollment Date")}</th>
+                            <th>${_("Actions")}</th>
+                        </tr>
+                    </thead>
+                    % for enrollment in enrollments:
+                    <tr>
+                        <td>${enrollment.user.email}</td>
+                        <td data-sort="${enrollment.created.timestamp()}">
+                            ${utc_datetime_to_local_datetime(enrollment.created).strftime("%d-%m-%Y %I:%M %p")}
+                        </td>
+                        <td>${enrollment.user.username}</td>
+                    </tr>
+                    % endfor
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</%block>
+
+<%block name="jsextra">
+<script type="text/javascript">
+    var courseId = "${course_id}";
+</script>
+</%block>
+
+<%block name='requirejs'>
+require(
+  ['domReady', 'jquery', 'underscore', 'gettext', 'moment', 'js/views/utils/enroll_users_utils', 'dataTables'],
+  function(domReady, $, _, gettext, moment, EnrollUsersUtilsFactory) {
+      'use strict';
+
+      var enrollmentsTable = null;
+      var EnrollUsersUtils = new EnrollUsersUtilsFactory({
+            email: '.email',
+            csv: '.csv',
+            save: '.enroll-users',
+            errorWrapper: '.enroll-users-form .wrap-error',
+            errorMessage: '#user-enrollment-error',
+            tipError: '.enroll-users-form span.tip-error',
+            error: '.enroll-users-form .error',
+            allowUnicode: '.allow-unicode-enroll-users'
+        }, {
+            shown: 'show',
+            showing: 'show',
+            hiding: 'hidden',
+            disabled: 'is-disabled',
+            error: 'error'
+        });
+
+      var addNewEnrollment = function (e) {
+        e.preventDefault();
+        $('.new-enrollment-button').addClass('is-disabled').attr('aria-disabled', true);
+        $('.wrapper-enroll-users').addClass('is-shown');
+      };
+
+      var enrollReqSuccessHandler = function(data) {
+        enrollmentsTable.rows.add(data.enrolled).draw();
+        document.getElementById("enroll-users-form").reset();
+        $('.new-enrollment-button').removeClass('is-disabled').attr('aria-disabled', false);
+        $('.enroll-users').removeClass('is-disabled').attr('aria-disabled', false);
+        $('.wrapper-enroll-users').removeClass('is-shown');
+      };
+
+      var enrollReqErrorHandler = function(errorMessage) {
+          var msg = edx.HtmlUtils.joinHtml(edx.HtmlUtils.HTML('<p>'), errorMessage, edx.HtmlUtils.HTML('</p>'));
+          $('.enroll-users-form .wrap-error').addClass('is-shown');
+          edx.HtmlUtils.setHtml($('#user-enrollment-error'), msg);
+          $('.enroll-users').addClass('is-disabled').attr('aria-disabled', true);
+      };
+
+      var enrollUsers = function (e) {
+        e.preventDefault();
+
+        if (EnrollUsersUtils.hasInvalidRequiredFields()) {
+          return;
+        }
+        var enrollUsersInfo = new FormData(e.currentTarget);
+
+        $('.enroll-users').addClass('is-disabled').attr('aria-disabled', true);
+        EnrollUsersUtils.create(enrollUsersInfo, enrollReqSuccessHandler, enrollReqErrorHandler);
+      };
+
+      var onReady = function() {
+        $('.new-enrollment-button').bind('click', addNewEnrollment);
+        $('.enroll-users-form').bind('submit', enrollUsers);
+
+        enrollmentsTable = $('#tbl-enrollments').DataTable({
+            columnDefs: [{
+                "targets": -1,
+                "render": function (data, type, row) {
+                    var button = '<button class="btn btn-primary unenroll" data-username="' + data + '">' + "${_("Unenroll")}" + '</button>';
+                    return button;
+                }
+            }],
+            language: {
+                url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+            },
+        });
+
+        $('#tbl-enrollments').on( 'click', '.unenroll', function () {
+            var $el = $(this);
+            var $row = $el.closest("tr");
+            var username = $el.data('username');
+            $.post({
+                url: "/api/enrollment/v1/unenroll/",
+                data: {
+                    username: username,
+                    course_id: courseId
+                },
+                success: function(){
+                    enrollmentsTable
+                                    .row( $row )
+                                    .remove()
+                                    .draw();
+                },
+                error: function(xhr) {
+                    alert('Something went wrong!');
+                }
+            });
+        });
+
+      }
+
+      domReady(onReady);
+
+      return {
+          onReady: onReady
+      };
+  }
+);
+</%block>
+

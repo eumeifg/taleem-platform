@@ -1,0 +1,38 @@
+.personalContent {
+    padding-top: 1vh;
+    display: flex;
+     justify-content: center;
+}
+
+.personalMain {
+    padding-top: 2vh;
+    height: 40vh;
+    width: 85vw;
+    border: solid 1px black;
+    text-align: center;
+}
+
+.btnline {
+    display: flex;
+    justify-content: space-around;
+}
+
+.loginbtnTag {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+    cursor:pointer;
+    width: 10vw;
+    margin: auto;
+    margin-top: 4vh;
+    text-decoration: none;
+}
+
+th,td {
+    min-width: 2vw;
+    min-height: 3vh;
+}

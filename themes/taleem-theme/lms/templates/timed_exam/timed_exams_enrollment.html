@@ -1,0 +1,48 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+  from student.models import CourseEnrollment
+  from openedx.custom.wishlist.models import Wishlist
+  from django.urls import reverse
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+</%block>
+
+<%block name="pagetitle">${_("Exam Enrollment")}</%block>
+
+<div id="register_error"></div>
+<main id="main" aria-label="Content" tabindex="-1">
+    % if errors:
+    <div class="messages" style="padding: 1em;color: red;">
+        <div class="error-text">${errors}</div>
+    </div>
+    % endif
+    <div class="course-content">
+        <p>To enroll in <b>${timed_exam.display_name}</b>, please enter the password in the field below and submit the form.</p>
+
+    </div>
+    <div class="exam-enrollment-form">
+        <form action="" method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="${ csrf_token }">
+            <div>
+                <label for="id_enrollment_password">Enrollment password:</label>
+                <input type="text" name="enrollment_password" maxlength="255" required="required" id="id_enrollment_password">
+            </div>
+            <div>
+                <input type="submit" value="Enroll">
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<%block name="js_extra">
+  <script>
+  </script>
+</%block>

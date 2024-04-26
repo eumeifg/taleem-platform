@@ -1,0 +1,5 @@
+<div class="wrapper-comp-setting">
+	<label class="label setting-label" for="<%- uniqueId %>"><%- model.get('display_name') %></label>
+        <textarea class="input setting-input" id="<%- uniqueId %>" style="height:100px; width: 45%; text-indent:5px;"><%- model.get("value") %></textarea>
+</div>
+<span class="tip setting-help"><%- model.get('help') %></span>

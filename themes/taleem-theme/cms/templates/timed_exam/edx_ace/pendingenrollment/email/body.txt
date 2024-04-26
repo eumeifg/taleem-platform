@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}You have been enrolled in a timed exam, please visit Ta3leem Site to register and attempt your timed exam.{% endblocktrans %}
+
+{{ registration_link }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

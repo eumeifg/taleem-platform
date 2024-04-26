@@ -1,0 +1,54 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+    from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+    from openedx.core.djangolib.js_utils import dump_js_escaped_json
+%>
+<%namespace name='static' file='/static_content.html'/>
+
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Captcha Verification")}</%block>
+
+
+<%block name="header_extras">
+<style>
+    .error {
+        color: #B20610FF;
+    }
+</style>
+</%block>
+<div class="section-bkg-wrapper">
+    <main id="main" aria-label="Content" tabindex="-1">
+        <div id="content-container" class="login-register-content">
+            <div id="login-and-registration-container captcha-container" class="login-register captcha">
+                % if messages:
+                    <ul class="messages">
+                        % for message in messages:
+                            <li class="${message.tags if message.tags else ''}">
+                                ${'Please enter valid captcha' if LANGUAGE_CODE == 'en' else 'الرجاء إدخال كلمة التحقق الصحيحة'}
+                            </li>
+                        % endfor
+                    </ul>
+                % endif
+                <form method="post" >
+                    <label for="captcha">${_('Human verification')}</label>
+                    <br />
+                    <img src="data:image/png;base64, ${captcha}" alt="captcha">
+                    <br />
+                    <br />
+                    <input style="width: 100%;" type="text" id="captcha" name="captcha"/>
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
+                    <input type="hidden" name="captcha_text" value="${captcha_text}"/>
+                    <br />
+                    <br />
+                    <button style="width: 100%;" class="btn btn-primary" type="submit">${_('Verify')}</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="text/javascript">
+</script>

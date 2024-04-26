@@ -1,0 +1,126 @@
+<%def name="online_help_token()"><% return "course" %></%def>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.utils import timezone
+from django.urls import reverse
+from django.conf import settings
+from six import text_type
+from opaque_keys.edx.keys import CourseKey
+from openedx.custom.taleem_grades.models import PersistentExamGrade
+from openedx.custom.timed_exam.models import TimedExam, QuestionSet
+from openedx.custom.utils import utc_datetime_to_local_datetime
+from completion.models import BlockCompletion
+from student.models import CourseEnrollment
+from edx_proctoring.models import ProctoredExamReview, ProctoredExamStudentAttempt
+from edx_proctoring import constants
+from edx_proctoring.statuses import ProctoredExamStudentAttemptStatus
+from openedx.custom.offline_exam.models import OfflineExamStudentAttempt
+from openedx.custom.offline_exam.statuses import OfflineExamStudentAttemptStatus
+%>
+<%page args="exam,is_tb,tb_exam_url" expression_filter="h"/>
+
+<%
+exam_key = CourseKey.from_string(exam.key)
+review_status = ProctoredExamReview.get_review_status(user, exam.key)
+
+try:
+    exam_score = PersistentExamGrade.objects.get(
+        course_id=exam_key,
+        user_id=user.id,
+    ).percent_grade
+except PersistentExamGrade.DoesNotExist:
+    exam_score = 0
+
+if exam.release_date < timezone.now() < exam.due_date:
+  exam_status = _('On Going')
+  badge_class = 'badge-primary'
+elif timezone.now() < exam.release_date:
+  exam_status = _('Scheduled')
+  badge_class = 'badge-warning'
+else:
+  exam_status = _('Ended')
+  badge_class = 'badge-danger'
+
+attempted = False
+live_status = ''
+if exam.mode == 'ON':
+  attempted = ProctoredExamStudentAttempt.objects.filter(
+    user=user,
+    proctored_exam__course_id=exam_key,
+    status=ProctoredExamStudentAttemptStatus.submitted,
+  ).exists()
+  live_status = ProctoredExamStudentAttempt.live_status(user, exam.key)
+else:
+  attempted = OfflineExamStudentAttempt.objects.filter(
+    user=user,
+    timed_exam__key=exam_key,
+    status=OfflineExamStudentAttemptStatus.submitted,
+  ).exists()
+
+disable_link = True
+btn_text = _("Start Exam")
+score = "--"
+btn_link = 'javascript:void(0);'
+
+if attempted:
+  attempt_status = _('Completed')
+  attempt_class = 'badge-success'
+  score = exam_score
+elif live_status and live_status == 'attempting':
+  attempt_status = _("Attempting")
+  attempt_class = 'badge-info'
+  btn_link = exam.exam_url if is_tb else tb_exam_url
+  disable_link = False
+  btn_text = _("Resume Exam")
+elif live_status and live_status == 'dangling':
+  attempt_status = _("Timed out")
+  attempt_class = 'badge-warning'
+elif exam.due_date <= timezone.now():
+  attempt_status = _('Missed')
+  attempt_class = 'badge-danger'
+  score = 0
+else:
+  attempt_status = _("Yet to start")
+  attempt_class = 'badge-primary'
+  if exam.release_date < timezone.now() < exam.due_date:
+    disable_link = False
+    if QuestionSet.objects.filter(user=user, course_id=exam.key).exists():
+      btn_link = exam.exam_url if is_tb else tb_exam_url
+    else:
+      btn_text = _("Preparing question set")
+%>
+<tr>
+  <td>${exam.display_name}</td>
+  <td><span>${exam.display_allotted_time}</span></td>
+  <td data-order="${exam.release_date.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(exam.release_date).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td data-order="${exam.due_date.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(exam.due_date).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td>
+    <span class="badge badge-${'success' if exam.mode=='ON' else 'danger'}">${exam.get_mode_display()}
+    </span>
+  </td>
+  <td><span class="badge ${badge_class}">${exam_status}</span></td>
+  <td><span class="badge ${attempt_class}">${attempt_status}</span></td>
+  <td>
+      % if exam.enable_monitoring:
+            ${"{}/100".format(score) if review_status else _("Under Review")}
+      % else:
+            ${_("Under Review") if score == '--' else "{}/100".format(score) }
+      % endif:
+  </td>
+  <td class="text-nowrap">
+    % if disable_link:
+      <span>--</span>
+    % else:
+      <a href="${btn_link}">${btn_text}</a>
+    % endif
+  </td>
+</tr>

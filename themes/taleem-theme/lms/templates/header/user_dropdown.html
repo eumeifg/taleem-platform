@@ -1,0 +1,71 @@
+## mako
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+
+<%!
+from django.conf import settings
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
+from openedx.core.djangoapps.user_api.accounts.toggles import should_redirect_to_order_history_microfrontend
+from openedx.custom.taleem.utils import user_is_verified_teacher, user_is_verification_specialist, user_is_ta3leem_admin
+from openedx.features.enterprise_support.utils import get_enterprise_learner_generic_name
+from lms.djangoapps.verify_student.services import IDVerificationService
+from openedx.custom.timed_exam.models import TimedExamHide
+%>
+
+<%
+## This template should not use the target student's details when masquerading, see TNL-4895
+self.real_user = getattr(user, 'real_user', user)
+profile_image_url = get_profile_image_urls_for_user(self.real_user)['medium']
+username = self.real_user.username
+displayname = get_enterprise_learner_generic_name(request) or username
+user_verified = IDVerificationService.user_has_valid_or_pending(self.real_user)
+studio_url = "http://" + settings.CMS_BASE
+user_is_teacher = user_is_verified_teacher(self.real_user)
+is_verification_specialist = user_is_verification_specialist(self.real_user)
+is_ta3leem_admin = user_is_ta3leem_admin(self.real_user)
+has_archived_exams = TimedExamHide.has_archived_exams(self.real_user)
+%>
+
+<div class="nav-item hidden-mobile">
+    <a href="${reverse('dashboard')}" class="menu-title">
+        <img class="user-image-frame" src="${profile_image_url}" alt="">
+        <span class="sr-only">${_("Dashboard for:")}</span>
+        <span class="username">${displayname}</span>
+    </a>
+</div>
+<div class="nav-item hidden-mobile nav-item-dropdown" tabindex="-1">
+    <div class="toggle-user-dropdown" role="button" aria-label=${_("Options Menu")} aria-expanded="false" tabindex="0" aria-controls="user-menu">
+        <span class="las la-lg la-caret-down" aria-hidden="true"></span>
+    </div>
+    <div class="dropdown-user-menu hidden" aria-label=${_("More Options")} role="menu" id="user-menu" tabindex="-1">
+        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('dashboard')}" role="menuitem"><i class="las la-lg mx-1 la-sitemap"></i> ${_("Dashboard")}</a></div>
+        % if not user_verified:
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('verification:verify_student_identification')}" role="menuitem"><i class="las la-lg mx-1 la-user-check"></i> ${_("ID Verification")}</a></div>
+        % endif
+        % if self.real_user.is_superuser or self.real_user.is_staff or (user_is_teacher and user_verified) or is_ta3leem_admin:
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('live_classes_management')}" role="menuitem"><i class="las la-tasks"></i> ${_("Live Class Management")}</a></div>
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('teacher_dashboard_view:teacher_dashboard_view')}" role="menuitem"><i class="las la-tasks"></i> ${_("Teacher Dashboard")}</a></div>
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${studio_url}" role="menuitem"><i class="las la-lg mx-1 la-chalkboard-teacher"></i> ${_("Studio")}</a></div>
+            % if has_archived_exams:
+                <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('timed_exam:archived_exams_page')}" role="menuitem"><i class="las la-lg mx-1 la-chalkboard-teacher"></i> ${_("Archived Exams")}</a></div>
+            % endif
+        % endif
+        % if self.real_user.is_superuser or is_ta3leem_admin:
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('taleem:teacher_account_requests')}" role="menuitem"><i class="las la-tasks"></i> ${_("Teacher Account Requests")}</a></div>
+        % endif
+        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('learner_profile', kwargs={'username': username})}" role="menuitem"><i class="las la-lg mx-1 la-id-card"></i> ${_("Profile")}</a></div>
+        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('account_settings')}" role="menuitem"><i class="las la-lg mx-1 la-user-shield"></i> ${_("Account")}</a></div>
+        % if self.real_user.is_superuser or is_verification_specialist:
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('verification:verification_requests_view', kwargs={'user_type': 'student'})}" role="menuitem"><i class="las la-lg mx-1 la-id-badge"></i> ${_("Student Verifications")}</a></div>
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('verification:verification_requests_view', kwargs={'user_type': 'teacher'})}" role="menuitem"><i class="las la-lg mx-1 la-id-card-alt"></i> ${_("Teacher Verifications")}</a></div>
+        % endif
+        % if should_redirect_to_order_history_microfrontend():
+            <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${settings.ORDER_HISTORY_MICROFRONTEND_URL}" role="menuitem"><i class="las la-lg mx-1 la-history"></i> ${_("Order History")}</a></div>
+        % endif
+        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="/help" role="menuitem"><i class="las la-lg mx-1 la-question-circle"></i> ${_("Help")}</a></div>
+        <div class="mobile-nav-item dropdown-item dropdown-nav-item"><a href="${reverse('logout')}" role="menuitem"><i class="las la-lg mx-1 la-sign-out-alt"></i> ${_("Sign Out")}</a></div>
+    </div>
+</div>

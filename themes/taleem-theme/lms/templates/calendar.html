@@ -1,0 +1,339 @@
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+from datetime import datetime
+%>
+
+<div class="calendar-wrapper loading">
+  <div class="calendar-panel">
+    <div id="calendar" class="calendar"></div>
+    <div class="calendar-timezone">${ user_timezone if user_timezone is not None else 'Asia/Baghdad' }</div>
+    <div class="calendar-close">
+      <i class="las la-2x la-times"></i>
+    </div>
+    <div class="loading-block"><i class="las la-3x la-spin la-sync"></i></div>
+  </div>
+  <div class="calendar-overlay"></div>
+
+  <div class="modal fade" id="addReminderModal" data-backdrop="static" tabindex="-1" aria-labelledby="addReminderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addReminderModalLabel"><i class="las la-lg la-bell mx-1"></i> ${_("Add Reminder")}</h5>
+          <a class="btn close" data-dismiss="modal" aria-label="Close">
+            <i class="las la-times"></i>
+          </a>
+        </div>
+        <div class="modal-body">
+          <form>
+            <input type="hidden" id="reminder-type">
+            <input type="hidden" id="reminder-id">
+            <div class="form-group">
+              <label for="reminder-desc" class="col-form-label">${_("Description")} :</label>
+              <textarea class="form-control" id="reminder-desc"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="reminder-datetime" class="col-form-label">${_("Time")} :</label>
+              <input type="datetime-local" class="form-control" id="reminder-datetime" value="${datetime.now().replace(microsecond=0).isoformat()}" min="${datetime.now().replace(microsecond=0).isoformat()}">
+            </div>
+            <div class="row">
+              <div class="col">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="reminder-email" checked>
+                  <label class="custom-control-label" for="reminder-email">${_("Send Email")}</label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="reminder-notification" checked>
+                  <label class="custom-control-label" for="reminder-notification">${_("Send Notification")}</label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <a type="button" onclick="saveEventReminder()" class="btn btn-send"> ${_("Add")}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="createEventModal" data-backdrop="static" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createEventModalLabel"><i class="las la-lg la-bell mx-1"></i> ${_("Create Event")}</h5>
+          <a class="btn close" data-dismiss="modal" aria-label="Close">
+            <i class="las la-times"></i>
+          </a>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="event-title" class="col-form-label">${_("Title")} :</label>
+              <input class="form-control" id="event-title" type="text" name="event_title"></input>
+            </div>
+            <div class="form-group">
+              <label for="event-desc" class="col-form-label">${_("Description")} :</label>
+              <textarea class="form-control" id="event-desc" name="event_description"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="event-datetime" class="col-form-label">${_("Time")} :</label>
+              <input type="datetime-local" class="form-control" id="event-datetime" value="${datetime.now().replace(microsecond=0).isoformat()}" min="${datetime.now().replace(microsecond=0).isoformat()}" name="event_time">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <a type="button" onclick="createCalendarEvent()" class="btn btn-send"> ${_("Add Event")}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript" src="${static.url('assets/js/fullcalendar.min.js')}"></script>
+<script type="text/javascript" src="${static.url('assets/js/fullcalendar-ar.js')}"></script>
+<script type="text/javascript" src="${static.url('assets/js/moment-with-locales.min.js')}"></script>
+<script type="text/javascript" src="${static.url('assets/js/moment-timezone.min.js')}"></script>
+<script type="text/javascript" src="${static.url('assets/js/calendar.js')}"></script>
+
+<!--Start of Calendar Script-->
+<script type="text/javascript">
+  var currentLocale = '${ LANGUAGE_CODE }';
+  var timeZone = '${ user_timezone }';
+  var firstDayOfWeek = '${ calendar_first_day_of_week }';
+  var dateFormat = '${ calendar_date_format }';
+  var eventsColors = {
+    'course': 'green',
+    'course_start_date': 'green',
+    'course_end_date': 'green',
+    'course_important_date': 'purple',
+    'exam': 'red',
+    'exam_start_date': 'red',
+    'exam_end_date': 'red',
+    'live_class': 'orange',
+    'custom_event': 'blue'
+  };
+
+  var origCalendarGetUserEvents = calendarGetUserEvents;
+  calendarGetUserEvents = function(info, successCallback, failureCallback) {
+    let start = info.startStr.valueOf().substring(0, 10);
+    let end = info.endStr.valueOf().substring(0, 10);
+
+    // Request the user events
+    var url = '/calendar/get_all_calendar_events/';
+
+    jQuery.ajax({
+      type: "GET",
+      url: url,
+      data: {
+        'from_date': start,
+        'to_date': end
+      },
+      success: function (res) {
+          if (res.events) {
+              let events = res.events.map( x => {
+                  x.start = moment(x.start_date).tz(calendarTimeZone).format();
+                  if(x.end_date) {
+                      x.end = moment(x.end_date).tz(calendarTimeZone).format();
+                  }
+                  delete x.start_date;
+                  delete x.end_date;
+                  // extract the ID
+                  if(x.course_id) {
+                      x.entity_id = x.course_id;
+                  } else if(x.exam_id) {
+                      x.entity_id = x.exam_id;
+                  } if(x.live_class_id) {
+                      x.entity_id = x.live_class_id;
+                  } if(x.course_important_date_id) {
+                      x.entity_id = x.course_important_date_id;
+                  } if(x.event_id){
+                      x.entity_id = x.event_id
+                  }
+                  // set colors for event types
+                  if(eventsColors.hasOwnProperty(x.type)) {
+                      x.color = eventsColors[x.type];
+                  }
+                  // check reminders
+                  if(x.reminders.length) {
+                      x.classNames = "with-reminder";
+                  }
+                  return x;
+              })
+              successCallback(events)
+          }
+      },
+      error: function (xhr) { // if error occured
+        console.error(xhr.statusText + xhr.responseText);
+        failureCallback(xhr.responseText);
+      },
+      complete: function () {
+
+      },
+    });
+  }
+
+  var origAddEventReminder = addEventReminder;
+  addEventReminder = function(id, type, title, description, datetime) {
+    $('#addReminderModal #reminder-id').val(id);
+    $('#addReminderModal #reminder-type').val(type);
+    $('#addReminderModal #reminder-desc').val(title + ' (' + description + ')');
+    $('#addReminderModal #reminder-datetime').val(moment(datetime).format('YYYY-MM-DDTHH:mm:ss'));
+    $('#addReminderModal #reminder-datetime').prop('min', moment().format('YYYY-MM-DDTHH:mm:ss'));
+    $('#addReminderModal #reminder-datetime').prop('max', moment(datetime).format('YYYY-MM-DDTHH:mm:ss'));
+    $('#addReminderModal #reminder-email').prop('checked', true);
+    $('#addReminderModal #reminder-notification').prop('checked', true);
+    $('#addReminderModal').modal('show');
+  }
+
+  function saveEventReminder() {
+    let id = $('#addReminderModal #reminder-id').val();
+    let type = $('#addReminderModal #reminder-type').val();
+    let desc = $('#addReminderModal #reminder-desc').val();
+    let datetime = $('#addReminderModal #reminder-datetime').val();
+    let email = $('#addReminderModal #reminder-email').is(':checked');
+    let notification = $('#addReminderModal #reminder-notification').is(':checked');
+    // send a request to add the reminder
+    var url = '/calendar/reminder/create/';
+
+    jQuery.ajax({
+      type: "POST",
+      url: url,
+      data: JSON.stringify({
+        'reminder_type': type,
+        'identifier': id,
+        'description': desc,
+        'time': moment(datetime).tz('Asia/Baghdad').format(),
+        'send_email': email,
+        'send_notification': notification
+      }),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function (res) {
+        $('#addReminderModal').modal('hide');
+        calendarObj.refetchEvents();
+      },
+      error: function (xhr) { // if error occured
+        console.error(xhr.statusText + xhr.responseText);
+      },
+      complete: function () {},
+    });
+  }
+
+  function createCalendarEvent() {
+    let title = $('#createEventModal #event-title').val();
+    let desc = $('#createEventModal #event-desc').val();
+    let datetime = $('#createEventModal #event-datetime').val();
+
+    var url = '/calendar/event/create/';
+
+    jQuery.ajax({
+      type: "POST",
+      url: url,
+      data: JSON.stringify({
+        'event_title': title,
+        'event_description': desc,
+        'event_time': moment(datetime).tz('Asia/Baghdad').format()
+      }),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function (res) {
+        $('#createEventModal').modal('hide');
+        calendarObj.refetchEvents();
+      },
+      error: function (xhr) { // if error occured
+        console.error(xhr.statusText + xhr.responseText);
+      },
+      complete: function () {},
+    });
+  }
+
+  var origEventDidMount = eventDidMount;
+  eventDidMount = function(info) {
+    let tooltipContent = '<h3 class="event-tooltip-title">' + info.event.title + '</h3>';
+    tooltipContent += '<span class="event-tooltip-time">' + info.timeText + '</span>';
+    if(info.event.extendedProps.description) {
+        tooltipContent += '<p class="event-tooltip-desc">' + info.event.extendedProps.description + '</p>';
+    }
+    if(info.event.extendedProps.reminders.length) {
+      tooltipContent += '<ul>';
+      $.each(info.event.extendedProps.reminders, function( i, l ){
+        tooltipContent += '<li>' + moment(l.start_date).tz(calendarTimeZone).format("MMM Do, h:mm a") + '</li>';
+      });
+      tooltipContent += '</ul>';
+    }
+    $(info.el).tooltip({
+        html: true,
+        title: tooltipContent,
+        placement: 'top',
+        trigger: 'hover',
+        container: '#calendar',
+        template: '<div class="tooltip event-tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+    });
+
+
+    let popoverContent = $('<div>').addClass('popover-menu-wrapper');
+    if(info.event.extendedProps.link) {
+      popoverContent.append($('<a>').addClass('list-group-item popover-menu').attr('href', info.event.extendedProps.link).attr('target', '_blank').append('<i class="las la-lg la-external-link-alt mx-1"></i> ${_("Open the link")}'));
+    }
+    if(info.isFuture && info.event.extendedProps.type !== 'custom_event') {
+      popoverContent.append($('<a>').addClass('list-group-item popover-menu').append('<i class="las la-lg la-bell mx-1"></i> ${_("Add Reminder")}</a>').click(function() {
+        addEventReminder(info.event.extendedProps.entity_id,
+          info.event.extendedProps.type,
+          info.event.title,
+          info.event.extendedProps.description,
+          info.event.startStr);
+      }));
+    }
+    if(info.event.extendedProps.link || info.isFuture && info.event.extendedProps.type !== 'custom_event') {
+      $(info.el).popover({
+          title: info.event.title,
+          content: popoverContent,
+          html: true,
+          placement: 'bottom',
+          trigger: 'click',
+          container: '#calendar',
+          template: '<div class="popover event-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
+      }).on('show.bs.popover', function () {
+        $('.fc-event').not(this).popover('hide');
+      });
+    }
+  }
+
+  var origEventWillUnmount = eventWillUnmount;
+  eventWillUnmount = function(info) {
+    $(info.el).popover('dispose');
+  }
+
+  var calendarObj = null;
+  var calendarLocale = (typeof currentLocale !== 'undefined' && currentLocale != 'None') ? currentLocale : 'ar';
+  var calendarTimeZone = (typeof timeZone !== 'undefined' && timeZone != 'None') ? timeZone : 'Asia/Baghdad';
+  var calendarWeekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  var calendarFirstDayOfWeek = (typeof firstDayOfWeek !== 'undefined' && calendarWeekDays.indexOf(firstDayOfWeek) != -1) ? calendarWeekDays.indexOf(firstDayOfWeek) : 6;
+  var calendarDateFormat = 'dddd, MMMM D, YYYY'
+  if(typeof dateFormat !== 'undefined') {
+      if(dateFormat == 'num') {
+        calendarDateFormat = 'MM/DD/YYYY'
+      } else if(dateFormat == 'short') {
+        calendarDateFormat = 'MMM D, YYYY'
+      } else if(dateFormat == 'long') {
+        calendarDateFormat = 'dddd, MMMM D, YYYY'
+      }
+  }
+
+  $(document).ready(function(){
+    if (typeof calendarInit !== "undefined") {
+      calendarInit();
+      $('.calendar-wrapper').on('click', function(e) {
+        if (!$(e.target).parents().is('.fc-event') && !$(e.target).parents().is('.event-popover')) {
+          $('#calendar .fc-event').popover('hide');
+        }
+      });
+    }
+  });
+</script>
+ <!--End of Calendar Script-->

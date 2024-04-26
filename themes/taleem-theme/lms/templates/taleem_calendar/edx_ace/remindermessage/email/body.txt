@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}
+{{event_name}} {% blocktrans %}{{ reminder_title }}{% endblocktrans %}
+
+{{ reminder_description }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

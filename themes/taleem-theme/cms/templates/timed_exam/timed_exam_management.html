@@ -1,0 +1,168 @@
+<%page expression_filter="h"/>
+<%!
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import (
+      dump_js_escaped_json, js_escaped_string
+  )
+  from django.urls import reverse
+%>
+
+<%inherit file="../base.html" />
+<%namespace name='static' file='../static_content.html'/>
+<%def name="online_help_token()"><% return "home" %></%def>
+<%block name="title">${_("Timed Exam Access Management")}</%block>
+<%block name="bodyclass">is-signedin index view-dashboard enrollment-dashboard</%block>
+
+
+<%block name="requirejs">
+  require(["js/factories/timed_exam_management"], function (IndexFactory) {
+  });
+</%block>
+
+
+
+<%block name="header_extras">
+<!--    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>-->
+</%block>
+<%block name="content">
+
+<div class="wrapper-mast wrapper">
+    <header class="mast has-actions">
+        <h1 class="page-header">${_("Timed Exam Access Management")}</h1>
+        <nav class="nav-actions" aria-label="${_('Page Actions')}">
+            <h3 class="sr">${_('Page Actions')}</h3>
+            <ul>
+                <li class="nav-item action-item">
+                    <a href="${reverse('home')}" class="button new-button">
+                        <span class="icon fa fa-arrow-left icon-inline" aria-hidden="true"></span> <span class="action-button-text">${_("Go to Dashboard")}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="button button-new" id="newCoTeacherButton" title="${_('Click to add a new co-teacher')}">
+                        <span class="icon fa fa-plus" aria-hidden="true"></span>${_('New Co-Teacher')}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+</div>
+
+<div class="wrapper-content wrapper">
+  % if user.is_active:
+      <section class="content">
+        <article class="content-primary" role="main">
+          <!-- Modal HTML embedded directly into document -->
+            <div id="consent-modal" class="jqueryModal">
+              <h2>${_('Warning')}</h2>
+                <br />
+                ${_("The user has already Enrolled in a timed exam. If the user has attempted the exam already by making a Co-teacher, you allow the user to review his submissions. If not, then the user will not be able to attempt the exam. However, the user will be visible in the exam report.")}
+                <br />
+                <br />
+              <a href="#" class="btn-brand btn-base" rel="modal:close" style="float: right; background-color: #DC143C; margin-left: 10px;">${_('Cancel')}</a>
+                <a href="#" class="btn-brand btn-base" id="create_after_consent" rel="modal:close" style="float: right; background-color: green">${_('Proceed')}</a>
+            </div>
+
+          <div class="wrapper-create-element wrapper-course-filter">
+            <form class="form-create co-teacher-form" id="co-teacher-form" name="co-teacher-form" method="post" action="${reverse('timed_exam:timed_exam_management', args=(exam_key,))}">
+                <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
+              <div class="wrap-error">
+                <div id="co-teacher-form-error" class="message message-status message-status error" role="alert">
+                    <p>${_("Please correct the highlighted fields below.")}</p>
+                </div>
+              </div>
+
+              <div class="wrapper-form">
+                <h3 class="title">${_("Add New Co-Teacher to Exam")}</h3>
+
+                <fieldset>
+                  <legend class="sr">${_("Required Information to add a new co-teacher to exam.")}</legend>
+
+                  <ol class="list-input">
+                    <li class="field select2 required" id="field-selectCoteacher">
+                      <label for="selectCoTeacher">${_("Teacher")}</label>
+                        <select class="text-editor select2" id="selectCoTeacher" name="teacher_email" required>
+                            <option value="">${_("Select Teacher")}</option>
+                             % for teacher in teachers:
+                                % if teacher.profile.name or teacher.first_name:
+                                    <option value="${teacher.email}">
+                                        % if teacher.profile.name:
+                                            ${teacher.email}
+                                        % else:
+                                            ${teacher.first_name} ${teacher.last_name} (${teacher.email})
+                                        % endif
+                                    </option>
+                                % endif
+                             % endfor
+                        </select>
+                      <span class="tip" id="tip-selectTeacher">${_("The teacher to be added as a co-teacher in exam.")}</span>
+                      <span class="tip tip-error is-hiding" id="tip-error-email"></span>
+                    </li>
+                  </ol>
+                </fieldset>
+              </div>
+
+              <div class="actions">
+                <input type="submit" value="${_('Add')}" class="action action-primary enroll-users" id="add_new_teacher"
+                    data-link="${reverse('timed_exam:can_add_teacher', args=(exam_key,))}"
+                />
+              </div>
+            </form>
+          </div>
+
+          <div class="table-responsive">
+                <table class="display data-table" id="coTeacherListTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>${_("Teacher Email")}</th>
+                            <th>${_("Action")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for teacher in co_teachers:
+                            <tr>
+                                <td>
+                                    ${teacher.email}
+                                </td>
+                                <td>
+                                    <a href="${reverse('timed_exam:delete_co_teacher', args=(exam_key,teacher.id,))}">
+                                    ${_("Delete")}</a>
+                                </td>
+                            </tr>
+                        % endfor
+                    </tbody>
+                </table>
+            </div>
+
+        </article>
+
+      </section>
+
+  % else:
+      <section class="content">
+        <article class="content-primary" role="main">
+          <div class="introduction">
+            <h2 class="title">${_("Thanks for signing up, {name}!").format(name=user.username)}</h2>
+          </div>
+
+          <div class="notice notice-incontext notice-instruction notice-instruction-verification">
+            <div class="msg">
+              <h3 class="title">${_("We need to verify your email address")}</h3>
+              <div class="copy">
+                <p>${_('Almost there! In order to complete your sign up we need you to verify your email address ({email}). An activation message and next steps should be waiting for you there.').format(email=user.email)}</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="content-supplementary" role="complementary">
+          <div class="bit">
+            <h3 class="title title-3">${_('Need help?')}</h3>
+            <p>${_('Please check your Junk or Spam folders in case our email isn\'t in your INBOX. Still can\'t find the verification email? Request help via the link below.')}</p>
+          </div>
+        </aside>
+      </section>
+  %endif
+</div>
+
+</%block>

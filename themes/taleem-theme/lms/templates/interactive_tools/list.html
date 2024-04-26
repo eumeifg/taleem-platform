@@ -1,0 +1,507 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.conf import settings
+    from django.utils.translation import ugettext as _
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <style>
+        .interactive-report a.reports-btn {
+            margin: 20px;
+            margin-top: 40px;
+            padding: 5px 10px;
+            color: #281958;
+            border: 1px solid #281958;
+            border-radius: 20px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+
+        }
+        .interactive-report a.reports-btn:hover, .reports a.reports-btn:focus {
+            background: #281958;
+            color: #f3f4f9;
+            text-decoration: none;
+        }
+        .interactive-report table thead {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 0;
+            color: #281958;
+            background-color: #f8f9fc;
+            border: 1px solid #e3e6f0;
+        }
+        .interactive-report table .view-report {
+            padding: 10px 20px;
+            color: #281958;
+            background-color: #fc0;
+            border: 1px solid #fc0;
+            border-radius: 20px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .interactive-report table .view-report:hover {
+            background: #ffd83d;
+            border: 1px solid #ffd83d;
+        }
+        .text-purple {
+            color: #281958 !important;
+        }
+        .bg-purple {
+            background-color: #281958 !important;
+        }
+        .text-yellow {
+            color: #fc0 !important;
+        }
+        .opacity-25 {
+            opacity: .25!important;
+        }
+
+        .report-table-wrapper {
+            overflow-x: auto;
+        }
+        .report-table tbody span, .report-table thead i {
+            display: block;
+        }
+        .report-table td.student-details {
+            color: #212529;
+            background-color: #e2e6ea;
+            border-color: #e2e6ea;
+            min-width: 150px;
+        }
+        .report-table td.total-duration {
+            color: #212529;
+            background-color: #ffc107;
+            border-color: #ffc107;
+            min-width: 100px;
+        }
+        .report-table td.space {
+            min-width: 100px;
+        }
+        .report-table td.total-score {
+            min-width: 100px;
+        }
+        .report-table td.total-score.passed {
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .report-table td.total-score.failed {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .report-table td.answer {
+            min-width: 200px;
+        }
+        .report-table td.answer.passed {
+            color: #858796;
+            background-color: #d4f3ba;
+            border: 1px solid #e3e6f0;
+        }
+        .report-table td.answer.passed i {
+            color: #28a745;
+        }
+        .report-table td.answer.failed {
+            color: #858796;
+            background-color: #f8d9bf;
+            border: 1px solid #e3e6f0;
+        }
+        .report-table td.answer.failed i {
+            color: #dc3545;
+        }
+
+        .question-item {
+            cursor: pointer;
+        }
+        .question-popover {
+            min-width: 350px;
+            width: 350px;
+        }
+        .question-popover .question-type {
+            display: block;
+            text-align: center;
+            text-transform: capitalize;
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+        }
+        .question-popover .question-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .question-popover .question-title i {
+            color: #17a2b8;
+            font-weight: 700;
+        }
+        .question-popover .question-desc {
+            font-size: 14px;
+        }
+        .question-popover .question-lable {
+            color: #17a2b8;
+            font-size: 13px;
+        }
+        .question-popover .question-answers {
+            font-size: 14px;
+        }
+        .question-popover .question-correct {
+            font-size: 14px;
+        }
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Interactive Content Report")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid interactive-report" id="interactiveReport">
+        <!-- Report Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+          <h1 class="h2 mb-4 text-gray-800">
+            ${_("Interactive Content Report")} : "${course.display_name_with_default}"
+          </h1>
+          <div>
+              <a href="/dashboard" class="reports-btn"><i class="las la-undo mx-1"></i>${_("Back to dashboard")}</a>
+          </div>
+        </div>
+        <div class="report-wrapper pt-2">
+            <div class="row mt-2">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-purple text-white">
+                            <a name="content-list">${_("Interactive Content List")}</a>
+                        </div>
+                        <div class="card-body">
+                            % if blocks:
+                            <div class="table-responsive">
+                                <table class="table text-center" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>${_("Module Name")}</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        % for block in blocks:
+                                        <tr>
+                                            <td>${block.display_name}</td>
+                                            <td>
+                                                <span class="view-report" data-module-id="${block.location}" data-module-name="${block.display_name}">
+                                                    ${_("View Report")}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        % endfor
+                                    </tbody>
+                                </table>
+                            </div>
+                            % else:
+                            <p class="text-center"><strong>${_("No interactive content was found in this course.")}</strong></p>
+                            % endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4" id="intraction-details-wrapper" style="display: none;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-purple text-white">
+                            <a name="intraction-details">${_("Students Interactions")} : "<span id="module-name"></span>"</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="report-table-wrapper">
+                                <table id="report-table" class="table text-center report-table">
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%block name="js_extra">
+    <!-- Page level custom js -->
+    <script>
+        var interactionFetchURL = "${reverse('interactive_tools_report', kwargs={'course_id': text_type(course.id),})}";
+        var interactionCSRF = "${ csrf_token }";
+        var interactionQuestions = new Object();
+        var interactionAnswers = new Array();
+        $(document).ready(function() {
+            // Fetch student interactions
+            $(".view-report").click(function(){
+                let moduleID = $(this).data('module-id');
+                let moduleName = $(this).data('module-name');
+                $.ajax({
+                    url: interactionFetchURL,
+                    type: "POST",
+                    data: {
+                        module_id: moduleID,
+                        csrfmiddlewaretoken: interactionCSRF
+                    },
+                    success: function(res) {
+                        $('#module-name').text(moduleName);
+                        reportProcess(res.interactions);
+                    }
+                    ,error: function (xhr) { // if error occured
+                        console.error(xhr.statusText + xhr.responseText);
+                        alert("Error occured. please try again");
+                        //get the status code
+                        if (xhr.status == 404) {
+                        } else {
+                        }
+                    },
+                    complete: function () {
+                        
+                    },
+                });
+            });
+        });
+        function reportProcess(data) {
+            interactionQuestions = new Object();
+            interactionAnswers = new Array();
+            // Loop on students intactions
+            data.forEach((el, idx) => {
+                let interactObj = new Object();
+                interactObj['student'] = el.student;
+
+                // check the student answers
+                let h5p = el.state.h5p_data;
+                let interactAns = new Object();
+                h5p.statement.details.forEach((item) => {
+                    let id = item.definition.extensions["http://h5p.org/x-api/h5p-subContentId"];
+                    // Check if question exist
+                    if(!interactionQuestions.hasOwnProperty(id)) {
+                        // Add the question
+                        let question = reportQuestionObject(item.definition);
+                        question["max"] =  item.result.score.max;
+                        interactionQuestions[id] = question;
+                    }
+                    // Add the answer of question
+                    interactAns[id] = {
+                        "id": id,
+                        "score": item.result.score.scaled ?? 0,
+                        "max": item.result.score.max ?? 0,
+                        "raw": item.result.score.raw ?? 0,
+                        "duration": reportGetTime(item.result.duration ?? "0"),
+                        "response": reportUserResponse(item.result.response),
+                    }
+                });
+                
+                let stateObj = {
+                    "score": el.state.lesson_score ?? 0,
+                    "max": h5p.statement.score.max ?? 0,
+                    "raw": h5p.statement.score.raw ?? 0,
+                    "duration": reportGetTime(h5p.statement.duration ?? "0"),
+                    "status": el.state.lesson_status ?? "incomplete",
+                    "success": el.state.success_status ?? "unknown",
+                    "answers": interactAns
+                }
+                interactObj['state'] = stateObj;
+                interactionAnswers.push(interactObj);
+            });
+            reportShow();
+        }
+        function reportQuestionObject(obj) {
+            let question = new Object();
+            question['id'] = obj.extensions["http://h5p.org/x-api/h5p-subContentId"];
+
+            // get title
+            question['title'] = "";
+            if(checkNested(obj, 'name', 'en-US')) {
+                question['title'] = obj.name['en-US']
+            } else if(obj.hasOwnProperty('name') && Object.keys(obj.name).length) {
+                question['title'] = obj.name[Object.keys(obj.name)[0]];
+            }
+
+            // get description
+            question['description'] = "";
+            if(checkNested(obj, 'description', 'en-US')) {
+                question['description'] = obj.description['en-US']
+            } else if(obj.hasOwnProperty('description') && Object.keys(obj.description).length) {
+                question['description'] = obj.description[Object.keys(obj.description)[0]];
+            }
+
+            // get type
+            question['type'] = "";
+            if(obj.hasOwnProperty('interactionType')) {
+                question['type'] = obj.interactionType;
+            }
+
+            // get responses
+            question['responses'] = [];
+            if(obj.hasOwnProperty('choices')) {
+                question['responses'] = obj.choices.map(function(x) {
+                    let str = '(' + x.id + ') ';
+                    if(x.description.hasOwnProperty('en-US')) {
+                        str += x.description['en-US']
+                    } else if(Object.keys(x.description).length) {
+                        str += x.description[Object.keys(x.description)[0]];
+                    }
+                    return str; 
+                });
+            } else if(question['type'].toLowerCase() == "matching" && obj.hasOwnProperty('source') && obj.hasOwnProperty('target')) {
+                question['responses'] = obj.source.map(function(x) {
+                    let str = '(Source: ' + x.id + ') ';
+                    if(x.description.hasOwnProperty('en-US')) {
+                        str += x.description['en-US']
+                    } else if(Object.keys(x.description).length) {
+                        str += x.description[Object.keys(x.description)[0]];
+                    }
+                    return str; 
+                });
+                question['responses'].push(obj.target.map(function(x) {
+                    let str = '(Target: ' + x.id + ') ';
+                    if(x.description.hasOwnProperty('en-US')) {
+                        str += x.description['en-US']
+                    } else if(Object.keys(x.description).length) {
+                        str += x.description[Object.keys(x.description)[0]];
+                    }
+                    return str; 
+                }));
+            }
+
+            // get correctResponses
+            question['correctResponses'] = [];
+            if(obj.hasOwnProperty('correctResponsesPattern')) {
+                if(Array.isArray(obj.correctResponsesPattern)) {
+                    question['correctResponses'] = obj.correctResponsesPattern.map(function(x) { return reportUserResponse(x); });
+                } else if(typeof obj.correctResponsesPattern === 'string') {
+                    question['correctResponses'].push(reportUserResponse(obj.correctResponsesPattern));
+                }
+            }
+
+            return question;
+        }
+        function checkNested(obj /*, level1, level2, ... levelN*/) {
+            var args = Array.prototype.slice.call(arguments, 1);
+
+            for (var i = 0; i < args.length; i++) {
+                if (!obj || !obj.hasOwnProperty(args[i])) {
+                    return false;
+                }
+                obj = obj[args[i]];
+            }
+            return true;
+        } 
+        function reportGetTime(str) {
+            let regex = /[+-]?\d+(\.\d+)?/g;
+            let nums = str.match(regex).map(function(v) { return parseFloat(v); });
+            let sec = (nums.length > 0) ? nums[0] : 0;
+            if(sec < 3600) {
+                return new Date(sec * 1000).toISOString().substr(14, 5);
+            } else {
+                return new Date(sec * 1000).toISOString().substr(11, 5);
+            }
+        }
+        function reportUserResponse(str) {
+            if(typeof str === 'string')
+                return str.replace(/{.*}/g, '').replaceAll('[,]', ', ').replaceAll('[.]', '-').replaceAll('[', '').replaceAll(']', '');
+            else return "";
+        }
+        function reportShow() {
+            $('#intraction-details-wrapper').slideUp('slow');
+            let table = $('#report-table');
+            table.empty();
+
+            // build report header
+            let thead = $('<thead>');
+            let row = $('<tr>');
+            row.append($('<td>').append('<i class="las la-lg la-user-circle"></i>${_("Student")}'))
+                .append($('<td>').append('<i class="las la-lg la-check-circle"></i>${_("Score")}'))
+                .append($('<td>').append('<i class="las la-lg la-stopwatch"></i>${_("Duration")}'))
+                .append($('<td>').addClass('space').text(''));
+            for (const key in interactionQuestions) {
+                let question = interactionQuestions[key];
+                row.append($('<td>').addClass('question-item').data('question', question).append('<i class="las la-lg la-question-circle"></i><span class="question-title">' + question.title + '</span>'))
+            }
+            thead.append(row);
+            table.append(thead);
+
+            // build table rows
+            let tbody = $('<tbody>');
+            interactionAnswers.forEach((item, idx) => {
+                row = $('<tr>').addClass((item.state.status == 'incomplete') ? 'incomplete' : '');
+                row.append($('<td>').addClass('student-details').append($('<span>').attr('data-toggle', 'tooltip').attr('title', item.student.email).text(item.student.username)));
+                row.append($('<td>').addClass('total-score').addClass(item.state.success).append($('<span>').attr('data-toggle', 'tooltip').attr('title', item.state.raw + '/' + item.state.max).text((item.state.score * 100) + '%')));
+                row.append($('<td>').addClass('total-duration').text(item.state.duration));
+                row.append($('<td>').addClass('space').text(''));
+                for (const key in interactionQuestions) {
+                    if(item.state.answers.hasOwnProperty(key)) {
+                        row.append(
+                            $('<td>').addClass('answer').addClass((item.state.answers[key].score >= 0.5) ? 'passed' : 'failed').attr('data-toggle', 'tooltip').attr('title', item.state.answers[key].duration)
+                            .append($('<span>').addClass('question-score').append('<i class="las la-check-circle mx-1"></i>' + item.state.answers[key].score * 100 + '%'))
+                            .append($('<span>').addClass('question-answers').append('<i class="las la-tasks mx-1"></i>' + item.state.answers[key].response))
+                        );
+                    } else {
+                        row.append($('<td>').text(''));
+                    }
+                }
+                tbody.append(row);
+            });
+            table.append(tbody);
+            $('[data-toggle="tooltip"]').tooltip();
+            $('#intraction-details-wrapper').slideDown('slow');
+            scroolTo('#intraction-details-wrapper');
+
+            $('#report-table .question-item').popover({
+                title: '${_("Question Details")}',
+                content: popoverContent,
+                html: true,
+                placement: 'auto',
+                trigger: 'click',
+                container: 'body',
+                template: '<div class="popover question-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
+            }).on('show.bs.popover', function () {
+                $('#report-table .question-item').not(this).popover('hide');
+            });
+
+            $('body').on('click', function(e) {
+                if (!$(e.target).is('.question-item') && !$(e.target).parents().is('.question-item') && !$(e.target).parents().is('.question-popover')) {
+                    $('#report-table .question-item').popover('hide');
+                }
+            });
+        }
+        function popoverContent() {
+            let question = $(this).data('question');
+            let popoverContent = $('<div>').addClass('question-wrapper');
+            popoverContent.append($('<span>').addClass('question-type').append(question.type));
+            popoverContent.append($('<h4>').addClass('question-title').append('<i class="las la-question-circle mx-1"></i>' + question.title));
+            popoverContent.append($('<p>').addClass('question-desc').append(question.description));
+            if(question.responses.length) {
+                popoverContent.append($('<h6>').addClass('question-lable').text('${_("Question Answers")} : '));
+                popoverContent.append($('<p>').addClass('question-answers').append(question.responses.join('<br/>')));
+            }
+            if(question.correctResponses.length) {
+                popoverContent.append($('<h6>').addClass('question-lable').text('${_("Correct Answers")} : '));
+                popoverContent.append($('<p>').addClass('question-correct').append(question.correctResponses.join('<br/>')));
+            }
+            return popoverContent;
+        }
+        function scroolTo(anchor) {
+            // An offset to push the content down from the top.
+            var offset = 30;
+            // Our scroll target : the top position of the
+            // section that has the id referenced by our href.
+            var target = $(anchor).offset().top - offset;
+            // The magic...smooth scrollin' goodness.
+            $('html, body').animate({scrollTop:target}, 500);
+            //prevent the page from jumping down to our section.
+            event.preventDefault();
+        }
+    </script>
+</%block>

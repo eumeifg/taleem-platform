@@ -1,0 +1,372 @@
+<%page expression_filter="h"/>
+<%inherit file="main-opt.html" />
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import get_language_bidi
+from openedx.core.djangolib.markup import HTML, Text
+%>
+
+<%block name="bodyclass">guest-home</%block>
+
+<%block name="head_extra">
+
+  % if get_language_bidi():
+    <link rel="stylesheet" href="${static.url('assets/css/home-rtl.css')}">
+  % else:
+    <link rel="stylesheet" href="${static.url('assets/css/home-ltr.css')}">
+  % endif
+  <style type="text/css">
+    .taleem-theme header.global-header {background: transparent;position: absolute;z-index: 100;}
+    .taleem-theme .content-wrapper {margin-top: 0 !important;}
+    .taleem-theme .carousel {padding-top: 0;}
+    .highlighted-courses .courses, .find-courses .courses {padding: 20px 0 15px;}
+    #suggestion-msg {color: #856404;background-color: #fff3cd;border-color: #ffeeba;margin-bottom: 20px;display: none;}
+    #suggestion-msg .suggestion-cat{font-weight: 700;}
+    /******* AutoComplete *******/
+    .autoComplete_wrapper > input:focus {border: 0;box-shadow: none;}
+    .autoComplete_wrapper > input:focus-visible {outline: #281958 auto 1px;}
+    .autoComplete_wrapper > ul {overflow: hidden auto;margin-top: 1px;border-radius: 5px;right: -20px;left: -20px;max-height: 300px;}
+    .autoComplete_wrapper > ul > li mark {background-color: transparent;color: #A445B0;font-weight: bold;}
+    .taleem-theme .courses-filter .filter-accordion .filter-card .filter-body {-ms-flex: 1 1 auto;flex: 1 1 auto;min-height: 1px;padding: 20px;}
+    input[type="radio"], input[type="checkbox"] {box-sizing: border-box;padding: 0;}
+    .form-check-label {margin-bottom: 0;}
+    label {display: inline-block;margin-bottom: 0.5rem;font: inherit;text-shadow: none;}
+ </style>
+</%block>
+
+<div id="carouselExampleFade" class="carousel home-slider slide carousel-fade" data-ride="carousel" data-pause="true">
+  <div class="carousel-inner">
+
+    <div class="slide carousel-item active">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+              <h1>${_("Learning is the")}<br />${_("process of acquiring")}<br /><strong>${_("new knowledge,")}</strong><br /><strong>${_("skills and value")}</strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem is a platform that provides high-quality educational content.")}</li>
+              <li>${_("- Follow up questions and answers for each student.")}</li>
+              <li>${_("- Follow up the progress of the student and send notifications to the guardian.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img class="lazyload" data-src="${static.url('images/img03.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide carousel-item">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+              <h1>${_("Learning is a")}<br/>${_("process that")}<br/><strong><span class="leads">${_("leads")}</span></strong> ${_("to")} <strong><span class="change">${_("change")}</span></strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem  platform introduces the latest innovative technologies in e-learning.")}</li>
+              <li>${_("- Divide the Courses into small sections that make it easy to find and easy to understand.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img class="lazyload" data-src="${static.url('images/img02.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide slide-3 carousel-item">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+            <h1>${_("Learning is the")}<br />${_("process of acquiring")}<br /><strong>${_("new knowledge,")}</strong><br /><strong>${_("skills and value")}</strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem is a platform that provides high-quality educational content.")}</li>
+              <li>${_("- Follow up questions and answers for each student.")}</li>
+              <li>${_("- Follow up the progress of the student and send notifications to the guardian.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img class="lazyload" data-src="${static.url('images/img03.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a class="carousel-control-prev carousel-control" href="#carouselExampleFade" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next carousel-control" href="#carouselExampleFade" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+% if settings.FEATURES.get('SHOW_RESULT_ANNOUNCEMENT_BANNER', False):
+<%include file="results/announcement.html" />
+% endif
+
+<main id="main" aria-label="Content" tabindex="-1">
+
+    <section class="home">
+      <%include file="courses_list-opt.html" />
+    </section>
+    <section class="home-posts">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-1">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img class="lazyload" data-src="${static.url('images/post-image-1.jpg')}" alt="" width="350" height="527">
+              </div>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-2">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img class="lazyload" data-src="${static.url('images/post-image-2.jpg')}" alt="" width="350" height="527">
+              </div>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-3">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img class="lazyload" data-src="${static.url('images/post-image-3.jpg')}" alt="" width="350" height="527">
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+</main>
+
+% if show_homepage_promo_video:
+  <section id="video-modal" class="modal home-page-video-modal video-modal">
+    <div class="inner-wrapper">
+      <iframe title="YouTube Video" width="640" height="360" src="//www.youtube.com/embed/${homepage_promo_video_youtube_id}?showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </section>
+% endif
+
+<%block name="js_extra">
+  <script type="text/javascript" src="${static.url('assets/vendor/star-rating/star-rating.min.js')}" defer></script>
+  <script type="text/javascript" src="${static.url('assets/js/autoComplete.min.js')}" defer></script>
+  <script type="text/javascript" src="${static.url('assets/js/filters.js')}"></script>
+  <script type="text/javascript">
+    var filterAutoCompleteId = "filters-auto-complete";
+    var filterAutoCompletePlaceholder = "${_('Search for a course')}";
+    var filterAutoCompleteLoading = "${_('Loading')}";
+    var searchURL = "${reverse('auto_complete_course_search')}";
+
+    function initStars(initialRating, startElementId, isUserEnrolled){
+      var $startElement = $(document.getElementById(startElementId));
+
+      try {
+        // Unload
+        $startElement.starRating('unload');
+      } catch(err) {console.log('Skip unloading');}
+      // Init rating
+
+      $startElement.starRating({
+          initialRating: initialRating,
+          starSize: 20,
+          useFullStars: true,
+          disableAfterRate: false,
+          starShape: 'rounded',
+          activeColor: '#Ff9933',
+          hoverColor: '#Ff9933',
+          ratedColor: '#Ff9933',
+          useGradient: false,
+          readOnly: !isUserEnrolled,
+          callback: function(currentRating, $el){
+              jQuery.ajax({
+                  type: "POST",
+                  url: $el.data('courseratingurl'),
+                  data: {
+                    stars: currentRating,
+                  },
+                  success: function (res) {
+                      $el.parent().parent().find('.avg-rating').text(res.avg);
+                      $el.parent().parent().find('.num-reviews').text(res.count);
+                  },
+              });
+          }
+      });
+    }
+
+    $(document).ready(function () {
+      let uParams = new URLSearchParams(window.location.search);
+      if (!uParams.has("filters")) $("#filter-btn").click();
+      // The autoComplete.js Engine instance creator
+      const autoCompleteJS = new autoComplete({
+        selector: "#" + filterAutoCompleteId,
+        placeHolder: filterAutoCompletePlaceholder,
+        data: {
+          src: async (query) => {
+            try {
+              // Loading placeholder text
+              document.getElementById(filterAutoCompleteId).setAttribute("placeholder", filterAutoCompleteLoading);
+              // Fetch Data from external Source
+              const source = await fetch(searchURL + "?search=" + query);
+              // Data is array of `Objects` | `Strings`
+              const data = await source.json();
+              // Post Loading placeholder text
+              document.getElementById(filterAutoCompleteId).setAttribute("placeholder", autoCompleteJS.placeHolder);
+              // Returns Fetched data
+              return data.results;
+            } catch (error) {
+              return error;
+            }
+          },
+          keys: ["name"]
+        },
+        threshold: 3,
+        debounce: 300,
+        resultsList: {
+          noResults: true,
+          maxResults: 15,
+          tabSelect: true
+        },
+        resultItem: {
+          highlight: true
+        }
+      });
+      autoCompleteJS.input.addEventListener("selection", function (event) {
+        const feedback = event.detail;
+        autoCompleteJS.input.blur();
+        // Prepare User's Selected Value
+        const selection = feedback.selection.value[feedback.selection.key];
+        // Replace Input value with the selected value
+        autoCompleteJS.input.value = selection;
+        filterLoadCourses([], selection, filterSort, 1);
+      });
+    });
+  </script>
+
+  <!-- filters scripts -->
+  <script type="text/javascript">
+    // set total number of pages
+    var filtertAllPages = ${total_num_of_pages};
+    var filterCoursesDefaultImage = "${static.url('images/placeholder.png')}";
+
+    var origFilterAddCourse = filterAddCourse;
+    filterAddCourse = function(course) {
+      let list = $("#courses-wrapper .courses-listing");
+      let template = $.trim($('#course-template').html());
+
+      // update course data
+      let clone = template.replace(/{{id}}/ig, course.id);
+      clone = clone.replace(/{{display_name_with_default}}/ig, course.display_name_with_default);
+      clone = clone.replace(/{{display_org_with_default}}/ig, course.display_org_with_default);
+      clone = clone.replace(/{{display_number_with_default}}/ig, course.display_number_with_default);
+      clone = clone.replace(/{{course_image_url}}/ig, course.course_image_url);
+      clone = clone.replace(/{{course_date_string}}/ig, course.course_date_string);
+      clone = clone.replace(/{{advertised_start}}/ig, course.advertised_start);
+      clone = clone.replace(/{{course_link}}/ig, '/courses/' + course.id + '/about');
+
+      clone = clone.replace(/{{course_rating_url}}/ig, '/taleem/course-rating/' + course.id);
+      clone = clone.replace(/{{user_rating}}/ig, ((course.user_rating == 0 ) ? course.avg_rating : course.user_rating));
+      clone = clone.replace(/{{avg_rating}}/ig, course.avg_rating);
+      clone = clone.replace(/{{num_reviews}}/ig, course.num_reviews);
+
+      clone = $(clone);
+      if(course.advertised_start !== null) {
+        clone.find('.no-advertised_start').remove();
+      } else {
+        clone.find('.advertised_start').remove();
+      }
+
+      if(course.is_enrolled) {
+        clone.find('.wishlist-btn').remove();
+        clone.find('.course-rating').data('isuserenrolled', true);
+      }
+      else if(course.is_favorite) {
+        clone.find('.wishlist-icon').removeClass('lar').addClass('las');
+      }
+
+      clone.find('.course-cover>img').on("error", function (event) {
+        this.src = filterCoursesDefaultImage;
+      });
+
+      // add course to the list
+      list.append(clone);
+    }
+
+    var origFilterUpdatePagination = filterUpdatePagination;
+    filterUpdatePagination = function(total, current) {
+      let pagination = $("#filter-pages");
+
+      // remove all pages
+      pagination.empty();
+      for (let page = 1; page <= total; page++) {
+        let $p = $("<span>", {"class": "page", "data-page": page});
+        $p.text(page);
+        if(page == current) $p.addClass("active");
+        $p.click(function(){
+          let page = parseInt($(this).data("page"));
+          if(page > 0 && page <= filtertAllPages) {
+            filterLoadCourses(filtersSelected, filterSearch, filterSort, page);
+          }
+        });
+        pagination.append($p);
+      }
+    }
+
+    var origFilterUpdateSuggestionMsg = filterUpdateSuggestionMsg;
+    filterUpdateSuggestionMsg = function(isSuggestion, category) {
+      if(isSuggestion) {
+        $("#suggestion-msg .suggestion-cat").text(category);
+        let values = $(".courses-filter #"+category  +"-filter input:checkbox:checked+.form-check-label").map(function () {
+          return $(this).text().replaceAll("\n", "").trim();
+        }).get().join(', ');
+        if(values != "") {
+          $("#suggestion-msg .suggestion-cat").text(values);
+        }
+        $("#suggestion-msg").show();
+      } else {
+        $("#suggestion-msg").hide();
+      }
+    }
+
+    var origFilterCoursesUpdated = filterCoursesUpdated;
+    filterCoursesUpdated = function() {
+      // wishlist event listener
+      $("#courses-wrapper .wishlist-icon").click(function(e){
+        var course_id = $(this).data('course_id');
+        var url = ($(this).hasClass('las')) ? '/api/wishlist/remove/': '/api/wishlist/add/';
+        var method = ($(this).hasClass('las')) ? 'DELETE': 'POST';
+        var $el = $(this);
+        jQuery.ajax({
+          type: method,
+          url: url,
+          data: {'course_key': course_id},
+          success: function (res) {
+            $el.toggleClass('las');
+            $el.toggleClass('lar');
+          },
+          error: function (xhr) { // if error occured
+            alert('Something went wrong!');
+          }
+        });
+      });
+
+      // Init course rating
+      $("#courses-wrapper .course-rating").each(function() {
+        initStars($(this).data('userrating'), $(this).attr('id'), $(this).data('isuserenrolled'));
+      });
+    }
+  </script>
+
+</%block>

@@ -1,0 +1,180 @@
+## mako
+
+<%! main_css = "style-main-v2" %>
+
+<%page expression_filter="h"/>
+<%inherit file="../main.html" />
+<%namespace name='static' file='../static_content.html'/>
+
+<%!
+import json
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+from django.utils.translation import get_language_bidi
+from django.template.defaultfilters import escapejs
+from lms.djangoapps.discussion.django_comment_client.permissions import has_permission
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from openedx.core.djangolib.markup import HTML
+%>
+
+<%block name="pagetitle">${_("Announcements")}</%block>
+
+<%block name="head_extra">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+
+<style>
+.error {color: red;}
+.select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+    background-image: none;
+    background-color: unset;
+    text-shadow: none;
+    float: ${'right' if get_language_bidi() else 'left'} !important;
+    padding: 0 1px 0 3px;
+    border: none;
+}
+.select2-selection__choice {
+    float: ${'right' if get_language_bidi() else 'left'} !important;
+    display: inline-block !important;
+    max-width: 160px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.select2-container .select2-selection--multiple .select2-selection__rendered {
+    white-space: nowrap;
+    max-width:100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display:inline-block;
+}
+textarea, textarea:focus {box-shadow:none;}
+</style>
+</%block>
+
+<%block name="footer_extra">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js">
+</script>
+% if get_language_bidi():
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/localization/messages_ar.min.js"></script>
+% endif
+
+<script>
+$(function(){
+    var params = {page:1};
+    var $selectControl = $("#studentSelect").select2({
+        minimumInputLength: 2,
+        theme: 'bootstrap4',
+        ajax: {
+            type: "POST",
+            url: "${reverse('notifications:autocomplete_users')}",
+            data: function(params) {
+                var query = {
+                    term: params.term,
+                    page: params.page || 1,
+                    page_size: 20,
+                }
+                return JSON.stringify(query);
+            },
+            processResults: function(data, params) {
+                return {
+                    results: $.map(data.data, function(item) {
+                        return {
+                            text: item.name,
+                            id: item.id
+                        }
+                    }),
+                    pagination: {
+                        more: data.has_next
+                    },
+                };
+            }
+        },
+    });
+
+    $('#selectall').change(function(e){
+        $("#studentSelect").toggleClass('ignore');
+        if(this.checked) {
+            $("#studentSelect").attr('disabled', '');
+            $selectControl.val(null).trigger("change");
+        } else {
+            $('#studentSelect').removeAttr('disabled');
+        }
+    });
+
+    $("#notification-form").validate({
+        ignore: ".ignore",
+        submitHandler: function(form) {
+            $('#send').attr('disabled', '').html('<i class="fa fa-spin fa-refresh"></i>');
+            $.post({
+                url: ".",
+                data: JSON.stringify({
+                    selectall: $("#selectall").is(':checked'),
+                    students: $("#studentSelect").val(),
+                    message: $("#message").val(),
+                    resolve_link: $("#resolveLink").val(),
+                }),
+                success: function(res) {
+                    $("#notification-status")
+                        .addClass('text-success')
+                        .removeClass('text-danger')
+                        .text('${_("Notification sent successfully.")}');
+                    $("#notification-form").trigger("reset");
+                    $('#send').removeAttr('disabled').html('').text('${_("Announce")}');
+                },
+                error: function() {
+                    $("#notification-status")
+                        .addClass('text-danger')
+                        .removeClass('text-success')
+                        .text('${_("Something went wrong! Please try again after sometime.")}');
+                    $('#send').removeAttr('disabled').html('').text('${_("Announce")}');
+                }
+            });
+        }
+    });
+});
+</script>
+</%block>
+
+<%block name="content">
+<div class="course-view page-content-container" id="course-container">
+    <div class="page-content">
+        <div class="row">
+            <div class="col-md-8">
+                <h3>${_("Make Announcement")}</h3>
+                <form id="notification-form">
+                    <p class="text-success font-weight-bold" id="notification-status"></p>
+                    <div class="form-group">
+                        <label for="studentSelect">${_("Select the students to send notification")}
+                        </label>                    
+                        <div>
+                          <input type="checkbox" id="selectall" name="selectall">
+                          <label for="selectall">${_("Select All")}</label>
+                        </div>
+                        <select id="studentSelect" class="form-control select2"
+                            multiple required name="students[]">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">${_("Enter a notification message")}</label>
+                        <textarea class="form-control" id="message" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="resolveLink">${_("Enter URL")} (${_("Optional")})</label>
+                        <input id="resolveLink" class="form-control"
+                            type="url" name="resolve_link" />
+                    </div>
+                    <div class="form-group">
+                        <button id="send" class="btn btn-primary" type="submit">${_("Announce")}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</%block>

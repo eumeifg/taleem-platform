@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: infra
+spec:
+  serviceAccountName: kaniko
+  containers:
+  - name: builder
+    image: gcr.io/kaniko-project/executor:debug
+    imagePullPolicy: Always
+    command:
+    - /busybox/cat
+    tty: true
+    resources:
+      limits:
+        cpu: "4"
+        memory: "7Gi"
+      requests:
+        cpu: "2"
+        memory: "2Gi"
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
+  - name: deployer
+    image: 310830963532.dkr.ecr.eu-central-1.amazonaws.com/jenkins-deployer:2022-08-02-211051
+    imagePullPolicy: Always
+    tty: true
+  volumes:
+    - name: docker-config
+      configMap:
+        name: regcred

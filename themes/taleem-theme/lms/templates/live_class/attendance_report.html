@@ -1,0 +1,170 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+    from openedx.custom.utils import utc_datetime_to_local_datetime
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/datatables.bundle.min.css')}"/>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Attendance Report")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Attendance Report")}: ${live_class.name}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table text-center" id="attendance-report-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>${_("Student Name")}</th>
+                                        <th>${_("Joined At")}</th>
+                                        <th>${_("Left At")}</th>
+                                        <th>${_("Duration")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for attendance in class_attendance:
+                                    <tr>
+                                        <td>${attendance.user.profile.name}</td>
+                                        <td>${utc_datetime_to_local_datetime(attendance.joined_at).strftime('%b %d, %Y %I:%M %p')}</td>
+                                        % if attendance.left_at:
+                                            <td>${utc_datetime_to_local_datetime(attendance.left_at).strftime('%b %d, %Y %I:%M %p')}</td>
+                                        % else:
+                                            <td>${_("Time Missing")}</td>
+                                        % endif
+                                        <td>${attendance.duration_string}</td>
+                                    </tr>
+                                    % endfor
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/pdfmake/pdfmake.min.js')}"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/pdfmake/vfs_fonts.js')}"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/datatables.bundle.min.js')}"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+            pdfMake.fonts = {
+               Almarai: {
+                 normal: 'Almarai-Regular.ttf',
+                 bold: 'Almarai-Bold.ttf',
+                 italics: 'Almarai-Regular.ttf',
+                 bolditalics: 'Almarai-Bold.ttf'
+               }
+            }
+
+            // Call the dataTables jQuery plugin
+            var table = $('#attendance-report-table').DataTable({
+                "oLanguage": {
+                        "sEmptyTable": `${_("No Attendance Marked")}`
+                },
+                dom: "<'row'<'col-sm-12 mb-2 text-right'B>>" +
+                     "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+
+                buttons: [
+                    {
+                        extend: 'csv',
+                        text: '<i class="las la-lg la-file-csv text-blue"></i>',
+                        titleAttr: 'CSV',
+                        title: '${live_class.name}',
+                        charset: 'UTF-8',
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="las la-lg la-file-excel text-green"></i>',
+                        titleAttr: 'Excel',
+                        title: '${live_class.name}',
+                        charset: 'UTF-8',
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="las la-lg la-file-pdf text-red"></i>',
+                        titleAttr: 'PDF',
+                        title: '${live_class.name}',
+                        orientation: 'landscape',
+                        customize: function (doc) {
+                          doc.defaultStyle = {font: 'Almarai'};
+                          doc.styles.tableBodyEven.alignment = 'center';
+                          doc.styles.tableBodyOdd.alignment = 'center';
+                        },
+                        exportOptions: {
+                            format: {
+                                header: function ( text, index, node ) {
+                                    if (/[\u0600-\u06FF]/.test(text)){
+                                       text = text.split(' ').reverse().join(' ')
+                                    }
+                                    return text;
+                                },
+                                body: function ( data, row, column, node ) {
+                                    data = node.innerText;
+                                    if (/[\u0600-\u06FF]/.test(data)){
+                                       data = data.split(' ').reverse().join(' ')
+                                    }
+                                    return data;
+                                }
+                            }
+                        },
+                    },
+
+                ],
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                },
+            });
+
+        });
+    </script>
+</%block>

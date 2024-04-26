@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>sebConfigPurpose</key>
+    <integer>0</integer>
+    <key>startURL</key>
+    <string>${start_url}</string>
+    <key>quitURL</key>
+    <string>${quit_url}</string>
+    <key>sendBrowserExamKey</key>
+    <true />
+    <key>allowPreferencesWindow</key>
+    <false />
+    <key>allowQuit</key>
+    <true />
+    <key>allowVideoCapture</key>
+    <true />
+    <key>showTaskBar</key>
+    <false />
+    <key>allowWlan</key>
+    <false />
+    <key>audioMute</key>
+    <true />
+  </dict>
+</plist>

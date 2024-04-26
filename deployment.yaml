@@ -1,0 +1,184 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: cms
+  name: cms
+  namespace: openedx
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cms
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2021-02-22T09:13:23Z"
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: cms
+    spec:
+      containers:
+      - args:
+        - gunicorn
+        - -c
+        - /openedx/edx-platform/cms_gunicorn.py
+        - cms.wsgi
+        env:
+        - name: PORT
+          value: "8010"
+        - name: ADDRESS
+          value: 0.0.0.0
+        - name: LANG
+          value: en_US.UTF-8
+        - name: SETTINGS
+          value: production
+        - name: SERVICE_VARIANT
+          value: cms
+        - name: EDXAPP_TEST_MONGO_HOST
+          value: mongodb
+        - name: STUDIO_CFG
+          value: /openedx/edx-platform/config/cms.yml
+        - name: LMS_CFG
+          value: /openedx/edx-platform/config/lms.yml
+        - name: EDX_REST_API_CLIENT_NAME
+          value: default_env-default_deployment-studio
+        - name: REVISION_CFG
+          value: /openedx/edx-platform/config/revisions.yml
+        - name: CONFIG_ROOT
+          value: /openedx/edx-platform
+        - name: NO_PREREQ_INSTALL
+          value: "1"
+        - name: SETUPTOOLS_USE_DISTUTILS
+          value: stdlib
+        - name: SKIP_WS_MIGRATIONS
+          value: "1"
+        - name: DJANGO_SETTINGS_MODULE
+          value: cms.envs.production
+        image: registry.creativeadvtech.com/ta3leem/openedx:latest
+        imagePullPolicy: Always
+        name: cms
+        ports:
+        - containerPort: 8010
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /openedx/edx-data
+          name: static
+        - mountPath: /openedx/edx-platform/config/cms.yml
+          name: cms-config
+          subPath: cms.yml
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: creative
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: static
+        persistentVolumeClaim:
+          claimName: static
+      - configMap:
+          defaultMode: 420
+          name: cms-configmap
+        name: cms-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: lms
+  name: lms
+  namespace: openedx
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lms
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: lms
+    spec:
+      containers:
+      - args:
+        - gunicorn
+        - -c
+        - /openedx/edx-platform/lms_gunicorn.py
+        - lms.wsgi
+        env:
+        - name: PORT
+          value: "8000"
+        - name: ADDRESS
+          value: 0.0.0.0
+        - name: LANG
+          value: en_US.UTF-8
+        - name: SETTINGS
+          value: production
+        - name: SERVICE_VARIANT
+          value: lms
+        - name: EDXAPP_TEST_MONGO_HOST
+          value: mongodb
+        - name: STUDIO_CFG
+          value: /openedx/edx-platform/config/cms.yml
+        - name: LMS_CFG
+          value: /openedx/edx-platform/config/lms.yml
+        - name: EDX_REST_API_CLIENT_NAME
+          value: default_env-default_deployment-studio
+        - name: REVISION_CFG
+          value: /openedx/edx-platform/config/revisions.yml
+        - name: CONFIG_ROOT
+          value: /openedx/edx-platform
+        - name: NO_PREREQ_INSTALL
+          value: "1"
+        - name: SETUPTOOLS_USE_DISTUTILS
+          value: stdlib
+        - name: SKIP_WS_MIGRATIONS
+          value: "1"
+        - name: DJANGO_SETTINGS_MODULE
+          value: lms.envs.production
+        image: registry.creativeadvtech.com/ta3leem/openedx:latest
+        imagePullPolicy: Always
+        name: lms
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /openedx/edx-data
+          name: static
+        - mountPath: /openedx/edx-platform/config/lms.yml
+          name: lms-config
+          subPath: lms.yml
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: creative
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: static
+        persistentVolumeClaim:
+          claimName: static
+      - configMap:
+          defaultMode: 420
+          name: lms-configmap
+        name: lms-config

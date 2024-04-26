@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34.001" height="55.001" viewBox="0 0 34.001 55.001">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_21" data-name="Rectangle 21" width="34" height="55.001" transform="translate(0 -0.001)" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Vector_Smart_Object" data-name="Vector Smart Object" transform="translate(-1084 -1290.999)">
+    <g id="Vector_Smart_Object-2" data-name="Vector Smart Object" transform="translate(1084 1291)">
+      <g id="Group_42" data-name="Group 42">
+        <g id="Group_41" data-name="Group 41" clip-path="url(#clip-path)">
+          <path id="Path_59" data-name="Path 59" d="M29.075,55H4.924A4.951,4.951,0,0,1,0,50.035V4.964A4.95,4.95,0,0,1,4.924,0H29.075A4.95,4.95,0,0,1,34,4.964V50.035A4.952,4.952,0,0,1,29.075,55M4.924,1.848a3.107,3.107,0,0,0-3.09,3.115V50.035a3.107,3.107,0,0,0,3.09,3.115H29.075a3.108,3.108,0,0,0,3.092-3.115V4.964a3.108,3.108,0,0,0-3.092-3.115Z" fill="#fff"/>
+          <path id="Path_60" data-name="Path 60" d="M33.084,46.3H.917A.92.92,0,0,1,0,45.373V8.527A.921.921,0,0,1,.917,7.6H33.084A.922.922,0,0,1,34,8.527V45.373a.921.921,0,0,1-.917.924M1.833,44.449H32.167v-35H1.833Z" fill="#fff"/>
+          <path id="Path_61" data-name="Path 61" d="M19.96,5.678H14.04a.924.924,0,0,1,0-1.848h5.92a.924.924,0,0,1,0,1.848" fill="#fff"/>
+          <path id="Path_62" data-name="Path 62" d="M17.485,50.773h-.971a.924.924,0,0,1,0-1.848h.971a.924.924,0,0,1,0,1.848" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+    <path id="Color_Overlay" data-name="Color Overlay" d="M1088.834,1346a4.952,4.952,0,0,1-4.835-4.964v-45.072a4.95,4.95,0,0,1,4.924-4.964h24.151a4.951,4.951,0,0,1,4.925,4.964v45.072a4.952,4.952,0,0,1-4.836,4.964Zm-3-4.964a3.107,3.107,0,0,0,3.091,3.116h24.151a3.108,3.108,0,0,0,3.091-3.116V1337.3h-30.334Zm0-5.586h30.334v-35h-30.334Zm0-39.486v2.639h30.334v-2.639a3.108,3.108,0,0,0-3.091-3.115h-24.151A3.107,3.107,0,0,0,1085.833,1295.963Zm14.681,45.81a.924.924,0,0,1,0-1.849h.971a.924.924,0,0,1,0,1.849Zm-2.474-45.1a.924.924,0,0,1,0-1.848h5.92a.924.924,0,0,1,0,1.848Z" fill="#666"/>
+  </g>
+</svg>

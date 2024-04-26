@@ -1,0 +1,22 @@
+.taleem-theme {
+    .courses-container .courses .course .course-info .fav-icon {
+        cursor: pointer;
+        color: red;
+        @include text-align(right);
+    }
+
+    .wishlist-btn {
+        display: block;
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 35px;
+        height: 35px;
+        text-align: center;
+        line-height: 38px;
+        background-color: #ffffff88;
+        border-radius: 35px;
+        cursor: pointer;
+        color: red;
+    }
+}

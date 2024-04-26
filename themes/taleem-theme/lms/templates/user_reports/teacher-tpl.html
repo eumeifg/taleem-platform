@@ -1,0 +1,74 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+%>
+
+<script id="exam-template" type="template">
+    <div class="card exam-item" data-key="{{exam_key}}">
+        <div class="card-header" id="heading-{{exam_index}}">
+            <h2 class="mb-0">
+                <a class="btn btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapse-{{exam_index}}" aria-expanded="false" aria-controls="collapse-{{exam_index}}">
+                    <div class="row">
+                        <div class="col-6 exam-name">{{exam_name}}</div>
+                        <div class="col">
+                            ${_("Average Grade")} : 
+                            <span class="exam-avg-grade">{{exam_avg_grade}}</span>
+                        </div>
+                        <div class="col">
+                            ${_("Absent Students")} : 
+                            <span class="exam-absent-students">{{exam_absent_num}}</span>
+                        </div>
+                    </div> 
+                </a>
+            </h2>
+        </div>
+        <div id="collapse-{{exam_index}}" class="collapse" aria-labelledby="heading-{{exam_index}}" data-parent="#exams-list">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                ${_("Top Students")}
+                            </div>
+                            <div class="card-body top-students-table">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">${_("Username")}</th>
+                                            <th scope="col">${_("Name")}</th>
+                                            <th scope="col">${_("Grade")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="top-students-list">
+                                    </tbody>
+                                </table>
+                                <i style="display: none;">${_("There are no top students")}</i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                ${_("Absent Students")}
+                            </div>
+                            <div class="card-body absent-students-table">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">${_("Username")}</th>
+                                            <th scope="col">${_("Name")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="absent-students-list">
+                                    </tbody>
+                                </table>
+                                <i style="display: none;">${_("There are no absent students")}</i>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</script>

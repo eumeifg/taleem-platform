@@ -1,0 +1,69 @@
+<%page expression_filter="h"/>
+<%inherit file="/main.html" />
+<%namespace name='static' file='/static_content.html'/>
+<%!
+
+from django.utils.translation import ugettext as _
+from openedx.core.djangolib.markup import HTML, Text
+from openedx.custom.utils import utc_datetime_to_local_datetime
+from openedx.custom.timed_exam.utils import get_exam_status
+%>
+
+<%block name="bodyclass">view-in-course view-exams</%block>
+
+<%block name="headextra">
+<%static:css group='style-course-vendor'/>
+<%static:css group='style-course'/>
+</%block>
+
+<%block name="pagetitle">${_("{course.display_number_with_default} Exams").format(course=course)}</%block>
+
+<%include file="/courseware/course_navigation.html" args="active_page='exams'" />
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="container">
+        <div class="date-wrapper">
+            <section class="course-info" id="course-exams">
+                <h2 class="hd hd-2 exams-title">
+                    ${_("Course Exams")}
+                </h2>
+                <div class="exams p-4">
+                    <table class="table" width="100%">
+                        <thead>
+                            <tr>
+                                <th>${_("Name")}</th>
+                                <th>${_("Duration")}</th>
+                                <th>${_("Starts")}</th>
+                                <th>${_("Deadline")}</th>
+                                <th>${_("Mode of Examination")}</th>
+                                <th>${_("Attempt Status")}</th>
+                                <th>${_("Score")}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            % for exam in exams:
+                            <tr>
+                                <td>${exam.display_name}</td>
+                                <td>${exam.display_allotted_time}</td>
+                                <td>${utc_datetime_to_local_datetime(exam.release_date).strftime('%b %d, %Y %I:%M %p')}</td>
+                                <td>${utc_datetime_to_local_datetime(exam.due_date).strftime('%b %d, %Y %I:%M %p')}</td>
+                                <td>
+                                    <span class="badge badge-${'success' if exam.mode=='ON' else 'danger'}">${exam.get_mode_display()}</span>
+                                </td>
+                                <% attempt_status, attempt_class, btn_link, btn_text, score = get_exam_status(exam, request.user) %>
+                                <td><span class="badge ${attempt_class}">${attempt_status}</span></td>
+                                <td>${score}</td>
+                                <td class="actions">
+                                    <a class="btn btn-primary" href="${btn_link}">${btn_text}</a>
+                                </td>
+                            </tr>
+                            % endfor
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+

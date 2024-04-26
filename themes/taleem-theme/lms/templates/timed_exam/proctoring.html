@@ -1,0 +1,640 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.conf import settings
+    from django.utils.translation import ugettext as _
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.timed_exam.utils import get_suspicion_level
+    from openedx.custom.utils import utc_datetime_to_local_datetime, timedelta_to_hhmmss
+    from openedx.core.djangolib.markup import HTML
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+<%block name="header_extras">
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    textarea, input[type="text"], input[type="url"], input[type="email"], input[type="password"], input[type="tel"] {
+        height: auto; box-shadow: none; border-radius: 5px;
+    }
+    textarea:focus, input[type="text"]:focus, input[type="url"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="tel"]:focus {
+        border: 1px solid #00C3FF; box-shadow: none;
+    }
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover, button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .carousel-caption {right: unset; bottom: 5px; left: 10px; padding: 5px; border-radius: 10px; text-align: left;background-color: #5555558f;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Proctoring")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Report Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">${course.display_name_with_default}</h1>
+            <div class="">
+                <div id="review-status" class="text-right show-only-monitor hidden">
+                    % if review_status == 'clean':
+                        <span class="badge badge-success">${_("Marked as clean-chit")}</span>
+                    % elif review_status == 'suspicious':
+                        <span class="badge badge-danger">${_("Marked as suspicious")}</span>
+                    % else:
+                        <span class="badge badge-warning">${_("Pending to review")}</span>
+                    % endif
+                </div>
+                <a href="${reverse('timed_exam:reports', args=[text_type(course.id)])}"
+                   class="d-none d-sm-inline-block btn btn-primary mt-2">
+                    <i class="las la-lg la-chevron-circle-left text-white-50"></i> ${_("Back to reports")}
+                </a>
+                % if is_monitored_timed_exam:
+                    <a href="${reverse('timed_exam:proctoring_pdf', args=[text_type(course.id), student.id])}"
+                       class="d-none d-sm-inline-block btn btn-primary mt-2 show-only-monitor hidden" target="_blank">
+                        <i class="las la-lg la-file-pdf text-white-50"></i> ${_("Export PDF")}
+                    </a>
+                % endif
+            </div>
+        </div>
+
+    <!-- Student Row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="table-responsive">
+                <table class="table text-center" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>${_("Name")}</th>
+                            <th>${_("Submission Time")}</th>
+                            <th>${_("Score")}</th>
+                            <th class="show-only-monitor hidden">${_("Session Violations")}</th>
+                            <th class="show-only-monitor hidden">${_("Tab Violations")}</th>
+                            <th class="show-only-monitor hidden">${_("Webcam Abnormalities")}</th>
+                            <th class="show-only-monitor hidden">${_("Suspicion Level")}</th>
+                            <th class="show-only-monitor hidden"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${student.profile.name}</td>
+                            <td>
+                                ${utc_datetime_to_local_datetime(attempt.completed_at).strftime('%b %d, %Y %I:%M %p')}
+                            </td>
+                            <td>
+                                ${score if score is not None else '--'}
+                            </td>
+                            <%
+                                num_session_violations = session_history.count() - 1
+                                num_tab_violations = tab_history.filter(event_type='out').count()
+                                num_snapshots_taken = webcam_history.count()
+                                num_face_not_found = webcam_history.filter(status='face_not_found').count()
+                                num_multiple_faces = webcam_history.filter(status__in=['multiple_face_found', 'multiple_people_found']).count()
+                                num_unknown_face = webcam_history.filter(status='unknown_face').count()
+                                suspicion_level, suspicion_class = get_suspicion_level(
+                                    num_session_violations,
+                                    num_tab_violations,
+                                    num_snapshots_taken,
+                                    num_face_not_found,
+                                    num_multiple_faces,
+                                    num_unknown_face,
+                                )
+                                num_webcam_violations = num_face_not_found + num_multiple_faces + num_unknown_face
+                            %>
+                            <td class="show-only-monitor hidden">
+                                <span class="badge badge-${'warning' if num_session_violations > 10 else 'success'}">
+                                    ${num_session_violations}
+                                </span>
+                            </td>
+                            <td class="show-only-monitor hidden">
+                                <span class="badge badge-${'warning' if num_tab_violations > 10 else 'success'}">
+                                    ${num_tab_violations}
+                                </span>
+                            </td>
+                            <td class="show-only-monitor hidden">
+                                <span class="badge badge-${'warning' if num_webcam_violations > 10 else 'success'}">
+                                    ${num_webcam_violations}
+                                </span>
+                            </td>
+                            <td class="show-only-monitor hidden">${int(round(suspicion_level))}%</td>
+                            <td class="show-only-monitor hidden">
+                                <span class="d-inline-block badge-${suspicion_class} rounded-circle" style="height: 20px; width: 20px;">
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proctoring Row -->
+    <div class="row mt-4 show-only-monitor hidden">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">${_("Webcam Snapshots")}</div>
+                <div class="card-body">
+                    <div id="carouselFaceDetected" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner">
+                            % for record in webcam_history:
+                                <%
+                                    image_url = ''
+                                    if record.proctored_exam_snapshot.snapshot:
+                                        image_url = record.proctored_exam_snapshot.snapshot.url
+                               %>
+
+                            <div class="carousel-item ${'active' if loop.index == 0 else ''}">
+                              <img class="d-block w-100" src="${image_url}">
+                              <div class="carousel-caption d-none d-md-block">
+                                <span class="d-inline-block badge-${'success' if record.status == 'face_found' else 'danger'} rounded-circle" style="height: 15px; width: 15px;">
+                                </span>
+                                <span>${timedelta_to_hhmmss(record.proctored_exam_snapshot.created - attempt.started_at)}</span>
+                              </div>
+                            </div>
+                            % endfor
+
+                            % if not webcam_history:
+                            <div class="carousel-item active">
+                              <img class="d-block w-100" src="https://dummyimage.com/340X191/fff/000&text=+"">
+                              <div class="carousel-caption d-none d-md-block" style="right:15%;left:15%;background-color: transparent;">
+                                <h5 class="text-center">${_("Snapshots not available")}</h5>
+                              </div>
+                            </div>
+                            % endif
+
+                        </div>
+                        <a class="carousel-control-prev" href="#carouselFaceDetected" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">${_("Previous")}</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carouselFaceDetected" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">${_("Next")}</span>
+                        </a>
+                    </div>
+                    <div class="mt-4 text-center" dir="ltr">
+                        <a class="btn btn-primary text-white" id="slider-first"><span class="las la-lg la-step-backward"></span></a>
+                        <a class="btn btn-primary text-white" id="slider-prev"><span class="las la-lg la-backward"></span></a>
+                        <a class="btn btn-primary text-white" id="slider-next"><span class="las la-lg la-forward"></span></a>
+                        <a class="btn btn-primary text-white" id="slider-last"><span class="las la-lg la-step-forward"></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">${_("Violations happened during the exam")}</div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height:296px;">
+                        <table class="table" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>${_("Elapsed Time")}</th>
+                                    <th>${_("Incident")}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for elapsed_time, incident in incidents.items():
+                                <tr>
+                                    <td>${elapsed_time}</td>
+                                    <td>${incident}</td>
+                                </tr>
+                                % endfor
+
+                                % if not incidents:
+                                <tr><td>${_("All good. No incidents to show.")}</td></tr>
+                                % endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mt-4 show-only-monitor hidden">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">${_("Examinee behaviour at every moment during the exam")}</div>
+                <div class="card-body">
+                    <figure class="highcharts-figure mt-4">
+                        <div id="timeline-chart"></div>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Problem scores Row -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">${_("Problem scores")}</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="scores-tbl table" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>${_("Question")}</th>
+                                    <th>${_("Correct Answer")}</th>
+                                    <th>${_("Student Answer")}</th>
+                                    <th>${_("Earned")}</th>
+                                    <th>${_("Possible")}</th>
+                                    <th>${_("Submission Time")}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for problem_score in problem_scores:
+                                <tr data-key="${problem_score['id']}"
+                                    data-start="${problem_score['start_time_point']+1}"
+                                    data-finish="${problem_score['finish_time_point']}">
+                                    <td>${problem_score["display_name"]}</td>
+                                    <td>${problem_score["correct_answer"]}</td>
+                                    % if problem_score["is_openassessment_problem"]:
+                                        <td>
+                                            <a
+                                                id="${problem_score['id']}"
+                                                class="show-openassessment-btn"
+                                                data-answer="${problem_score['student_answer']}"
+                                                data-file-url="${problem_score['attached_file']}"
+                                                data-file-description="${problem_score['attached_file_description']}"
+                                            >
+                                                ${_("Show Answer")}
+                                            </a>
+                                        </td>
+                                    % elif problem_score["is_edx_sga_problem"]:
+                                        <td>
+                                            <a
+                                                id="${problem_score['id']}"
+                                                class="show-edx-sga-btn"
+                                                data-file-url="${problem_score['attached_file']}"
+                                            >
+                                                ${_("Show Answer")}
+                                            </a>
+                                        </td>
+                                    % else:
+                                        <td>${HTML(problem_score["student_answer"])}</td>
+                                    % endif
+                                    <% td_class = 'bg-success' if problem_score['earned'] == problem_score['possible'] else 'bg-danger' if problem_score['earned'] == 0.0 else 'bg-warning'%>
+                                    <td class="earned text-center text-white ${td_class}">${problem_score["earned_show"]}</td>
+                                    <td class="possible text-center">${problem_score["max_score_show"]}</td>
+                                    <td>${timedelta_to_hhmmss(problem_score["submitted_at"] - attempt.started_at) if problem_score["submitted_at"] else _("Didn't answer")}</td>
+                                    <td>
+                                        % if not problem_score["attempted"] and problem_score["earned"] == 0:
+                                                ${_("No Action")}
+                                        % else:
+                                            <a
+                                                role="button"
+                                                data-possible="${problem_score['possible']}"
+                                                data-max-show="${problem_score['max_score_show']}"
+                                                data-key="${problem_score['id']}"
+                                                data-submission="${problem_score['submission_uuid']}"
+                                                class="text-danger"
+                                                data-toggle="popover"
+                                            >
+
+                                                % if (problem_score["is_openassessment_problem"] or problem_score["is_edx_sga_problem"]) and problem_score["earned"] == 0:
+                                                    ${_("Score")}
+                                                % else:
+                                                    ${_("Rescore")}
+                                                % endif
+                                            </a>
+                                        % endif
+                                    </td>
+                                </tr>
+                                % endfor
+
+                                % if not problem_scores:
+                                <tr><td colspan="6">${_("Problem scores are not available.")}</td></tr>
+                                % endif
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+    <div class="d-sm-flex align-items-end justify-content-end my-4 show-only-monitor hidden">
+        <div>
+            <a href="#" class="d-inline-block btn btn-sm btn-success review review-clean">
+                <i class="las la-lg la-thumbs-up text-white-50"></i> ${_("Clear")}
+            </a>
+
+            <a href="#" class="d-inline-block btn btn-sm btn-danger review">
+                <i class="las la-lg la-thumbs-down text-white-50"></i> ${_("Suspicious")}
+            </a>
+        </div>
+    </div>
+
+    <div id="openassessment-modal" class="jqueryModal">
+        <div style="overflow-y: scroll; height:400px;">
+            <pre>
+                <p id="student-answer"></p>
+            </pre>
+        </div>
+        <a href="#" target="_blank" id="problem-link" class="btn-brand btn-base" style="float: left; background-color: #00C3FF !important; margin-left: 90px;">${_("Attached File")}</a>
+        <a href="#" class="btn-brand btn-base" rel="modal:close" style="float: right; background-color: green; margin-left: 10px;">${_("I am ready to score")}</a>
+    </div>
+
+    <div id="edx-sga-modal" class="jqueryModal">
+        <a href="#" target="_blank" id="edx-sga-problem-link" class="btn-brand btn-base" style="float: left; background-color: #00C3FF !important; margin-left: 90px;">${_("Attached File")}</a>
+        <a href="#" class="btn-brand btn-base" rel="modal:close" style="float: right; background-color: green; margin-left: 10px;">${_("I am ready to score")}</a>
+    </div>
+
+</main>
+
+
+<%block name="js_extra">
+<%
+images = [
+    round((webcam_record.proctored_exam_snapshot.created - attempt.started_at).total_seconds())
+    for webcam_record in webcam_history
+]
+%>
+
+    <!-- Page level plugins -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+
+            if (Boolean(${1 if is_monitored_timed_exam else 0})) {
+                $('.show-only-monitor').removeClass('hidden');
+            }
+
+            // Init webcam image time
+            var images = JSON.parse('${images| n, dump_js_escaped_json}');
+
+            // Function to conver hh:mm:ss to seconds
+            var pointToSeconds = function(point){
+                var time_splitted = point.split(":");
+                return parseInt(time_splitted[0]) * 3600 + parseInt(time_splitted[1]) * 60 +  parseInt(time_splitted[2]);
+            }
+
+            $('.show-openassessment-btn').on('click', function (event){
+                var fileAttached = $(event.target).data('file-url');
+                var studentAnswer = $(event.target).data('answer');
+                $("#student-answer").text(studentAnswer);
+                if (fileAttached !=="") {
+                    $("#problem-link").attr('href', fileAttached);
+                } else {
+                    $("#problem-link").addClass('hidden');
+                }
+               $("#openassessment-modal").jqueryModal({
+                    escapeClose: false,
+                    clickClose: false,
+                    showClose: false
+                });
+            });
+
+            $('.show-edx-sga-btn').on('click', function (event){
+                var fileAttached = $(event.target).data('file-url');
+                if (fileAttached !=="") {
+                    $("#edx-sga-problem-link").attr('href', fileAttached);
+                } else {
+                    $("#edx-sga-problem-link").addClass('hidden');
+                }
+               $("#edx-sga-modal").jqueryModal({
+                    escapeClose: false,
+                    clickClose: false,
+                    showClose: false
+                });
+            });
+
+            // Function to get image index
+            var getWebcamImageIndex = function(point) {
+                var goal = pointToSeconds(point);
+                var image = images.indexOf(goal);
+                if (image > -1) {
+                    return image;
+                }
+                var closest = images.reduce(function(prev, curr) {
+                    return (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev);
+                });
+                return images.indexOf(closest);
+            }
+
+            // Function to get question to highlight
+            var highlightQuestion = function(point) {
+                var seconds = pointToSeconds(point);
+                $('.scores-tbl tr').removeClass("bg-warning");
+                $('.scores-tbl tr').filter(function () {
+                    return $(this).data('start') <= seconds && $(this).data('finish') >= seconds;
+                }).addClass("bg-warning");
+            }
+
+            // Init popover
+            $('[data-toggle="popover"]').popover({
+                container: 'body',
+                html: true,
+                sanitize: false,
+                template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-body"></div></div>',
+                content: function(){
+                    var max = $(this).data("possible");
+                    var maxShow = $(this).data("max-show");
+                    var problemKey = $(this).data("key");
+                    var submission_uuid = $(this).data("submission");
+                    var maxScoreText = "${_('out of')} " + maxShow;
+                    var submitBtnText = "${_('Submit')}";
+
+                    <%text>
+                    return `
+                        <section id="rescore-form">
+                            <form>
+                              <input type="hidden" value="${problemKey}" data-submission="${submission_uuid}" data-max-show="${maxShow}" id="problem-key">
+                              <div class="form-row align-items-center">
+                                <div class="col-sm-12 my-1">
+                                  <div class="input-group">
+                                    <input class="form-control score-input" id="new-score" type="number" value="0" min="0" max="${max}" step="1">
+                                    <div class="input-group-prepend">
+                                      <div class="input-group-text">${maxScoreText}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-12 my-1 text-right">
+                                  <a id="rescore-submit" class="btn btn-primary">${submitBtnText}</a>
+                                </div>
+                              </div>
+                            </form>
+                        </section>`;
+                    </%text>
+                },
+            });
+
+            $('[data-toggle="popover"]').on('show.bs.popover', function () {
+                $('[data-toggle="popover"]').popover('hide');
+            });
+
+            // Init carousel
+            var $slider = $('.carousel').carousel({
+                pause: true,
+                interval: false,
+                wrap: false,
+            });
+
+            $("#slider-next").click(function(){
+                $slider.carousel('next');
+            });
+
+
+            $("#slider-prev").click(function(){
+                $slider.carousel('prev');
+            });
+
+
+            $("#slider-first").click(function(){
+                $slider.carousel(0);
+            });
+
+
+            $("#slider-last").click(function(){
+                $slider.carousel(${webcam_history.count()-1});
+            });
+
+            $(document).on("click", "#rescore-submit", function(){
+                var newScore = parseFloat($("#new-score").val());
+                var maxScore = parseFloat($("#new-score").attr("max"));
+                var problemKey = $("#problem-key").val();
+                var submissionUUID = $("#problem-key").data("submission");
+                var maxScoreShow = $("#problem-key").data("max-show");
+                var score_input = document.getElementById("new-score");
+                if(!isNaN(newScore)){
+                    if(newScore < $("#new-score").attr("min")){
+                        score_input.setCustomValidity("Score must be a positive number.");
+                        score_input.reportValidity();
+                        return
+                    }
+                    if (!Number.isInteger(newScore)){
+                        score_input.setCustomValidity("Score must be a integer number.");
+                        score_input.reportValidity();
+                        return;
+                    }
+                    if(newScore > maxScoreShow){
+                        newScore = maxScoreShow;
+                    }
+                    $.post({
+                        url: "${rescore_url}",
+                        data: {
+                            problem_to_reset: problemKey,
+                            unique_student_identifier: "${student.username}",
+                            score: newScore,
+                            submission_uuid: submissionUUID,
+                            max_score: maxScore,
+                            max_score_show: maxScoreShow,
+                        },
+                        success: function(){
+                            var $row = $('tr[data-key="'+$("#problem-key").val()+'"]');
+                            var tdClass = newScore == maxScore ? "bg-success" : newScore == 0 ? "bg-danger" : "bg-warning";
+                            $row.find(".earned").text(newScore.toFixed(1)).removeClass('bg-success bg-danger bg-warning').addClass(tdClass);
+                            $(".scores-tbl tr").removeClass("bg-light");
+                            $row.addClass("bg-light");
+                            $('[data-toggle="popover"]').popover('hide');
+                        },
+                    });
+                }
+            });
+
+            $(".review").click(function(){
+                var $el = $(this);
+                var status = $el.hasClass('review-clean') ? 'clean' : 'suspicious';
+
+                // Send the review status to server
+                $.ajax({
+                    data: JSON.stringify({status: status, ids: [${student.id}]}),
+                    url: "/api/edx_proctoring/v1/proctored_exam/submit/review/" + "${course.id}",
+                    type: 'POST',
+                    success: function(){
+                        // Change the review status message
+                        if (status == 'clean') {
+                            $("#review-status").html('<span class="badge badge-success">${_("Marked as clean-chit")}</span>');
+                        } else {
+                            $("#review-status").html('<span class="badge badge-danger">${_("Marked as suspicious")}</span>');
+                        }
+                        // Scroll to top
+                        window.scrollTo(0, 0);
+                    }
+                });
+
+            });
+
+            // Init charts
+            Highcharts.chart('timeline-chart', {
+              chart: {
+                zoomType: 'x',
+                height: 250,
+              },
+              tooltip: {
+                enabled: false,
+              },
+              credits: false,
+              title: {
+                text: "${_('Elapsed time vs Student behaviour')}"
+              },
+              subtitle: {
+                text: document.ontouchstart === undefined ?
+                  "${_('Click and drag in the plot area to zoom in')}" : "${_('Pinch the chart to zoom in')}"
+              },
+              xAxis: {
+                labels: {
+                  rotation: 90,
+                },
+                % if LANGUAGE_CODE == 'ar':
+                reversed: true,
+                % endif
+                type: 'category',
+                categories: JSON.parse('${timeline_x_axis| n, dump_js_escaped_json}')
+              },
+              yAxis: {
+                top: 100,
+                min: 0.1,
+                max: 0.1,
+                visible: false,
+
+              },
+              legend: {
+                enabled: false
+              },
+              plotOptions: {
+                series: {
+                  pointPadding: 0,
+                  groupPadding: 0,
+                  borderWidth: 0,
+                  shadow: false,
+                  allowPointSelect: true,
+                  point: {
+                    events: {
+                      select: function(e) {
+                        if(images.length > 0){
+                          $slider.carousel(getWebcamImageIndex(e.target.category));
+                        }
+                        if($('.scores-tbl tr').length > 0) {
+                            highlightQuestion(e.target.category);
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              series: [{
+                type: 'column',
+                name: '',
+                pointPadding: 0,
+                turboThreshold: 0,
+                data: JSON.parse('${timeline_y_axis| n, dump_js_escaped_json}')
+              }]
+            });
+
+        });
+    </script>
+</%block>

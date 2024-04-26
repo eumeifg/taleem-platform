@@ -1,0 +1,141 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from openedx.custom.live_class.models import LiveClass
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/datatables.bundle.min.css')}"/>
+    <style>
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Live Classes")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800"></h1>
+            <div>
+                <a id="addNewBookingBtn"
+                   class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="las la-lg la-plus-circle la-sm text-white-50"></i> ${_("Add New Booking")}
+                </a>
+            </div>
+        </div>
+
+        <div class="row" id="newBookingDiv" ${'hidden' if not error else ''}>
+            <div class="col-xl-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Add New Booking")}</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                         <input type="hidden" name="csrfmiddlewaretoken" value="${ csrf_token }"/>
+                          <div class="form-group">
+                              % if error:
+                                <span class="form-text text-red">${error}</span>
+                              %else:
+                                <small id="voucher-code-help" class="form-text text-muted">${_("Please enter the email address for the student you want to book class.")}</small>
+                              %endif
+                            <label for="studentEmail" class="required">${_("Student Email Address")}</label>
+                            <input type="email" name="student_email" class="form-control" id="studentEmail" aria-describedby="studentEmailHelp">
+                              <br><br>
+                            <label for="bookCSVFile">${_("CSV")}</label>
+                            <input class="form-control" id="bookCSVFile" name="book_csv_file" type="file" accept=".csv"/>
+                            <span class="form-text text-muted">${_("The CSV containing emails you want to enroll.")}</span>
+                          </div>
+                          <button type="submit" class="btn btn-primary">${_("Submit")}</button>
+                          <a class="action action-primary right" href="${reverse('taleem_organization:csv_samples', args=('enrollments',))}" target="_blank">${_('Download Sample CSV')}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Live Class Bookings")}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table text-center" id="live-class-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>${_("Student Name")}</th>
+                                        <th>${_("Student Email")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for booking in bookings:
+                                    <tr>
+                                        <td>${booking.user.profile.name}</td>
+                                        <td>${booking.user.email}</td>
+                                    </tr>
+                                    % endfor
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/datatables.bundle.min.js')}"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+            // Call the dataTables jQuery plugin
+            var table = $('#live-class-table').DataTable({
+                "oLanguage": {
+                        "sEmptyTable": "${_("No booking for class")}"
+                },
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                },
+            });
+        });
+    </script>
+    <script>
+        var seatsLeft = "${seats_left}";
+        $(function () {
+            if (parseInt(seatsLeft) === 0) {
+                $("#addNewBookingBtn").addClass('hidden');
+            }
+            $("#addNewBookingBtn").click(function(){
+                document.getElementById('newBookingDiv').removeAttribute('hidden');
+            });
+        });
+    </script>
+</%block>

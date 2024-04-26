@@ -1,0 +1,91 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Privacy Policy")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="container about">
+        <h1>
+            <%block name="pageheader">${page_header or _("Privacy Policy")}</%block>
+        </h1>
+        <br><br>
+        <p>
+            <%block name="pagecontent">
+                ${_("Ta3leem and each Member that provides courses through the Ta3leem Site care about the confidentiality and security of your information.")}
+                ${_("If you do not accept the terms of this Privacy Policy, then please do not access, browse, or register for the Ta3leem Site or enroll in any courses.")}
+                ${_("If you choose not to provide certain information required to provide you with various products and services offered on the Ta3leem Site, then you may not be able to establish a user account or obtain those products or services.")}
+                <br><br>
+                ${_("Any version of this Privacy Policy in a language other than English or Arabic is provided for convenience and you understand and agree that the English and Arabic languages version will control if there is any conflict.")}
+                <ul>
+                    <li>${_("Ta3leem is solely and independently responsible for its own privacy practices. No Member is responsible for Ta3leem’s privacy practices.")}</li>
+                    <li>${_("Each Member is solely and independently responsible for its own privacy practices. No Member is responsible for another Member’s privacy practices. Also, Ta3leem is not responsible for any Member’s privacy practices.")}</li>
+                </ul>
+                <br>
+                <strong>${_("This Privacy Policy is organized as follows:")}</strong>
+                <br><br>
+                <ul>
+                    <li>${_("Information that Ta3leem collects from you (including Personal Information).")}</li>
+                    <li>${_("How your information is used.")}</li>
+                    <li>${_("How your information is shared.")}</li>
+                </ul>
+                <br>
+                <strong>${_("INFORMATION THAT TA3LEEM COLLECTS FROM YOU (INCLUDING PERSONAL INFORMATION):")}</strong>
+                <br>
+                <br>
+                ${_("Ta3leem directly collects information when you:")}
+                <ul>
+                    <li>${_("sign up for an Ta3leem user account (name, username, email address) and create an Ta3leem user profile;")}</li>
+                    <li>${_("enroll and participate in online courses;")}</li>
+                    <li>${_("purchase a product or service (for example, Verified Certificates, you will be directed to Ta3leem’s third-party payment processor and Ta3leem’s third-party ID verification service provider (the certificate will have your name on it)), so that Ta3leem’s third-party vendor can authenticate your identity or other product or service, so that Ta3leem’s third-party vendor can process payment;")}</li>
+                    <li>${_("send email messages to Ta3leem (including messages to learner support);")}</li>
+                    <li>${_("participate in user surveys;")}</li>
+                    <li>${_("participate in public forums, webinars, and other interactive experiences on the Ta3leem Site;")}</li>
+                    <li>${_("participate in remote proctoring or other course facilitation processes (so that Ta3leem’s third-party vendor can monitor and assess the integrity of your course activity);")}</li>
+                </ul>
+                ${_("You may voluntarily choose to share additional Personal Information on the Ta3leem Site, for example:")}
+                <ul>
+                    <li>${_("in your Ta3leem account profile (and you may display a limited or full profile to other Ta3leem Site users);")}</li>
+                    <li>${_("in applying for financial assistance; or")}</li>
+                    <li>${_("when participating in a course, forum, webinar, or other interactive experience on the Ta3leem Site (noting that in some cases, this information is shared with a third party that provides tools or other assistance for the Ta3leem Site or a course).")}</li>
+                </ul>
+                ${_("Ta3leem encourages you to use discretion before voluntarily sharing additional Personal Information on the Ta3leem Site.")}
+                <br><br>
+                <strong>${_("Note:")}</strong>
+                <br><br>
+                <ul>
+                    <li>${_("you will be directed to Ta3leem’s third-party payment processor and Ta3leem’s third-party ID verification service provider.")}</li>
+                    <li>${_("Members do not receive your Personal Information  plus the information that Ta3leem collects about your activity and performance in the course unless and until you enroll in a course.")}</li>
+                </ul>
+                <br>
+                <strong>${_("HOW YOUR INFORMATION IS USED")}</strong>
+                <br><br>
+                ${_("Ta3leem and Members use information, including Personal Information, to carry out the following purposes:")}
+                <ul>
+                    <li>${_("Operate and improve the Ta3leem Site – This includes creating and improving features that support the Ta3leem community and enable Ta3leem Site usage at scale.")}</li>
+                    <li>${_("Create, administer, provide, and teach courses – This includes creating and improving the delivery of massive open online courses and programs on Ta3leem. This also includes personalizing courses, so your learning experience is tailored to your interests and needs, and assessing your performance and awarding certificates.")}</li>
+                    <li>${_("Offer and improve products and services – This includes enabling you to navigate the Ta3leem Site, to enroll and participate in courses and programs on the Ta3leem Site, to learn effectively in such courses and programs, and to purchase or obtain products and services on the Ta3leem Site such as Verified Certificates.")}</li>
+                    <li>${_("Develop and maintain the security and performance of the Ta3leem Site – This includes tracking Ta3leem Site outages and creating software solutions, detecting violations of theTerms of Service, and monitoring uses, misuses, and potential misuses of the Ta3leem Site.")}</li>
+                    <li>${_("Communicate with you – This includes answering your course and platform questions, notifying you of course and Ta3leem Site maintenance and updates, marketing to you about course offerings, programs, news, and related products and services of Ta3leem or Ta3leem affiliates, and as permitted under applicable law, sending you communications about products or services of selected business partners that may be of interest to you.")}</li>
+                    <li>${_("Support scientific research including, for example, in the areas of cognitive science and education – This includes collaborating to enable and conduct research about how learners access and master course materials online, with the goal of improving course outcomes.")}</li>
+                    <li>${_("Track Ta3leem Site usage against goals and mission – This includes performing analytics to evaluate access to and performance in courses and course-related products and services and to report aggregate usage information (not Personal Information) to business partners and external audiences.")}</li>
+                    <li>${_("Exercise, enforce, and comply with legal rights and obligations – This includes responding to subpoenas, court orders, or other legal process; and investigating, preventing, or taking action regarding illegal activities, suspected fraud, security or technical issues, or to protect the rights, property, or safety of Ta3leem, Members, or others, and as otherwise required by applicable law.")}</li>
+                </ul>
+                <br>
+                ${_("Ta3leem or a Member may also seek your consent for additional uses of information, including Personal Information, and will use it only for the purpose described to you. All use of Personal Information is subject to applicable law.")}
+                <br/><br>
+                <strong>${_("HOW YOUR INFORMATION IS SHARED")}</strong>
+                <br><br>
+                ${_("Ta3leem and Members share information, including Personal Information, with third parties for the following purposes:")}
+                <ul>
+                    <li>${_("In some cases, the Ta3leem Site and individual courses are integrated with third-party services or contain links to websites published by third parties, including other content providers as well as service providers. These third parties are responsible for their own privacy practices, so you should pay attention anytime you are redirected to a third-party website and be sure to review its privacy policy.")}</li>
+                    <li>${_("With other learners in courses that you take and with other visitors to the Ta3leem Site, to create an interactive learning environment, support class participation, and share course information – This includes sharing comments, coursework, or other information or content that you submit to a portion of the Ta3leem Site designed for viewing by other class members or for public communication.")}</li>
+                    <li>${_("With employers, government programs, institutions, or other enterprises that sponsor your enrollment in a course for training or other educational purposes – If an entity pays for or otherwise sponsors your Verified Certificate or course participation, Ta3leem will share information with the entity as needed to confirm your enrollment, participation, progress, and completion status in that course.")}</li>
+                    <li>${_("With affiliates of Ta3leem or a Member, or with successors in the event of a merger, acquisition, or reorganization, for their use consistent with this Privacy Policy.")}</li>
+                </ul>
+                ${_("Ta3leem or a Member may also seek your consent for additional disclosures of information, including Personal Information, and will share it only as described to you. In addition, Ta3leem or a Member may share with the public and with third parties, including but not limited to researchers and business partners, information and Personal Information that is de-identified or aggregated in a manner that does not personally identify you.")}
+            </%block>
+        </p>
+    </section>
+</main>

@@ -1,0 +1,77 @@
+<%!
+  from django.utils.translation import get_language_bidi
+%>
+
+<%
+  direction = 'rtl' if get_language_bidi() else 'ltr'
+%>
+
+<div app="drawer">
+  <div class="menu-wrap">
+    <div class="menu">
+      <div style="width: 80%; height: 80%;">
+        <div class="hamburger" id="drawer-closer">
+          <div></div>
+        </div>
+        <div id='calendar' style="background: white;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+<script>
+  var calendar = null;
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      dir: '${direction}',
+      locale: "${'ar' if direction == 'rtl' else 'en'}",
+      height: '100%',
+      handleWindowResize: false,
+      headerToolbar: {
+        left: 'prev,next,today',
+        center: 'title',
+        right: 'dayGridMonth,dayGridWeek,dayGridDay'
+      },
+      initialDate: '2020-10-22',
+      navLinks: true, // can click day/week names to navigate views
+      dayMaxEvents: true, // allow "more" link when too many events
+      events: [
+        {
+          title: 'Course Event',
+          start: '2020-10-25',
+          color: '#FF0000'
+        },
+        {
+          title: 'Test Event',
+          start: '2020-10-22T10:30',
+          color: '#00FF00',
+          allDay: false
+        }        
+      ]
+    });
+
+  });
+
+  document.querySelector('#drawer-opener').addEventListener('click', function(event) {
+    var drawer = $("[app='drawer'] .menu");
+    drawer.css({
+      "opacity": 1,
+      "width": "100vw",
+      "transition": "all var(--menu-speed) ease"
+    });
+    calendar.render();
+    setTimeout(function(){ calendar.updateSize(); }, 1000);
+  });
+
+  document.querySelector('#drawer-closer').addEventListener("click", function(event) {
+    var drawer = $("[app='drawer'] .menu");
+    drawer.css({
+      "opacity": 0,
+      "width": 0,
+      "transition": "all var(--menu-speed) ease"
+    });
+  });
+
+</script>

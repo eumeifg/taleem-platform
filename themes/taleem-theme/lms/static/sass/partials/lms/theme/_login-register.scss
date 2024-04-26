@@ -1,0 +1,54 @@
+.taleem-theme {
+    .login-register-content {
+        max-width: initial;
+        background: initial;
+    }
+
+    .login-register,
+    .financial-assistance-wrapper .financial-assistance-form {
+        background: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    #resend_activation_email {
+        font-weight: bold;
+      }
+      
+    #activation_email_send_message
+      {
+        font-weight: bold;
+      }
+
+    .field-icon {
+        margin-top: -30px;
+        position: relative;
+        z-index: 2;
+        cursor: pointer;
+        float: left;
+        margin-left: 8px;
+        @if $bi-app-direction == ltr {
+            float: right;
+            margin-right: 8px;
+            margin-left: 0px;
+        }
+    }
+}
+.loading-block.login-screen-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.164);
+  i {
+    color: #ffd25f;
+    opacity: 1;
+  }
+}

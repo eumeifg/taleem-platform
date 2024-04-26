@@ -1,0 +1,97 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+%>
+
+<script id="assignments-template" type="template">
+    <div class="card assignment-item">
+        <div class="card-header" id="heading-{{assignment_index}}">
+            <h2 class="mb-0">
+                <a class="btn btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapse-{{assignment_index}}" aria-expanded="false" aria-controls="collapse-{{assignment_index}}">
+                    <div class="row">
+                        <div class="col-6 assignment-name">{{assignment_name}}</div>
+                        <div class="col">
+                            ${_("Submitted :")}
+                            <span class="submitted-assign-num mx-1">{{submitted_assign_num}}</span>
+                        </div>
+                        <div class="col">
+                            ${_("Pending :")} 
+                            <span class="pending-assign-num mx-1">{{pending_assign_num}}</span>
+                        </div>
+                        <div class="col">
+                            ${_("Missed :")}
+                            <span class="missed-assign-num mx-1">{{missed_assign_num}}</span>
+                        </div>
+                    </div> 
+                </a>
+            </h2>
+        </div>
+        <div id="collapse-{{assignment_index}}" class="collapse" aria-labelledby="heading-{{assignment_index}}" data-parent="#assignments-list">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                ${_("Submitted Assignments")}
+                            </div>
+                            <div class="card-body submitted-assigns-table">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">${_("Name")}</th>
+                                            <th scope="col">${_("Link")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="submitted-assigns-list">
+                                    </tbody>
+                                </table>
+                                <i style="display: none;">${_("There are no submitted assignments")}</i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                ${_("Pending Assignments")}
+                            </div>
+                            <div class="card-body pending-assigns-table">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">${_("Name")}</th>
+                                            <th scope="col">${_("Link")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="pending-assigns-list">
+                                    </tbody>
+                                </table>
+                                <i style="display: none;">${_("There are no pending assignments")}</i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                ${_("Missed Assignments")}
+                            </div>
+                            <div class="card-body missed-assigns-table">
+                                <table class="table table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">${_("Name")}</th>
+                                            <th scope="col">${_("Link")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="missed-assigns-list">
+                                    </tbody>
+                                </table>
+                                <i style="display: none;">${_("There are no missed assignments")}</i>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</script>

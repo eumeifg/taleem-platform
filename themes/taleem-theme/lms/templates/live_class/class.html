@@ -1,0 +1,48 @@
+<%namespace name='static' file='../static_content.html'/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+%>
+
+<%page args="live_class" expression_filter="h"/>
+
+<tr>
+    <td>${live_class.name}</td>
+    <td>${live_class.display_time}</td>
+    <td>${live_class.duration} ${_("Minutes")}</td>
+    <td>${live_class.moderator.user.profile.name}</td>
+    <td>
+        % if live_class.stage == LiveClass.RUNNING:
+            <span class="badge badge-info">${_("Live")}</span>
+        % elif live_class.stage == LiveClass.ENDED:
+            <span class="badge badge-success">${_("Attended")}</span>
+        % elif live_class.stage == LiveClass.UNDER_REVIEW:
+            <span class="badge badge-warning">${_("Under Review")}</span>
+        % elif live_class.stage == LiveClass.DECLINED:
+            <span class="badge badge-danger">${_("Declined")}</span>
+        % else:
+            <span class="badge badge-primary">${_("Upcoming")}</span>
+        % endif
+    </td>
+    <td>
+        % if live_class.is_paid and not live_class.is_fully_paid(request.user):
+            <a class="text-primary"
+                href="${reverse('class_payment', args=[text_type(live_class.id)])}">
+                <i class="las la-credit-card"></i> ${_("Pay Class Dues")}
+            </a>
+        % elif live_class.stage == LiveClass.SCHEDULED or live_class.stage == LiveClass.RUNNING:
+            <a class="text-primary"
+                href="${reverse('go_to_class', args=[text_type(live_class.id)])}">
+                <i class="fa fa-sign-in text-muted"></i> ${_("Go to class")}
+            </a>
+        % else:
+            ${_("No Action")}
+        % endif
+    </td>
+</tr>
+

@@ -1,0 +1,109 @@
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+<%!
+  from django.utils.translation import ugettext as _
+  from student.models import CourseEnrollment
+  from openedx.custom.wishlist.models import Wishlist
+  from django.urls import reverse
+%>
+
+<%
+  if user.is_authenticated:
+    fav_courses = Wishlist.fav_course_id_list(user)
+  else:
+    fav_courses = []
+
+  filter_icons = {
+    "provider": "la-landmark",
+    "subject": "la-book",
+    "stage": "la-stream",
+    "language": "la-language",
+  }
+%>
+
+<section class="courses-container highlighted-courses">
+  % if settings.FEATURES.get('COURSES_ARE_BROWSABLE'):
+
+    % if filters_data:
+    <section class="courses-filter mt-3">
+      <h1 class="filters-title"><i class="las la-lg la-filter mx-1"></i> ${_('Filter Courses')}</h1>
+      <div id="search-filter" class="filter-item">
+        <input id="filters-auto-complete" class="filter-input" type="text" name="search" placeholder="${_('Search for a course')}">
+      </div>
+      <div id="filter-accordion" class="filter-accordion">
+        %for filter_key, filter_items in filters_data.items():
+        <div class="filter-card" data-filter="${filter_key}">
+          <div class="filter-header collapsed" id="${filter_key}-filter-h" data-toggle="collapse" data-target="#${filter_key}-filter" aria-expanded="false" aria-controls="${filter_key}-filter">
+            <h3 class="filter-title">
+              <i class="las la-lg ${filter_icons[filter_key.lower()] if filter_key.lower() in filter_icons.keys() else 'la-filter'} mx-1"></i>
+              % if LANGUAGE_CODE == "ar" and filter_items["category_name_in_arabic"]:
+              ${filter_items["category_name_in_arabic"]}
+              % else:
+              ${filter_items["category_name"]}
+              % endif
+              <span id="${filter_key}-counter" class="filetr-count">0</span>
+            </h3>
+          </div>
+          <div id="${filter_key}-filter" class="collapse" aria-labelledby="${filter_key}-filter-h" data-parent="#filter-accordion">
+            <div class="filter-body">
+              %for filter_item in filter_items["category_filters"]:
+              <div class="form-check">
+                <input class="form-check-input filter-input" type="checkbox" name="${filter_key}[]" value="${filter_item['id']}" id="${filter_key}-${filter_item['id']}">
+                <label class="form-check-label" for="${filter_key}-${filter_item['id']}">
+                  % if LANGUAGE_CODE == "ar" and filter_item["value_in_arabic"]:
+                  ${filter_item["value_in_arabic"]}
+                  % else:
+                  ${filter_item["value"]}
+                  % endif
+                </label>
+              </div>
+              %endfor
+            </div>
+          </div>
+        </div>
+        %endfor
+      </div>
+      <div id="sort-filter" class="filter-item">
+        <h3 class="filter-label"><i class="las la-lg la-sort mx-1"></i> ${_('Sort')}</h3>
+        <select class="filter-input" name="sort">
+            <option value="" selected></option>
+            <option value="start_date">${_('By Date')}</option>
+            <option value="rating">${_('By Rating')}</option>
+            <option value="popular">${_('By Popularity')}</option>
+            <option value="atoz">${_('Alphabetically A-Z')}</option>
+            <option value="ztoa">${_('Alphabetically Z-A')}</option>
+        </select>
+      </div>
+      <a class="filter-btn" id="filter-btn"><i class="las la-sync mx-1"></i>${_('Filter')}</a>
+    </section>
+    % endif
+
+    <section class="courses container-fluid" id="courses-wrapper">
+      <div id="suggestion-msg" class="alert alert-warning" role="alert">
+        ${_("We couldn't find any courses for the selected filters. we will show you courses for")} :
+        <span class="suggestion-cat"></span>
+      </div>
+      <div class="courses-listing row">
+      </div>
+      <div class="pagination">
+        <span id="filter-prev" class="prev"><i class="las la-angle-left"></i></span>
+        <div id="filter-pages" class="pages">
+            <span class="page active" data-page="1">1</span>
+            %for p in range(2, total_num_of_pages+1):
+              <span class="page" data-page="${p}">${p}</span>
+            %endfor
+        </div>
+        <span id="filter-next" class="next"><i class="las la-angle-right"></i></span>
+      </div>
+      <div class="loading-block"><i class="las la-4x la-spin la-sync"></i></div>
+    </section>
+    ## in case there are courses that are not shown on the homepage, a 'View all Courses' link should appear
+    % if homepage_course_max and len(courses) > homepage_course_max:
+    <div class="courses-more">
+      <a class="courses-more-cta" href="${marketing_link('COURSES')}"> ${_("View all Courses")} </a>
+    </div>
+    % endif
+  % endif
+
+  <%include file="course-tpl.html"/>
+</section>

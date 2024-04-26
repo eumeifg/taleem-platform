@@ -1,0 +1,228 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+    from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+    from openedx.core.djangolib.js_utils import dump_js_escaped_json
+    from django.utils.http import urlquote_plus
+    from django.urls import reverse
+%>
+<%namespace name='static' file='/static_content.html'/>
+
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Sign in or Register")}</%block>
+
+<%block name="js_extra">
+    <%static:require_module module_name="js/student_account/logistration_factory" class_name="LogistrationFactory">
+        var options = ${data | n, dump_js_escaped_json};
+        LogistrationFactory(options);
+        if ('newrelic' in window) {
+            newrelic.finished();
+            // Because of a New Relic bug, the finished() event doesn't show up
+            // in Insights, so we have to make a new PageAction that is basically
+            // the same thing. We still want newrelic.finished() for session
+            // traces though.
+            newrelic.addPageAction('xfinished');
+        }
+    </%static:require_module>
+    % if configuration_helpers.get_value('DISPLAY_TOS_IN_MODAL_ON_REGISTRATION_PAGE', False):
+    <script type="text/javascript" src="${static.url('js/student_account/tos_modal.js')}"></script>
+    % endif
+    <script type="text/javascript">
+        function togglePassword (e) {
+            const addClass = document.querySelector('.field-icon').classList.contains('fa-eye') ? 'fa-eye-slash' : 'fa-eye';
+            const removeClass = document.querySelector('.field-icon').classList.contains('fa-eye') ? 'fa-eye' : 'fa-eye-slash';
+            document.querySelector('.field-icon').classList.remove(removeClass);
+            document.querySelector('.field-icon').classList.add(addClass);
+            if (document.querySelector('#login-password')) {
+                const loginType = document.querySelector('#login-password').getAttribute('type') === 'password' ? 'text' : 'password';
+                document.querySelector('#login-password').setAttribute('type', loginType);
+            }
+            if (document.querySelector('#register-password')){
+                const registerType = document.querySelector('#register-password').getAttribute('type') === 'password' ? 'text' : 'password';
+                document.querySelector('#register-password').setAttribute('type', registerType);
+            }
+        };
+    </script>
+</%block>
+
+<%block name="header_extras">
+    <script type="text/javascript" src="${static.url('assets/js/jquery.bootstrap.wizard.js')}"></script>
+    <link rel="stylesheet" href="${static.url('assets/vendor/intlTelInput/intlTelInput.css')}" />
+   <script src="${static.url('assets/vendor/intlTelInput/intlTelInput.min.js')}"></script>
+
+    % for template_name in ["account", "access", "form_field", "login", "register", "institution_login", "institution_register", "password_reset", "hinted_login", "second_password"]:
+        <script type="text/template" id="${template_name}-tpl">
+            <%static:include path="student_account/${template_name}.underscore" />
+        </script>
+    % endfor
+    <link rel="stylesheet" type="text/css" href="${static.url('css/register-wizard.css')}"/>
+    <style>
+        .login-register, section#register-anchor {
+            max-width: 700px;
+        }
+        /* Medium devices (landscape tablets, 768px and up) */
+        @media (min-width: 768px) {
+            .register-wizard {
+                width: 600px;
+            }
+        }
+        .login-register .form-field, .financial-assistance-wrapper .financial-assistance-form .form-field {
+            margin-top: 20px;
+            min-height: 85px;
+        }
+        .login-register .form-field label.focus-out, .financial-assistance-wrapper .financial-assistance-form .form-field label.focus-out, .login-register .form-field input.focus-out, .financial-assistance-wrapper .financial-assistance-form .form-field input.focus-out, .login-register .form-field select.focus-out, .financial-assistance-wrapper .financial-assistance-form .form-field select.focus-out, .login-register .form-field textarea.focus-out, .financial-assistance-wrapper .financial-assistance-form .form-field textarea.focus-out, .login-register .form-field .plaintext-field.focus-out, .financial-assistance-wrapper .financial-assistance-form .form-field .plaintext-field.focus-out {
+            position: relative;
+            padding-top: 0;
+            padding-left: 0;
+            opacity: 1;
+        }
+        input#register-phone_number {
+            direction: ltr;
+        }
+        .register-wizard .form-check {height: 40px; margin-top: 10px;}
+        .register-wizard .form-check label {margin-bottom: 30px;}
+        .register-wizard .form-check input[type="radio"] {width: 32px; right: 0; padding: 0; -webkit-appearance: none; border: 2px solid #281958; border-radius: 50%;outline: none;}
+        .register-wizard .form-check input[type="radio"]:before {content: ''; display: block; width: 32px; height: 32px; margin: -2px; border-radius: 50%;}
+        .register-wizard .form-check input[type="radio"]:checked:before {background: #281958;}
+        .rtl .register-wizard .form-check input[type="radio"] {right: auto; left: 0;}
+    </style>
+</%block>
+<div class="section-bkg-wrapper">
+    <main id="main" aria-label="Content" tabindex="-1">
+        <div id="content-container" class="login-register-content">
+            % if enable_enterprise_sidebar:
+                <%include file="enterprise_sidebar.html" />
+                <%
+                    border_class = 'border-left'
+                %>
+            % else:
+                <%
+                    border_class = ''
+                %>
+            % endif
+            <div id="login-and-registration-container" class="login-register ${border_class}"></div>
+        </div>
+        <div class="loading-block login-screen-loader" style="display:none"><i class="las la-4x la-spin la-sync"></i></div>
+    </main>
+</div>
+
+<script type="text/javascript">
+    var registerWizard;
+    var waitWizardChange = false;
+    var nextWizardIndex = -1;
+    var waitLiveValidates = 0;
+    var liveValidateFields = ['name', 'username', 'password', 'email', 'confirm_email', 'country'];
+
+    function registerFormInitialized() {
+
+        console.log('Register Form Initialized!');
+
+        registerWizard = $('.register-wizard').bootstrapWizard({
+            'tabClass': 'nav nav-pills',
+            'nextSelector': '.btn-next',
+            'previousSelector': '.btn-previous',
+
+            onNext: function(tab, navigation, index) {
+                // Check if still waiting previous validation
+                if(waitWizardChange) return false;
+
+                var $wizard = navigation.closest('.register-wizard');
+                var $active = $($wizard).find('.tab-pane.active');
+                waitLiveValidates = 0;
+                $($active).find('input, select').each(function( index ) {
+                    $( this ).focus().blur();
+                    if(liveValidateFields.includes($( this ).attr('name'))) {
+                        waitLiveValidates++;
+                    }
+                });
+                //var $errors = $($active).find('input.error, select.error').length;
+                //if ($errors > 0) return false;
+                waitWizardChange = true;
+                nextWizardIndex = index;
+                validateAndChange(navigation);
+                return false;
+            },
+
+            onInit : function(tab, navigation, index){
+
+                //check number of tabs and fill the entire row
+                var $total = navigation.find('li').length;
+                $width = 100/$total;
+
+                navigation.find('li').css('width',$width + '%');
+                console.log('Wizart Init');
+
+            },
+
+            onTabClick : function(tab, navigation, currentIndex, clickedIndex){
+                if(clickedIndex >= currentIndex) return false;
+            },
+
+            onTabShow: function(tab, navigation, index) {
+                var $total = navigation.find('li').length;
+                var $current = index+1;
+
+                var $wizard = navigation.closest('.register-wizard');
+
+                // If it's the last tab then hide the last button and show the finish instead
+                if($current >= $total) {
+                    $($wizard).find('.btn-next').hide();
+                    $($wizard).find('.btn-finish').show();
+                } else {
+                    $($wizard).find('.btn-next').show();
+                    $($wizard).find('.btn-finish').hide();
+                }
+
+                //update progress
+                var move_distance = 100 / $total;
+                move_distance = move_distance * (index) + move_distance / 2;
+
+                $wizard.find($('.progress-bar')).css({width: move_distance + '%'});
+                //e.relatedTarget // previous tab
+
+                $wizard.find($('.register-wizard .nav-pills li a.active .icon-circle')).addClass('checked');
+
+            }
+        });
+
+        $("#login-and-registration-container #register-college-optional-label").addClass('hidden');
+        $("#login-and-registration-container #register-department-optional-label").addClass('hidden');
+        // Set default values for form
+        $("#login-and-registration-container #register-user_type").val("student").change();
+        $("#login-and-registration-container #register-country").val("IQ").change();
+        if($("#login-and-registration-container #register-organization option[value='23']").length > 0) {
+            $("#login-and-registration-container #register-organization").val("23").change();
+        }
+    }
+
+    function livaValidateCompleted(status) {
+        console.log('Live validate completed : ' + status);
+
+        if(waitLiveValidates > 0)
+        {
+            waitLiveValidates--;
+        }
+    }
+
+    function validateAndChange() {
+        if(waitWizardChange)
+        {
+            if(waitLiveValidates == 0 && nextWizardIndex != -1) {
+                var $wizard = $('#RegisterWizard');
+                var $active = $($wizard).find('.tab-pane.active');
+                var $errors = $($active).find('input.error, select.error').length;
+                if ($errors == 0) {
+                    $wizard.find('li:has([data-toggle="tab"]):eq(' + nextWizardIndex + ') a').tab('show');
+                    console.log('cahnge to tab index : ' + nextWizardIndex);
+                }
+                waitWizardChange = false;
+                nextWizardIndex = -1;
+            } else {
+                // use setTimeout() to ReCheck
+                setTimeout(validateAndChange, 50);
+            }
+        }
+    }
+</script>

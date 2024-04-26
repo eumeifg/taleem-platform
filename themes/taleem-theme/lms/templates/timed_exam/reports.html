@@ -1,0 +1,890 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.timed_exam.utils import get_suspicion_level
+    from openedx.custom.utils import utc_datetime_to_local_datetime
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/datatables.bundle.min.css')}"/>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover, button:focus {background-image: none !important; box-shadow: none; text-shadow: none;}
+    .btn-primary:focus, .btn-primary:hover {background-color: #fc0 !important;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    table.dataTable tbody>tr.selected, table.dataTable tbody>tr>.selected {background-color: #eaf5f8;color: initial;}
+    table caption{caption-side: top;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    .text-blue {color: #0000FF;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Reports")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Report Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">${course.display_name_with_default}</h1>
+            <div>
+                <a href="${reverse('dashboard')}" class="d-none d-sm-inline-block btn btn-primary">
+                    <i class="las la-lg la-chevron-circle-left text-white-50"></i> ${_("Back to dashboard")}
+                </a>
+            </div>
+        </div>
+
+    <!-- Stats Row 1 -->
+    <div class="row">
+        <!-- Start Date -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase text-left mb-1">
+                                ${_("Start DateTime")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${utc_datetime_to_local_datetime(course.start).strftime('%b %d, %Y %I:%M %p')}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-calendar la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase text-left mb-1">
+                                ${_("End DateTime")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${utc_datetime_to_local_datetime(course.end).strftime('%b %d, %Y %I:%M %p')}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-calendar la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date after which proctoring data will be deleted -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase text-left mb-1">
+                                ${_("Due Data Retention Date") if is_monitored_timed_exam else _("Web Monitoring")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${utc_datetime_to_local_datetime(exam.due_data_retention_date).strftime('%b %d, %Y %I:%M %p') if is_monitored_timed_exam else _ ("Disabled")}
+                            </div>
+                        </div>
+                        % if is_monitored_timed_exam:
+                            <div class="col-auto">
+                                <a class="data-retention-edit-button" style="cursor: pointer">
+                                    <i class="las la-lg la-edit la-2x text-gray-300"></i>
+                                </a>
+                            </div>
+                        % else:
+                            <div class="col-auto">
+                            <i class="las la-lg la-desktop la-2x text-gray-300"></i>
+                        </div>
+                        % endif:
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode of the exam -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase text-left mb-1">
+                                ${_("Mode of Examination")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${exam.get_mode_display()}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-desktop la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row 2 -->
+    <div class="row">
+        <!-- Attendees count -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase text-left mb-1">
+                                ${_("Respondents")}
+                            </div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800 text-left">
+                                        ${len(attendees)}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <%
+                                            attended_percent = 0
+                                            if students.count():
+                                                attended_percent = int(round(len(attendees) * 100.0 / students.count()))
+                                        %>
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: ${attended_percent}%" aria-valuenow="${attended_percent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-graduation-cap la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quetion counts -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase text-left mb-1">
+                                ${_("Number of Questions")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${num_questions}
+                                % if num_optional_questions:
+                                <span class="mr-1">(${num_optional_questions} ${_("optional")})</span>
+                                % endif
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-question-circle la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P-Value -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase text-left mb-1">
+                                ${_("Average Difficulty")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${p_value['value']}
+                                <span>(${_(p_value['level'])})</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-bullseye la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- D-Value -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase text-left mb-1">
+                                ${_("Duration")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${exam.allotted_time}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-stopwatch la-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">${_("Score Distribution")}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-9 col-md-9">
+                            <div id="score-chart"></div>
+                        </div>
+                        <div class="col-xl-3 col-md-3 my-2">
+                            <table border="0" class="score-dist-list">
+                                <tr>
+                                    <td class="p-3">
+                                        <span class="text-xs font-weight-bold text-danger text-uppercase">
+                                            ${_("Highest")}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="h5 font-weight-bold text-gray-800">
+                                            ${score_distribution['highest']}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">
+                                        <span class="text-xs font-weight-bold text-danger text-uppercase">
+                                            ${_("Lowest")}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="h5 font-weight-bold text-gray-800">
+                                            ${score_distribution['lowest']}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">
+                                        <span class="text-xs font-weight-bold text-danger text-uppercase">
+                                            ${_("Mean")}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="h5 font-weight-bold text-gray-800">
+                                            ${score_distribution['mean']}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">
+                                        <span class="text-xs font-weight-bold text-danger text-uppercase">
+                                            ${_("Median")}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="h5 font-weight-bold text-gray-800">
+                                            ${score_distribution['median']}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">
+                                        <span class="text-xs font-weight-bold text-danger text-uppercase">
+                                            ${_("Mode (Mo)")}
+                                        </span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="h5 font-weight-bold text-gray-800">
+                                            ${round(score_distribution['mode'].mode[-1], 2) if score_distribution['mode'] else 0.0}%
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <!-- Right stats ends -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">${_("Students")}</h6>
+                    <button class="btn btn-primary" id="refreshGrades"
+                        data-url="${reverse('timed_exam:refresh_exam_grades', args=(text_type(course.id),))}">
+                        ${_("Refresh grades")}
+                        <i class="las la-circle-notch fa-spin" style="display:none;"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center" id="tbl-students" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>${_("Student ID")}</th>
+                                    <th>${_("Name")}</th>
+                                    <th>${_("Email")}</th>
+                                    <th>${_("Attempt Status")}</th>
+                                    % if is_monitored_timed_exam:
+                                        <th>${_("Review Status")}</th>
+                                    % endif:
+                                    <th>${_("Score")}</th>
+                                    % if is_monitored_timed_exam:
+                                        <th>${_("Suspicion Level")}</th>
+                                    % endif
+                                    <th>${_("ID Verification Status")}</th>
+                                    % if exam.external_exam_id:
+                                        <th class="hidden">${_("User SIS ID")}</th>
+                                        <th class="hidden">${_("Course SIS ID")}</th>
+                                    % endif
+                                    <th class='noexport'>${_("Actions")}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for student, verification_status in zip(students, id_verification_statuses):
+                                <tr>
+                                    <td>${student.id}</td>
+                                    <td>${student.profile.name}</td>
+                                    <td>${student.email}</td>
+                                    <td>
+                                        % if student.id in attendees:
+                                            <span class="badge badge-success">${_("Completed")}</span>
+                                        % elif student.id in live_students:
+                                            <span class="badge badge-info">${_("Attempting")}</span>
+                                        % elif student.id in dangling_students:
+                                            <span class="badge badge-warning">${_("Dangling")}</span>
+                                        % elif due_date_passed:
+                                            <span class="badge badge-danger">${_("Missed")}</span>
+                                        % else:
+                                            <span class="badge badge-primary">${_("Yet to start")}</span>
+                                        % endif
+                                    </td>
+                                    % if is_monitored_timed_exam:
+                                        <td>
+                                            <% review = review_status.get(student.id) %>
+                                            % if not review:
+                                                <span class="badge badge-warning text-white">${_("Pending")}</span>
+                                            % elif review == 'clean':
+                                                <span class="badge badge-success text-white">${_("Clean")}</span>
+                                            % elif review == 'suspicious':
+                                                <span class="badge badge-danger text-white">${_("Suspicious")}</span>
+                                            % endif
+                                        </td>
+                                    % endif
+                                    <td>
+                                        <% score = scores.get(student.id) %>
+                                        ${score if score is not None else '--'}
+                                    </td>
+                                    <%
+                                        num_session_violations = session_violations.get(student.id, 0)
+                                        num_tab_violations = tab_violations.get(student.id, 0)
+                                        num_snapshots_taken = snapshots_taken.get(student.id, 0)
+                                        num_face_not_found = face_not_found_violations.get(student.id, 0)
+                                        num_multiple_faces = multiple_faces_found_violations.get(student.id, 0)
+                                        num_unknown_face = unknown_face_found_violations.get(student.id, 0)
+                                        suspicion_level, suspicion_class = get_suspicion_level(
+                                            num_session_violations,
+                                            num_tab_violations,
+                                            num_snapshots_taken,
+                                            num_face_not_found,
+                                            num_multiple_faces,
+                                            num_unknown_face,
+                                        )
+                                    %>
+
+                                    % if is_monitored_timed_exam:
+                                        <td>
+                                            <span class="badge badge-${suspicion_class} text-white">
+                                                ${int(round(suspicion_level))}%
+                                            </span>
+                                        </td>
+                                    % endif
+                                    <td>
+                                        % if verification_status == "approved":
+                                            ${_("Approved")}
+                                        % elif verification_status == "approved_by_ai":
+                                            ${_("Approved_By_AI")}
+                                        % elif verification_status == "submitted":
+                                            ${_("Submitted")}
+                                        % elif verification_status == "denied":
+                                            ${_("Denied")}
+                                        % else:
+                                            ${verification_status}
+                                        % endif
+                                    </td>
+                                    % if exam.external_exam_id:
+                                        <td class="hidden">
+                                            % if student.profile.external_user_id:
+                                                    ${student.profile.external_user_id}
+                                            % else:
+                                                    ${_("Not Available")}
+                                            % endif
+                                        </td>
+                                        <td class="hidden">
+                                            ${exam.external_exam_id}
+                                        </td>
+                                    % endif
+                                    <td>
+                                        % if student.id in attendees and student.id in scores:
+                                            <a class="text-primary" href="${reverse('timed_exam:proctoring', args=[text_type(course.id), student.id])}">
+                                                % if is_monitored_timed_exam:
+                                                    ${_("Proctoring Report")}
+                                                % else:
+                                                    ${_("Student Scores")}
+                                                % endif:
+                                            </a>
+                                        % else:
+                                            ${_("Not Available")}
+                                        % endif
+                                    </td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                    % if not students:
+                        <p>${_("No one has been enrolled to this exam yet!")}</p>
+                    % endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Problems Row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">${_("Question Analysis")}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table text-center" id="tbl-problems" width="100%" cellspacing="0">
+                            <caption class="text-right">
+                                <i class="las la-lg la-square text-green"></i> <span>${_("Good")}</span>
+                                <i class="las la-lg la-square text-blue"></i> <span>${_("Fair")}</span>
+                                <i class="las la-lg la-square text-red"></i> <span>${_("Bad")}</span>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <td>${_("Question")}</td>
+                                    <td>${_("Difficulty Level")}</td>
+                                    <td>${_("Respondents")}</td>
+                                    <td>${_("Discrimination Value")}</td>
+                                    <td data-orderable="false">${_("Effectiveness")}</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                % for problem in problems:
+                                <tr>
+                                    <td>${problem['display_name']}</td>
+                                    <td>${_(problem['difficulty_level'])}</td>
+                                    <td>${problem['respondents']}</td>
+                                    <td>${problem['d_value']}</td>
+                                    <td><i class="las la-square la-lg text-${problem['effectiveness']}"></i></td>
+                                </tr>
+                                % endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="data-retention-modal" class="jqueryModal">
+        <div class="error-msgs">
+            <span class="tip tip-error hidden" id="tip-error-data-retention-modal" style="color: red;">
+                Please add a number between 10 and 30.
+            </span>
+        </div>
+        <label for="data-retention" style="font-weight: 600;"> Data Retention: </label>
+        <input id="data-retention" name="data-retention" type="number" value="${exam.data_retention_period}" min="10" max="30" value="10" style="
+            display: block;
+            width: 50%;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            height: 25px;
+        "/>
+        <a href="#" class="btn-brand btn-base" rel="modal:close" style="float: right; background-color: #DC143C; margin-left: 10px;">${_("Cancel")}</a>
+        <a href="#" class="btn-brand btn-base" id="submit-btn" rel="modal:close" style="float: right; background-color: green">${_("Submit")}</a>
+    </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/pdfmake/pdfmake.min.js')}"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/pdfmake/vfs_fonts.js')}"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/datatables.bundle.min.js')}"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+            // Use Arabic fonts to export pdf
+            pdfMake.fonts = {
+               Almarai: {
+                 normal: 'Almarai-Regular.ttf',
+                 bold: 'Almarai-Bold.ttf',
+                 italics: 'Almarai-Regular.ttf',
+                 bolditalics: 'Almarai-Bold.ttf'
+               }
+            }
+
+            var min = Number($('#data-retention').attr('min'));
+            var max = Number($('#data-retention').attr('max'));
+
+            $('#data-retention').on('keyup change', function (e) {
+                var value = parseInt(e.target.value);
+                if (value < min || value > max) {
+                    $('#tip-error-data-retention-modal').removeClass('hidden');
+                    $('#submit-btn').addClass('disabled').attr('rel', '');
+                } else {
+                    $('#tip-error-data-retention-modal').addClass('hidden');
+                    $('#submit-btn').removeClass('disabled').attr('rel', 'modal:close');
+                }
+            });
+            $('.data-retention-edit-button').on('click', function (){
+               $("#data-retention-modal").jqueryModal({
+                    escapeClose: false,
+                    clickClose: false,
+                    showClose: false
+                });
+            });
+
+            $('#submit-btn').on('click', function (){
+                var value = parseInt($('#data-retention').val());
+                var min = Number($('#data-retention').attr('min'));
+                var max = Number($('#data-retention').attr('max'));
+                console.log(value);
+                if (value >= min && value <= max) {
+                   $.ajax({
+                        url: "/exams/" + "${course.id}" + "/edit-data-retention-period/",
+                        type: 'POST',
+                        data: {
+                          data_retention_period: value
+                        },
+                        success: function() {
+                          // Reloading page will reflect the new state of the attempt
+                          location.reload();
+                        }
+                   });
+                }
+            });
+
+            // Call the dataTables jQuery plugin
+            var table = $('#tbl-students').DataTable({
+                columnDefs: [{targets: [0], visible: false}],
+                select: "multi",
+                dom: "<'row'<'col-sm-12 mb-2 text-right'B>>" +
+                     "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+
+                buttons: [
+                    {
+                        text: '<i class="las la-lg la-check-square text-primary"></i> ${_('Select all')}',
+                        titleAttr: 'Select all',
+                        action: function () {
+                            table.rows().select();
+                        }
+                    },
+                    {
+                        text: '<i class="las la-lg la-times-circle text-danger"></i> ${_('Clear selection')}',
+                        titleAttr: 'Select none',
+                        action: function () {
+                            table.rows().deselect();
+                        }
+                    },
+                    {
+                        text: '<i class="las la-lg la-check-circle text-success"></i> ${_('Mark Selected as reviewed')}',
+                        titleAttr: 'Mark as Reviewed',
+                        action: function () {
+                            var studentIDs = [];
+                            var selectedRows = table.rows({ selected: true });
+                            if(selectedRows.count() > 0){
+                                swal({
+                                    title: '${_("Are you sure?")}',
+                                    text: '${_("Once done, you will not be able to change it later!")}',
+                                    icon: "warning",
+                                    buttons: ['${_("Cancel")}', '${_('OK')}'],
+                                    dangerMode: true,
+                                })
+                                .then(function(willProceed) {
+                                    if (willProceed) {
+                                        selectedRows.every( function ( rowIdx, tableLoop, rowLoop ) {
+                                            studentIDs.push(this.data()[0]);
+                                        });
+                                        $.post({
+                                            url: "/api/edx_proctoring/v1/proctored_exam/submit/review/" + "${course.id}",
+                                            data: JSON.stringify({ids: studentIDs}),
+                                            success: function() {
+                                                swal(
+                                                    '${_("Mark as Reviewed")}',
+                                                    '${_("Students have been marked as review")}',
+                                                    "success"
+                                                );
+                                            }
+                                        });
+
+                                    }
+                                });
+                            } else {
+                                swal('${_("Mark as Reviewed")}',
+                                     '${_("Please select the students to mark as reviewed")}',
+                                     "warning");
+                            }
+                        }
+                    },
+                    {
+                        extend: 'csv',
+                        text: '<i class="las la-lg la-file-csv text-blue"></i>',
+                        titleAttr: 'CSV',
+                        title: '${course.display_name_with_default}',
+                        charset: 'UTF-8',
+                        bom: true,
+                        exportOptions: {
+                            columns: ':not(.noexport)'
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="las la-lg la-file-excel text-green"></i>',
+                        titleAttr: 'Excel',
+                        title: '${course.display_name_with_default}',
+                        charset: 'UTF-8',
+                        exportOptions: {
+                            columns: ':not(.noexport)'
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="las la-lg la-file-pdf text-red"></i>',
+                        titleAttr: 'PDF',
+                        title: '${course.display_name_with_default}',
+                        orientation: 'landscape',
+                        customize: function (doc) {
+                          doc.defaultStyle = {font: 'Almarai'};
+                          doc.styles.tableBodyEven.alignment = 'center';
+                          doc.styles.tableBodyOdd.alignment = 'center';
+                        },
+                        exportOptions: {
+                            columns: ':not(.noexport)',
+                            format: {
+                                header: function ( text, index, node ) {
+                                    if (/[\u0600-\u06FF]/.test(text)){
+                                       text = text.split(' ').reverse().join(' ')
+                                    }
+                                    return text;
+                                },
+                                body: function ( data, row, column, node ) {
+                                    data = node.innerText;
+                                    if (/[\u0600-\u06FF]/.test(data)){
+                                       data = data.split(' ').reverse().join(' ')
+                                    }
+                                    return data;
+                                }
+                            }
+                        },
+                    },
+
+                ],
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                },
+            });
+
+            // Refresh grades
+            $("#refreshGrades").click(function(){
+                $("#refreshGrades .fa-spin").show();
+                $.get($(this).data("url"), function(data) {
+                    table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                       let rowData = this.data();
+                       let existingGrade = rowData[5];
+                       if (rowData[0] in data) {rowData[5] = data[rowData[0]]}
+                       this.data(rowData);
+                       $("#refreshGrades .fa-spin").hide();
+                    });
+                });
+            });
+
+            // Problem Analysis Table
+            var problemTable = $('#tbl-problems').DataTable({
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                }
+            });
+
+            // Highcharts theme
+            Highcharts.theme = {
+                colors: ["#f45b5b", "#8085e9", "#8d4654", "#7798BF", "#aaeeee",
+                    "#ff0066", "#eeaaee", "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+                chart: {
+                    backgroundColor: '#ffffff',
+                    style: {
+                        fontFamily: 'Almarai,sans-serif'
+                    }
+                },
+                title: {
+                    style: {
+                        color: 'black',
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }
+                },
+                subtitle: {
+                    style: {
+                        color: 'black'
+                    }
+                },
+                tooltip: {
+                    borderWidth: 0
+                },
+                legend: {
+                    itemStyle: {
+                        fontWeight: 'bold',
+                        fontSize: '13px'
+                    }
+                },
+                xAxis: {
+                    labels: {
+                        style: {
+                            color: '#6e6e70',
+                            fontSize: '15px'
+                        }
+                    }
+                },
+                yAxis: {
+                    labels: {
+                        style: {
+                            color: '#6e6e70',
+                            fontSize: '15px'
+                        }
+                    }
+                },
+                plotOptions: {
+                    series: {
+                        shadow: true
+                    },
+                    candlestick: {
+                        lineColor: '#404048'
+                    },
+                    map: {
+                        shadow: false
+                    },
+                    column: {
+                        maxPointWidth: 50
+                    }
+                },
+
+                // Highstock specific
+                navigator: {
+                    xAxis: {
+                        gridLineColor: '#D0D0D8'
+                    }
+                },
+                rangeSelector: {
+                    buttonTheme: {
+                        fill: 'white',
+                        stroke: '#C0C0C8',
+                        'stroke-width': 1,
+                        states: {
+                            select: {
+                                fill: '#D0D0D8'
+                            }
+                        }
+                    }
+                },
+                scrollbar: {
+                    trackBorderColor: '#C0C0C8'
+                },
+
+                // General
+                background2: '#E0E0E8'
+
+            };
+
+            // Apply the theme
+            Highcharts.setOptions(Highcharts.theme);
+
+            /**
+                Age distribution
+            */
+            Highcharts.chart('score-chart', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: "${_('Number of learners in a score range')}"
+                },
+                credits: false,
+                xAxis: {
+                    categories: [
+                        "${_('Below 10%')}",
+                        "${_('10%-20%')}",
+                        "${_('21%-30%')}",
+                        "${_('31%-40%')}",
+                        "${_('41%-50%')}",
+                        "${_('51%-60%')}",
+                        "${_('61%-70%')}",
+                        "${_('71%-80%')}",
+                        "${_('81%-90%')}",
+                        "${_('Above 90%')}",
+                    ],
+                    % if LANGUAGE_CODE == 'ar':
+                    reversed: true
+                    % endif
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: "${_('Respondents')}"
+                    }
+                },
+                colors: ["#03A9F4"],
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: "${_('Respondents')}",
+                    data: JSON.parse("${score_distribution['scores_y_axis']| n, dump_js_escaped_json}")
+
+                }]
+            });
+
+        });
+    </script>
+</%block>

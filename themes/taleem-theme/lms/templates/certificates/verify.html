@@ -1,0 +1,77 @@
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+%>
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Certificate verification")}</%block>
+
+<%block name="header_extras">
+<style>
+    .cert-verification h1 {
+        margin-top: 20px;
+        letter-spacing: normal;
+    }
+    .cert-verification {
+        background: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        overflow: hidden;
+        max-width: 700px;
+        min-height: 100%;
+        margin: 0 auto;
+    }
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover, button:focus {
+        background-image: none !important;
+        box-shadow: none;
+        text-shadow: none;
+    }
+</style>
+</%block>
+
+<%block name="js_extra">
+<script>
+    $(document).ready(function() {
+        // stop form submition
+        $("form").submit(function(e){
+            e.preventDefault();
+        });
+
+        // redirect to cert
+        $("#btn-verify").click(function(){
+            // show spinner
+            $(".la-spin").removeClass("d-done");
+            var certificateID = $("#certificate-id").val();
+            if (certificateID.length == 32) {
+                window.location = "/certificates/" + certificateID;
+            } else {
+                // hide spinner
+                $(".la-spin").addClass("d-done");
+            }
+        });
+    });
+</script>
+</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="outside-app">
+        <div class="cert-verification bootstrap-iso">
+            <h1 class="text-left text-warning">
+                <%block name="pageheader">${_("Verify Certificate")}</%block>
+            </h1>
+
+            <form class="form-verification">
+                <div class="form-group">
+                    <label for="certificate-id">${_("Certificate ID")}</label>
+                    <input id="certificate-id" type="text" name="certificate_id" class="form-control form-control-lg"
+                        placeholder="${_('Enter certificate ID')}" minlength="32" maxlength="32" required="required" value="">
+                </div>
+                <button id="btn-verify" class="action action-primary">${_("Verify")}
+                    <i class="la la-circle-notch la-spin d-none"></i>
+                </button>
+            </form>
+        </div>
+    </section>
+</main>

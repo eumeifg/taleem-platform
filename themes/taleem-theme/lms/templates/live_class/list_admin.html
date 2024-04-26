@@ -1,0 +1,201 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/datatables.bundle.min.css')}"/>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Live Classes")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800"></h1>
+            <div>
+                <a href="${reverse('create_meeting')}"
+                   class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="las la-lg la-plus-circle la-sm text-white-50"></i> ${_("Add Live Class")}
+                </a>
+            </div>
+        </div>
+
+        <!-- Live classes Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Live Classes")}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table text-center" id="live-class-table" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>${_("Name")}</th>
+                                        <th>${_("Start Time")}</th>
+                                        <th>${_("Duration")}</th>
+                                        <th>${_("Seats")}</th>
+                                        <th>${_("Type")}</th>
+                                        <th>${_("Stage")}</th>
+                                        <th>${_("Price")}</th>
+                                        <th>${_("Actions")}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    % for live_class in live_classes:
+                                    <tr>
+                                        <td>${live_class.name}</td>
+                                        <td>${live_class.display_time}</td>
+                                        <td>${live_class.duration} ${_("Minutes")}</td>
+                                        <td>${live_class.seats}</td>
+                                        <td>
+                                            % if live_class.class_type == LiveClass.PRIVATE:
+                                                ${_("Private")}
+                                            % elif live_class.class_type == LiveClass.PUBLIC_AT_INSTITUTION:
+                                                ${_("Public at Institution Level")}
+                                            % else:
+                                                ${_("Public")}
+                                            % endif
+                                        </td>
+                                        <td>
+                                            % if live_class.stage == LiveClass.RUNNING:
+                                                <span class="badge badge-info">${_("Live")}</span>
+                                            % elif live_class.stage == LiveClass.ENDED:
+                                                <span class="badge badge-success">${_("Completed")}</span>
+                                            % elif live_class.stage == LiveClass.UNDER_REVIEW:
+                                                <span class="badge badge-warning">${_("Under Review")}</span>
+                                            % elif live_class.stage == LiveClass.DECLINED:
+                                                <span class="badge badge-danger">${_("Declined")}</span>
+                                            % else:
+                                                <span class="badge badge-primary">${_("Upcoming")}</span>
+                                            % endif
+                                        </td>
+                                        <td>${live_class.price} ${_("IQD")}</td>
+                                        <td>
+                                            % if live_class.stage == LiveClass.UNDER_REVIEW:
+                                                <a class="text-primary mr-1"
+                                                    href="${reverse('edit_meeting', args=[text_type(live_class.id)])}">
+                                                    <i class="las la-lg la-edit"></i> ${_("Update Class or Add Price")}
+                                                </a>
+                                                <a class="text-success mr-1"
+                                                    href="${reverse('approve_class', args=[text_type(live_class.id)])}">
+                                                    <i class="las la-lg la-check-circle"></i> ${_("Approve class")}
+                                                </a>
+                                                <a class="text-danger mr-1"
+                                                    href="${reverse('decline_class', args=[text_type(live_class.id)])}">
+                                                    <i class="las la-lg la-times-circle"></i> ${_("Decline Class")}
+                                                </a>
+                                                % if live_class.editable and live_class.moderator == request.user.ta3leem_profile:
+                                                    <a class="text-primary mr-1"
+                                                        href="${reverse('edit_meeting', args=[text_type(live_class.id)])}">
+                                                        <i class="las la-lg la-edit"></i> ${_("Edit")}
+                                                    </a>
+                                                % endif
+                                            % elif live_class.stage == LiveClass.SCHEDULED or live_class.stage == LiveClass.RUNNING:
+                                                <a class="text-primary text-success"
+                                                    href="${reverse('go_to_class', args=[text_type(live_class.id)])}">
+                                                    <i class="las la-lg la-sign-in-alt"></i> ${_("Go to class")}
+                                                </a>
+                                                % if live_class.stage == LiveClass.SCHEDULED:
+                                                    % if live_class.seats_left > 0:
+                                                        <a class="text-primary text-success"
+                                                            href="${reverse('class_bookings', args=[text_type(live_class.id)])}">
+                                                            <i class="las la-lg la-sign-in-alt"></i> ${_("Class Bookings")}
+                                                        </a>
+                                                    % endif
+                                                    <a class="text-danger mr-1"
+                                                        href="${reverse('cancel_meeting', args=[text_type(live_class.id)])}">
+                                                        <i class="las la-lg la-times-circle"></i> ${_("Cancel")}
+                                                    </a>
+                                                    % if live_class.editable and live_class.moderator == request.user.ta3leem_profile:
+                                                        <a class="text-primary mr-1"
+                                                            href="${reverse('edit_meeting', args=[text_type(live_class.id)])}">
+                                                            <i class="las la-lg la-edit"></i> ${_("Edit")}
+                                                        </a>
+                                                    % endif
+                                                    <a class="text-danger mr-1"
+                                                        href="${reverse('decline_class', args=[text_type(live_class.id)])}">
+                                                        <i class="las la-lg la-times-circle"></i> ${_("Decline Class")}
+                                                    </a>
+                                                % endif
+                                            % elif live_class.stage == LiveClass.ENDED:
+                                                <a class="text-primary text-info"
+                                                    href="${reverse('attendance_report', args=[text_type(live_class.id)])}">
+                                                    <i class="las la-lg la-file"></i> ${_("View Attendance Report")}
+                                                </a>
+                                            % else:
+                                                ${_("No Action Needed")}
+                                            % endif
+                                        </td>
+                                    </tr>
+                                    % endfor
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/datatables.bundle.min.js')}"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+            // Call the dataTables jQuery plugin
+            var table = $('#live-class-table').DataTable({
+                "oLanguage": {
+                        "sEmptyTable": `${_("No class")}`
+                },
+                columnDefs: [
+                    { width: 210, targets: 7 }
+                ],
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                },
+            });
+
+        });
+    </script>
+</%block>

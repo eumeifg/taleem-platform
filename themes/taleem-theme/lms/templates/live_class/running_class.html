@@ -1,0 +1,161 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    import pytz
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.markup import HTML
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+    from datetime import datetime
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <script src="https://kit.fontawesome.com/16acf9db36.js" crossorigin="anonymous"></script>
+    <style>
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled)
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .form .fieldset {margin-bottom: 20px;}
+    .form #id_name {width: 50%;}
+    .form #id_course {width: 50%;}
+    .form #id_folder {margin-right: 10px;width: 50%;}
+    .form input {font-style: normal;}
+    .form label {display: block; font-style: normal;}
+    .form select {min-width: 100px; height: 30px;}
+    .form .errorlist {padding-left: 0; margin: 10px 0 0 0;}
+    .form .errorlist li {list-style-type: none; color: red;}
+    .non-field-errors .form-error {color: red; margin-bottom: 10px;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${live_class.name}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Form Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div id="classBox"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <script src='${jitsi_server_url}/external_api.js'></script>
+
+    <!-- Page level custom js -->
+    <script type="text/javascript">
+
+        var isTeacher = Boolean(${int(is_teacher)});
+        var participantID = "TA${user.id}";
+
+        window.addEventListener('beforeunload', function (e) {
+            if(!isTeacher) {
+                $.ajax({
+                    url: "${reverse('mark_individual_attendance', args=[live_class.id])}",
+                    type: "POST",
+                    success: function (res) {
+                        console.log('Attendance Marked.')
+                    },
+                    error: function (res) {
+                        console.log('Attendance Marking Issue.')
+                    }
+                });
+            }
+        });
+
+        // Setting Jitsi Configurations
+        const domain = '${jitsi_server_domain}';
+        const options = {
+            roomName: '${live_class.id}',
+            height: 700,
+            width: '100%',
+            parentNode: document.querySelector('#classBox'),
+            jwt: '${user_jwt_token}',
+            configOverwrite: JSON.parse('${class_settings}')
+        };
+
+        // Creating Jitsi IFrame
+        const apiObj = new JitsiMeetExternalAPI(domain, options);
+
+        // Setting Up the Name of the Meeting
+        apiObj.executeCommand('subject', '${live_class.name}');
+
+        // Adding Jitsi Object Event Listener
+        apiObj.addEventListeners({
+            participantRoleChanged: function(data) {
+                if (data.id == participantID) {
+                    isTeacher = data.role == 'moderator';
+                }
+            },
+            participantKickedOut: function(data) {
+                if (data.kicked.local) {
+                    markAttendance();
+                }
+            },
+            toolbarButtonClicked: function(data) {
+                if (data.key == 'hangup'){
+                    isTeacher ? hangupTeacher() : hangupStudent();
+                }
+            },
+            readyToClose: function(data) {
+                $('#classBox').empty();
+                window.location = '/dashboard';
+            }
+        });
+
+        // Take attendance
+        var hangupStudent = function () {
+            $.ajax({
+                url: "${reverse('mark_individual_attendance', args=[live_class.id])}",
+                type: "POST",
+                complete: function (res) {
+                    apiObj.executeCommand('hangup');
+                }
+            });
+        };
+
+        // End the party
+        var hangupTeacher = function () {
+            var numModerators = 0;
+            apiObj.getRoomsInfo().then(info => {
+                var rooms = info.rooms;
+                rooms[0].participants.forEach(function(participant){
+                    if (participant.role == "moderator") {
+                        numModerators++;
+                    }
+                });
+                if(--numModerators < 1) {
+                    $.ajax({
+                        url: "${reverse('end_class', args=[live_class.id])}",
+                        type: "POST",
+                        complete: function (res) {
+                            apiObj.executeCommand('hangup');
+                        }
+                    });
+                } else {apiObj.executeCommand('hangup');}
+
+            });
+        };
+
+    </script>
+</%block>
+

@@ -1,0 +1,228 @@
+<%page expression_filter="h"/>
+<%inherit file="../main.html" />
+<%!
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+from django.utils.formats import date_format
+
+from openedx.core.djangolib.markup import HTML
+from openedx.custom.notifications.utils import translate
+from openedx.custom.utils import utc_datetime_to_local_datetime
+%>
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="head_extra">
+<link rel="stylesheet" type="text/css" href="${static.url('assets/css/bootstrap-table.min.css')}"/>
+
+<style>
+    .read-icon {
+        cursor: pointer;
+        font-size: 20px;
+    }
+    .unread {background: #e9edf2;}
+    .pt-32pt {padding-top: 32px;}
+    .p-24pt {padding: 24px;}
+
+    .notification-list .notification-item {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.35rem;
+        color: #858796;
+        background-color: #f3f4f9;
+        border-color: #d6d8db;
+        border-left: solid 5px #858796;
+    }
+    .rtl .notification-list .notification-item {
+        border-right: solid 5px #858796;
+        border-left: unset;
+    }
+    .notification-list .notification-item .notification-icon {
+        background-color: #858796;
+        color: #f3f4f9;
+        padding: 10px;
+        border-radius: 50%;
+        line-height: 50%;
+        margin: 0 30px 0 20px;
+    }
+    .notification-item .la-comment {font-size: 20px;}
+    .rtl .notification-list .notification-item .notification-icon {
+        margin: 0 20px 0 30px;
+    }
+    .notification-list .notification-item .notification-body {
+        flex-grow: 1;
+    }
+    .notification-list .notification-item .notification-date {
+        float: right;
+        font-size: 13px;
+    }
+    .rtl .notification-list .notification-item .notification-date {
+        float: left;
+    }
+    .notification-list .notification-item.notification-unread {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        border-left: solid 5px #155724;
+    }
+    .rtl .notification-list .notification-item.notification-unread {
+        border-right: solid 5px #155724;
+        border-left: unset;
+    }
+    .notification-list .notification-item.notification-unread .notification-icon {
+        background-color: #155724;
+        color: #f3f4f9;
+    }
+    .btn-outline-main {
+        color: #281958;
+        border-color: #281958;
+    }
+    .btn-outline-main:hover {
+        color: #fff;
+        background-color: #281958;
+        border-color: #281958;
+    }
+    .notification-page-title {
+        flex-grow: 1;
+    }
+</style>
+</%block>
+
+<%block name="pagetitle">${_("Notifications")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="notificatipon-wrapper" id="notificatipon_details_wrapper" app="luma">
+        <div class="pt-32pt">
+            <div class="container d-flex flex-column flex-md-row align-items-center text-center text-sm-left">
+                <div class="notification-page-title flex d-flex flex-column flex-sm-row align-items-center mb-24pt mb-md-0">
+
+                    <div class="mb-24pt mb-sm-0 mr-sm-24pt">
+                        <h2 class="mb-0">${_("Notifications")}</h2>
+                    </div>
+                </div>
+
+
+                <div class="row" role="tablist" style="padding: 10px">
+                    <div class="col-auto">
+                        <a href="javascript:void(0);" class="btn btn-outline-danger ${'' if notifications else 'disabled'}" id="mark-all-read">
+                            <i class="las la-lg la-bell-slash"></i>
+                            ${_("Mark all as read")}
+                        </a>
+                    </div>
+                </div>
+                % if can_add_new_notification:
+                    <div class="row" role="tablist" style="padding: 10px">
+                        <div class="col-auto">
+                            <a  class="btn btn-outline-main"
+                                type="button"
+                                href="${reverse('notifications:announcement')}"
+                                id="addNotificationModalButton">
+                                <i class="las la-lg la-bullhorn"></i>
+                                ${_("Announcements")}
+                            </a>
+                        </div>
+                    </div>
+                % endif
+
+
+
+            </div>
+        </div>
+
+        <div class="container page__container">
+            <div class="page-section notification-list pb-0">
+
+                <div class="row mb-lg-8pt">
+                    <div class="col-lg-12">
+                        % if notifications:
+                            % for notification in notifications:
+                            <div class="notification-item ${'notification-unread' if not notification.read else ''}">
+                                <span class="notification-icon">
+                                    % if not notification.read:
+                                    <i class="las la-2x la-bell read-icon" data-id="${notification.id}"></i>
+                                    % else:
+                                    <i class="las la-2x la-comment"></i>
+                                    % endif
+                                </span>
+                                <div class="notification-body">
+                                    <p>${translate(notification.message, language=request.LANGUAGE_CODE)}</p>
+                                    <span class="notification-date">${date_format(utc_datetime_to_local_datetime(notification.created), format="DATETIME_FORMAT")} <i class="las la-lg la-calendar mx-2"></i></span>
+                                </div>
+                            </div>
+                            % endfor
+                        % else:
+                        <h4 class="p-4 text-primary text-center">
+                            ${_("You are done. No more notifications!")}
+                        </h4>
+                        % endif
+                    </div>
+                </div> <!--notificatipons-->
+
+            </div> <!--page-section-->
+
+        </div>
+
+    </section><!-- ./ End  Top Most Wrapper-->
+
+</main>
+
+<%block name="js_extra">
+<script>
+    (function() {
+        'use strict';
+
+        // ************ Mark as read
+        $(".read-icon").click(function(e){
+            var notification_id = $(this).data('id');
+            var $row = $(this).closest('.notification-item');
+            var $icon = $(this).closest('.notification-icon').children('i');
+            jQuery.ajax({
+                type: "POST",
+                url: "/notifications/mark/as/read/"+notification_id+"/",
+                success: function (res) {
+                    if(res.success){
+                        $row.removeClass('notification-unread');
+                        $icon.removeClass('la-bell');
+                        $icon.addClass('la-comment');
+                        $icon.removeClass('read-icon');
+                    } else {
+                        alert('Something went wrong!');
+                    }
+                },
+            });
+        });
+
+        // *********** Mark all as read
+        $("#mark-all-read").not(".disabled").click(function(e){
+            jQuery.ajax({
+                type: "POST",
+                url: "/notifications/mark/as/read/",
+                success: function (res) {
+                    if(res.success){
+                        /*$("tr").hide("slow","swing", function (){
+                            $("#card-body").html('<h4 class="p-4 text-primary text-center">You are done. No more notifications!</h4>');
+                        });*/
+                        $('.notification-icon').each(function(index){
+                            let $icon = $(this).children('i');
+                            $icon.removeClass('la-bell');
+                            $icon.addClass('la-comment');
+                            $icon.removeClass('read-icon');
+                        });
+                        $('.toggle-notify-dropdown .notification-count').text('0');
+                        $('.toggle-notify-dropdown .notification-count').addClass('hidden');
+                        $('.notification-item').removeClass('notification-unread');
+                        $("#mark-all-read").addClass("disabled");
+                    } else {
+                        alert('Something went wrong!');
+                    }
+                },
+            });
+        });
+    })();
+</script>
+</%block>

@@ -1,0 +1,120 @@
+<%def name="online_help_token()"><% return "course" %></%def>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.utils.http import urlencode, urlquote_plus
+from django.urls import reverse
+from six import text_type
+from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_params
+%>
+<%page args="course, share_settings" expression_filter="h"/>
+<div class="course-container">
+  <article class="course" aria-labelledby="${course.id}">
+    <section class="details" aria-labelledby="details-heading-${course.id}">
+      <h2 class="hd hd-2 sr" id="details-heading-${course.id}">Course details</h2>
+      <div class="wrapper-course-image" aria-hidden="true">
+        <a href="${reverse('about_course', args=[text_type(course.id)])}" data-course-key="${course.id}" class="cover course-target-link course-cover" tabindex="-1">
+        <img src="${course.course_image_url}" class="course-image" alt="${course.display_name_with_default}">
+        </a>
+      </div>
+      <div class="wrapper-course-details">
+        <h3 class="course-title" id="course-title-${course.id}">
+          <a data-course-key="${course.id}" href="${reverse('about_course', args=[text_type(course.id)])}" class="course-target-link">
+              ${course.display_name_with_default}
+          </a>
+        </h3>
+        <div class="course-info">
+          <span class="info-university">${course.display_org_with_default}</span>
+          <span class="info-course-id">${course.display_number_with_default}</span>
+          <span class="info-date-block-container">
+          <%
+          if course.start is not None:
+              course_date_string = course.start.strftime('%Y-%m-%dT%H:%M:%S%z')
+          else:
+              course_date_string = ''
+          %>
+          % if course.advertised_start is not None:
+              <span class="info-date-block localized-datetime" aria-hidden="true">${_("Starts")}: ${course.advertised_start}</span>
+          % else:
+              <span class="info-date-block localized-datetime" aria-hidden="true" data-format="shortDate" data-datetime="${course_date_string}" data-language="${LANGUAGE_CODE}" data-string="${_("Starts: {date}")}"></span>
+          % endif
+        </div>
+        <div class="wrapper-course-actions">
+          <div class="course-actions">
+
+            <div class="wrapper-action-more">
+              <button type="button" class="action action-more remove-wishlist" id="actions-dropdown-link-0" aria-haspopup="true" aria-expanded="false" aria-controls="actions-dropdown-0" data-course-key="${text_type(course.id)}">
+                <img src="${static.url('images/icons/delete_icon.svg')}" style="height: 20px;">
+              </button>
+            </div>
+
+            <a href="${reverse('about_course', args=[text_type(course.id)])}" class="course-target-link enter-course " data-course-key="${course.id}">
+            ${_("Check it out")}
+              <span class="sr">
+              &nbsp;${course.display_name_with_default}
+              </span>
+            </a>
+
+            % if share_settings:
+                <%
+                  share_url = get_link_for_about_page(course)
+                  encoded_utm_parameters = get_encoded_course_sharing_utm_params()
+                  share_window_name = 'shareWindow'
+                  share_window_config = 'toolbar=no, location=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=640, height=480'
+                %>
+                % if share_settings.get('DASHBOARD_FACEBOOK', False):
+                    <%
+                      facebook_share_url = u"{url}?{utm_params}".format(url=share_url, utm_params=encoded_utm_parameters['facebook'])
+                      share_text = _("I'm taking {course_name} online with {facebook_brand}. Check it out!").format(course_name=course.display_name_with_default, facebook_brand='taleem.iq')
+                      query_params = urlencode((('u', facebook_share_url), ('quote', share_text),))
+                      facebook_url = 'https://www.facebook.com/sharer/sharer.php?{query}'.format(query=query_params)
+                      share_msg = _("Share {course_name} on Facebook").format(course_name=course.display_name_with_default)
+                    %>
+                    <a
+                      data-tooltip="${_('Share on Facebook')}"
+                      data-trigger="focus hover"
+                      class="action action-facebook"
+                      href="${facebook_url}"
+                      rel="noopener"
+                      target="_blank"
+                      title="${_('Share on Facebook')}"
+                      data-course-id="${course.id}"
+                      onclick="var popupWindow = window.open('${facebook_url}', '${share_window_name}', '${share_window_config}'); popupWindow.opener = null; return false;">
+                      <span class="sr">${share_msg}</span>
+                      <span class="lab la-lg la-facebook-f" aria-hidden="true"></span>
+                    </a>
+                % endif
+                % if share_settings.get('DASHBOARD_TWITTER', False):
+                    <%
+                      twitter_share_url = u"{url}?{utm_params}".format(url=share_url, utm_params=encoded_utm_parameters['twitter'])
+                      default_share_text = _("I'm taking {course_name} online with {twitter_brand}. Check it out!").format(course_name=course.display_name_with_default, twitter_brand='@ta3leem')
+                      share_text = urlquote_plus(share_settings.get('DASHBOARD_TWITTER_TEXT', default_share_text))
+                      twitter_url = u'https://twitter.com/intent/tweet?text=' + share_text + u'%20' + urlquote_plus(twitter_share_url)
+                      share_msg = _("Share {course_name} on Twitter").format(course_name=course.display_name_with_default)
+                    %>
+                    <a
+                      data-tooltip="${_('Share on Twitter')}"
+                      data-trigger="focus hover"
+                      class="action action-twitter"
+                      href="${twitter_url}"
+                      rel="noopener"
+                      target="_blank"
+                      title="${_('Share on Twitter')}"
+                      data-course-id="${course.id}"
+                      onclick="var popupWindow = window.open('${twitter_url}', '${share_window_name}', '${share_window_config}'); popupWindow.opener = null; return false;">
+                      <span class="sr">${share_msg}</span>
+                      <span class="lab la-lg la-twitter" aria-hidden="true"></span>
+                    </a>
+                % endif
+            % endif
+
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="wrapper-messages-primary">
+      <div class="messages-list">
+      </div>
+    </footer>
+  </article>
+</div>

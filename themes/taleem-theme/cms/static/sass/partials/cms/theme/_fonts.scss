@@ -1,0 +1,75 @@
+
+
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extralight-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extralight-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extralight-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extralight-webfont.svg#bahij_thesansarabicextralight') format('svg');
+    font-weight: 100;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-light-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-light-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-light-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-light-webfont.svg#bahij_thesansarabiclight') format('svg');
+    font-weight: 200;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semilight-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semilight-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semilight-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semilight-webfont.svg#bahij_thesansarabicsemilight') format('svg');
+    font-weight: 300;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-plain-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-plain-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-plain-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-plain-webfont.svg#bahij_thesansarabicplain') format('svg');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semibold-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semibold-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semibold-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-semibold-webfont.svg#bahij_thesansarabicsemibold') format('svg');
+    font-weight: 500;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-bold-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-bold-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-bold-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-bold-webfont.svg#bahij_thesansarabicbold') format('svg');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extrabold-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extrabold-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extrabold-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-extrabold-webfont.svg#bahij_thesansarabicextrabold') format('svg');
+    font-weight: 800;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Arabic Sans';
+    src: url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-black-webfont.woff2') format('woff2'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-black-webfont.woff') format('woff'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-black-webfont.ttf') format('truetype'),
+         url('#{$static-path}/fonts/TheSansArabic/bahij_thesansarabic-black-webfont.svg#bahij_thesansarabicblack') format('svg');
+    font-weight: 900;
+    font-style: normal;
+}

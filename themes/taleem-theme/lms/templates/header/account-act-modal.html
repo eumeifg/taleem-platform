@@ -1,0 +1,22 @@
+<%!
+from django.utils.translation import ugettext as _
+%>
+
+<div class="modal fade show" style="display: none;" id="accountActivationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: block; padding-right: 15px;" aria-modal="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header account-act-modal-header">
+          
+          
+        </div> 
+        <div class="modal-body text-center">
+
+          <p class="mb-0">${_("Please activate your account to show the Exams page. <br> You will find the activation link in your email.")}</p>
+        </div>
+        <div class="modal-footer account-act-modal-btn-center justify-content-center">
+          
+          <button style="color: #ffffff;" type="button" class="btn account-act-modal-btn" data-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>

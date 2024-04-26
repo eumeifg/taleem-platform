@@ -1,0 +1,293 @@
+<style>
+  .taleem-theme .global-header .nav-links .secondary .dropdown-user-menu {
+    -webkit-box-shadow: 0 10px 30px 0 rgb(31 45 61 / 10%);
+    box-shadow: 0 10px 30px 0 rgb(31 45 61 / 10%);
+  }
+
+  .taleem-theme .notify .dropdown-notify-menu {
+    -webkit-box-shadow: 0 10px 30px 0 rgb(31 45 61 / 10%);
+    box-shadow: 0 10px 30px 0 rgb(31 45 61 / 10%);
+  }
+  body.modal-open {
+    overflow: hidden;
+    padding: 0 !important;
+  }
+  @media (min-width: 768px) {
+    .taleem-theme .content-wrapper {
+      padding: 0 20px 10px;
+    }
+    .taleem-theme .home-slider, .taleem-theme .home-posts, .taleem-theme .course-info {
+      margin: 0 -20px;
+    }
+    .taleem-theme .course .course-info {
+      margin: 0;
+    }
+  }
+  @media (max-width: 991px) {
+    /* Just for hide duplicate dashboard */
+    .taleem-theme .mobile-nav-item.nav-item:first-child {
+      display: none;
+    }
+  }
+  @media (max-width: 767px) {
+    .taleem-theme .home-posts:before {
+      bottom: 0;
+    }
+    .taleem-theme .courses-container {
+      flex-flow: column nowrap !important;
+    }
+    .taleem-theme .courses-filter {
+      width: 100% !important;
+    }
+  }
+  /* ---------------------------- */
+  .calendar .fc-h-event .fc-event-time {
+    max-width: 100%;
+    overflow: visible;
+  }
+  .calendar input[type="submit"], .calendar input[type="button"], .calendar button, .calendar .button {
+    text-shadow: none;
+  }
+  .calendar .tooltip.event-tooltip {
+    z-index: 10000;
+  }
+  .calendar .popover.event-popover {
+    z-index: 10001;
+  }
+  .calendar .popover.event-popover.bs-popover-bottom .arrow, .calendar .popover.event-popover.bs-popover-auto[x-placement^="bottom"] .arrow {
+    top: .25rem;
+  }
+  .calendar .popover.event-popover a.list-group-item.popover-menu {
+    font-weight: 700;
+  }
+  .calendar .popover.event-popover a.list-group-item.popover-menu:hover {
+    text-decoration: none;
+    color: #fff;
+    background-color: #2C1C59;
+  }
+  .calendar .event-tooltip-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .calendar .event-tooltip-time {
+    font-size: 14px;
+    font-style: italic;
+    color: #fff;
+  }
+  .calendar .event-tooltip-desc {
+    font-size: 14px;
+    font-weight: 400;
+    color: #fff;
+  }
+  .calendar .tooltip.event-tooltip ul {
+    list-style: none;
+    padding: 0;
+  }
+  .calendar .tooltip.event-tooltip ul li {
+    padding-left: 1.3em;
+  }
+  .rtl .calendar .tooltip.event-tooltip ul li {
+    padding-right: 1.3em;
+    padding-left: initial;
+  }
+  .calendar .tooltip.event-tooltip ul li:before {
+    content: "\f0f3";
+    font-family: 'Line Awesome Free';
+    display: inline-block;
+    margin-left: -1.3em;
+    width: 1.3em;
+  }
+  .rtl .calendar .tooltip.event-tooltip ul li:before {
+    margin-right: -1.3em;
+    margin-left: initial;
+  }
+  #addReminderModal {
+    background-color: initial;
+  }
+  #addReminderModal .modal-header .close {
+    padding: initial;
+    margin: initial;
+  }
+  #addReminderModal .btn-send {
+    color: #fff;
+    background-color: #281958;
+    border-color: #281958;
+  }
+  #addReminderModal .btn-send:hover, 
+  #addReminderModal .btn-send:active, 
+  #addReminderModal .btn-send:focus,
+  #addReminderModal .btn-send:visited {
+    color: #fff;
+    background-color: #5b2662;
+    border-color: #5b2662;
+  }
+  .custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #5b2662;
+    background-color: #5b2662;
+  }
+
+  /* reset btn in HtmlBlock */
+  .xmodule_HtmlBlock button ,
+  .xmodule_HtmlBlock button:hover ,
+  .xmodule_HtmlBlock button:active ,
+  .xmodule_HtmlBlock button:visited {
+    animation : none;
+    animation-delay : 0;
+    animation-direction : normal;
+    animation-duration : 0;
+    animation-fill-mode : none;
+    animation-iteration-count : 1;
+    animation-name : none;
+    animation-play-state : running;
+    animation-timing-function : ease;
+    backface-visibility : visible;
+    background : 0;
+    background-attachment : scroll;
+    background-clip : border-box;
+    background-color : transparent;
+    background-image : none;
+    background-origin : padding-box;
+    background-position : 0 0;
+    background-position-x : 0;
+    background-position-y : 0;
+    background-repeat : repeat;
+    background-size : auto auto;
+    border : 0;
+    border-style : none;
+    border-width : medium;
+    border-color : inherit;
+    border-bottom : 0;
+    border-bottom-color : inherit;
+    border-bottom-left-radius : 0;
+    border-bottom-right-radius : 0;
+    border-bottom-style : none;
+    border-bottom-width : medium;
+    border-collapse : separate;
+    border-image : none;
+    border-left : 0;
+    border-left-color : inherit;
+    border-left-style : none;
+    border-left-width : medium;
+    border-radius : 0;
+    border-right : 0;
+    border-right-color : inherit;
+    border-right-style : none;
+    border-right-width : medium;
+    border-spacing : 0;
+    border-top : 0;
+    border-top-color : inherit;
+    border-top-left-radius : 0;
+    border-top-right-radius : 0;
+    border-top-style : none;
+    border-top-width : medium;
+    bottom : auto;
+    box-shadow : none;
+    box-sizing : content-box;
+    caption-side : top;
+    clear : none;
+    clip : auto;
+    color : inherit;
+    columns : auto;
+    column-count : auto;
+    column-fill : balance;
+    column-gap : normal;
+    column-rule : medium none currentColor;
+    column-rule-color : currentColor;
+    column-rule-style : none;
+    column-rule-width : none;
+    column-span : 1;
+    column-width : auto;
+    content : normal;
+    counter-increment : none;
+    counter-reset : none;
+    cursor : auto;
+    direction : ltr;
+    display : inline;
+    empty-cells : show;
+    float : none;
+    font : normal;
+    font-family : inherit;
+    font-size : medium;
+    font-style : normal;
+    font-variant : normal;
+    font-weight : normal;
+    height : auto;
+    hyphens : none;
+    left : auto;
+    letter-spacing : normal;
+    line-height : normal;
+    list-style : none;
+    list-style-image : none;
+    list-style-position : outside;
+    list-style-type : disc;
+    margin : 0;
+    margin-bottom : 0;
+    margin-left : 0;
+    margin-right : 0;
+    margin-top : 0;
+    max-height : none;
+    max-width : none;
+    min-height : 0;
+    min-width : 0;
+    opacity : 1;
+    orphans : 0;
+    outline : 0;
+    outline-color : invert;
+    outline-style : none;
+    outline-width : medium;
+    overflow : visible;
+    overflow-x : visible;
+    overflow-y : visible;
+    padding : 0;
+    padding-bottom : 0;
+    padding-left : 0;
+    padding-right : 0;
+    padding-top : 0;
+    page-break-after : auto;
+    page-break-before : auto;
+    page-break-inside : auto;
+    perspective : none;
+    perspective-origin : 50% 50%;
+    position : static;
+    /* May need to alter quotes for different locales (e.g fr) */
+    quotes : '\201C' '\201D' '\2018' '\2019';
+    right : auto;
+    tab-size : 8;
+    table-layout : auto;
+    text-align : inherit;
+    text-align-last : auto;
+    text-decoration : none;
+    text-decoration-color : inherit;
+    text-decoration-line : none;
+    text-decoration-style : solid;
+    text-indent : 0;
+    text-shadow : none;
+    text-transform : none;
+    top : auto;
+    transform : none;
+    transform-style : flat;
+    transition : none;
+    transition-delay : 0s;
+    transition-duration : 0s;
+    transition-property : none;
+    transition-timing-function : ease;
+    unicode-bidi : normal;
+    vertical-align : baseline;
+    visibility : visible;
+    white-space : normal;
+    widows : 0;
+    width : auto;
+    word-spacing : normal;
+    z-index : auto;
+    /* basic modern patch */
+    all: initial;
+    all: unset;
+  }
+
+  .wiki-wrapper section.wiki #hint_id_content {
+    font-size: 12px;
+    text-align: left;
+  }
+</style>

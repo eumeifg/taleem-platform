@@ -1,0 +1,35 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="80%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <div class="image-block col-md-6">
+            <img src="{{ site_url}}static/taleem-theme/images/email/secret_pin_banner.png" alt="" style="margin-left: auto; margin-right: auto; display: block; width: 50%;">
+        </div>
+    </tr>
+    <tr>
+        <td style="text-align: center;">
+            <h3 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {% trans "Your secret Pin from Ta3leem" as tmsg %}{{ tmsg | force_escape }}
+            </h3>
+            <p style="color: #ffffff; text-align: center; font-weight: 200;">
+                {% filter force_escape %}
+                {% blocktrans %}Welcome to Ta3leem Platform{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+            <p style="color: #ffffff; text-align: center; font-weight: 200;">
+                {% filter force_escape %}
+                {% blocktrans %}Thank you for signing into Ta3leem. Please insert the following Pin to proceed to your Ta3leem portal.{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+            <h2 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {{ second_password }}
+            </h2>
+        </td>
+    </tr>
+</table>
+{% endblock %}

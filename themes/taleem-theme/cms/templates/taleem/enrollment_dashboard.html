@@ -1,0 +1,138 @@
+<%page expression_filter="h"/>
+<%!
+from django.conf import settings
+from django.utils.translation import ugettext as _
+from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangolib.js_utils import (
+      dump_js_escaped_json
+  )
+from django.urls import reverse
+from openedx.custom.utils import utc_datetime_to_local_datetime
+%>
+
+<%inherit file="../base.html" />
+<%namespace name='static' file='../static_content.html'/>
+<%def name="online_help_token()"><% return "home" %></%def>
+<%block name="title">${_("Enrollment Dashboard")}</%block>
+<%block name="bodyclass">is-signedin index view-dashboard enrollment-dashboard</%block>
+
+<%block name="requirejs">
+  require(["js/factories/enrollment_dashboard"], function (IndexFactory) {
+      IndexFactory();
+  });
+</%block>
+
+<%block name="header_extras">
+    <style type="text/css">
+        .btn {border-radius: 5px;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {color: #fff !important; background: #2c1c59 !important;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {background: #2c1c59 !important;}
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:active {background: transparent !important;}
+        .global-settings {border: 1px solid gray; padding: 20px; margin-bottom: 20px;}
+        #submitEnrollmentSettings {margin-top: 10px;}
+        .ltr .text-right {text-align: right;}
+        .rtl .text-right {text-align: left;}
+        #save-status {margin: 0 5px;}
+        .fa-check-circle {color: #00FF00;}
+    </style>
+</%block>
+
+<%block name="content">
+<div class="wrapper-mast wrapper">
+  <header class="mast has-actions">
+    <h1 class="page-header">${_("Enrollment Dashboard")}</h1>
+      <nav class="nav-actions" aria-label="Page Actions">
+        <h3 class="sr">Page Actions</h3>
+        <ul>
+          <li class="nav-item action-item">
+              <a href="${reverse('home')}" class="button new-button">
+                  <span class="icon fa fa-arrow-left icon-inline" aria-hidden="true"></span> <span class="action-button-text">${_("Go to Dashboard")}</span>
+              </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="button new-button new-enrollment-button">
+                <span class="icon fa fa-plus icon-inline" aria-hidden="true"></span>
+                ${_("New Enrollment")}
+            </a>
+          </li>
+        </ul>
+    </nav>
+  </header>
+</div>
+
+<div class="wrapper-content wrapper">
+  <section class="content">
+    <article class="content-primary" role="main">
+
+    <ul id="course-index-tabs" class="enrollment-index-tabs">
+        <li class="enrollments-tab active"><a>${_("Enrollments")}</a></li>
+        <li class="pending-enrollments-tab"><a>${_("Pending Enrollments")}</a></li>
+    </ul>
+
+      <div class="wrapper-create-element wrapper-enroll-users">
+        <form class="form-create enroll-users-form" id="enroll-users-form" name="enroll-users-form">
+          <div class="wrap-error">
+            <div id="user-enrollment-error" class="message message-status message-status error" role="alert">
+                <p>${_("Please correct the highlighted fields below.")}</p>
+            </div>
+          </div>
+
+          <div class="wrapper-form">
+            <h3 class="title">${_("Enroll Users")}</h3>
+
+            <fieldset>
+              <legend class="sr">${_("Required Information to Enroll a New User")}</legend>
+
+              <ol class="list-input">
+                <li class="field text required" id="field-email">
+                  <label for="email">${_("Email")}</label>
+                  <input class="email" id="email" type="text" name="email" placeholder="${_('e.g. staff@example.com')}" aria-describedby="tip-email tip-error-email" />
+                  <span class="tip" id="tip-email">${_("The email of the user, you want to enroll.")}</span>
+                  <span class="tip tip-error is-hiding" id="tip-error-email"></span>
+                </li>
+                <li class="field text required" id="field-csv">
+                  <label for="csv">${_("CSV")}</label>
+                  <input class="file_field csv" id="csv" name="csv" type="file" accept=".csv" aria-describedby="tip-csv tip-error-csv"/>
+                  <span class="tip" id="tip-csv">${_("The CSV containing emails you want to enroll.")}</span>
+                  <span class="tip tip-error is-hiding" id="tip-error-csv"></span>
+                </li>
+
+              </ol>
+             <input type="hidden" value="true" class="allow-unicode-enroll-users" />
+             <input type="hidden" value="timed" name="mode" />
+             <input type="hidden" value="${course_key_string}" name="course_key_string" />
+
+            </fieldset>
+          </div>
+
+          <div class="actions">
+            <input type="submit" value="${_('Enroll')}" class="action action-primary enroll-users" />
+            <a class="action action-primary right" href="${reverse('taleem_organization:csv_samples', args=('enrollments',))}" target="_blank">${_('Download Sample CSV')}</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="enrollments-wrapper enrollments-tab active">
+        <div class="enrollments">
+            <br />
+            <table id="user-enrollments" class="display data-table" style="width:100%">
+            </table>
+        </div>
+      </div>
+
+      <div class="pending-enrollments-wrapper pending-enrollments-tab">
+        <div class="pending-enrollments">
+            <br />
+            <table id="pending-enrollments" class="display data-table" style="width:100%">
+            </table>
+        </div>
+      </div>
+
+    </article>
+
+  </section>
+</div>
+</%block>

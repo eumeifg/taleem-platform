@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="54" height="54" viewBox="0 0 54 54">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_18" data-name="Rectangle 18" width="54" height="54" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Vector_Smart_Object" data-name="Vector Smart Object" transform="translate(-1071 -1442)">
+    <g id="Vector_Smart_Object-2" data-name="Vector Smart Object" transform="translate(1071 1442)">
+      <g id="Group_36" data-name="Group 36">
+        <g id="Group_35" data-name="Group 35" clip-path="url(#clip-path)">
+          <path id="Path_47" data-name="Path 47" d="M27,10.509l2.308,4.713a3.452,3.452,0,0,0,2.6,1.9l5.162.755-3.735,3.669a3.492,3.492,0,0,0-.992,3.077l.882,5.18-4.617-2.445a3.425,3.425,0,0,0-3.211,0L20.778,29.8l.882-5.18a3.492,3.492,0,0,0-.992-3.077l-3.735-3.669,5.162-.755a3.452,3.452,0,0,0,2.6-1.9Z" fill="#ff6d3b"/>
+          <path id="Path_48" data-name="Path 48" d="M46.436,20.2A19.436,19.436,0,1,0,27,39.785,19.509,19.509,0,0,0,46.436,20.2Z" fill="none" stroke="#344154" stroke-miterlimit="10" stroke-width="1.236"/>
+          <path id="Path_49" data-name="Path 49" d="M42.167,20.2a15.167,15.167,0,1,0-30.333,0" fill="none" stroke="#344154" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.236"/>
+          <path id="Path_50" data-name="Path 50" d="M44.776,33.687,52.6,44.362l-9.58-1.593-1.581,9.653L32.025,39.195" fill="none" stroke="#344154" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.236"/>
+          <path id="Path_51" data-name="Path 51" d="M9.224,33.687,1.4,44.362l9.58-1.593,1.581,9.653,9.417-13.227" fill="none" stroke="#344154" stroke-linecap="round" stroke-miterlimit="10" stroke-width="1.236"/>
+        </g>
+      </g>
+    </g>
+    <path id="Color_Overlay" data-name="Color Overlay" d="M1103.025,1481.195l.472-.2a19.424,19.424,0,0,1-10.993,0l.472.2-9.417,13.226-1.581-9.653-9.58,1.593,7.827-10.675,8.073,3.487a19.437,19.437,0,1,1,19.4,0l8.076-3.487,7.826,10.675-9.581-1.593-1.581,9.653Z" fill="#666"/>
+  </g>
+</svg>

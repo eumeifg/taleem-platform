@@ -1,0 +1,24 @@
+### Editor and IDE artifacts
+*~
+*.swp
+
+### Styling generated from templates
+lms/static/sass/*.css
+lms/static/sass/*.css.map
+lms/static/certificates/sass/*.css
+!lms/static/css/
+!cms/static/css/
+lms/static/css/*
+cms/static/css/*
+!lms/static/css/processed/
+!cms/static/css/processed/
+cms/static/sass/*.css
+cms/static/sass/*.css.map
+.sass-cache
+
+### Unknown artifacts
+*.bak
+.DS_Store
+
+# Visual Studio Code
+.vscode

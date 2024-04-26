@@ -1,0 +1,69 @@
+## mako
+
+<%page args="active_page=None" expression_filter="h" />
+<%namespace name='static' file='/static_content.html'/>
+
+<%!
+from lms.djangoapps.courseware.tabs import get_course_tab_list
+from django.conf import settings
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+%>
+
+<%
+if active_page is None and active_page_context is not UNDEFINED:
+    # If active_page is not passed in as an argument, it may be in the context as active_page_context
+    active_page = active_page_context
+
+if course is not None:
+    disable_tabs = include_special_exams = (
+    request.user.is_authenticated and
+    settings.FEATURES.get('ENABLE_SPECIAL_EXAMS', False) and
+    (course.enable_proctored_exams or course.enable_timed_exams)
+    )
+%>
+
+% if include_special_exams is not UNDEFINED and include_special_exams:
+    <%static:js group='proctoring'/>
+    % for template_name in ["proctored-exam-status"]:
+        <script type="text/template" id="${template_name}-tpl">
+            <%static:include path="courseware/${template_name}.underscore" />
+        </script>
+    % endfor
+    <div class="proctored_exam_status"></div>
+% endif
+
+% if disable_tabs is UNDEFINED or not disable_tabs:
+    <%
+        tab_list = get_course_tab_list(request.user, course)
+        tab_icons = {
+            "course": "la-school",
+            "discussion": "la-comments",
+            "wiki": "la-book",
+            "progress": "la-tasks",
+            "dates": "la-calendar",
+            "instructor": "la-user-tie",
+        }
+    %>
+    <nav class="course-tabs" aria-label="${_('Course Material')}">
+        <div class="nav nav-tabs" id="course-tabs">
+            % for tab in tab_list:
+                <%
+                    tab_is_active = tab.tab_id in (active_page, default_tab)
+                %>
+                <a class="nav-item nav-link ${'active' if tab_is_active else ''}" href="${tab.link_func(course, reverse)}">
+                    <i class="las la-2x ${tab_icons[tab.name.lower()] if tab.name.lower() in tab_icons.keys() else 'la-file-alt'} align-middle"></i>
+                    ${_(tab.name)}
+                    % if tab_is_active:
+                        <span class="sr-only">, ${_('current location')}</span>
+                    %endif
+                    % if tab_image:
+                        ## Translators: 'needs attention' is an alternative string for the
+                        ## notification image that indicates the tab "needs attention".
+                        <img src="${tab_image}" alt="${_('needs attention')}" />
+                    %endif
+                </a>
+            % endfor
+        </div>
+    </nav>
+%endif

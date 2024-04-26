@@ -1,0 +1,32 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="100%" align="left" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <td>
+            <p style="color: #ffffff;">
+                {% filter force_escape %}
+                {% blocktrans %}Hello {{full_name}},{% endblocktrans %}
+                {% endfilter %}
+                <br />
+                {% filter force_escape %}
+                {% trans "Congratulations! Your ID verification process was successful." as tmsg %}{{ tmsg | force_escape }}
+                {% endfilter %}
+                <br />
+            </p>
+            <p style="color: #ffffff;">
+                {% trans "Your verification is effective for one year." as tmsg %}{{ tmsg | force_escape }}
+            </p>
+            <p style="color: #ffffff;">
+                {% trans "Thank you," as tmsg %}{{ tmsg | force_escape }}
+                <br />
+                {% filter force_escape %}
+                {% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+                {% endfilter %}
+            </p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% load i18n %}
+<script>
+    $(document).ready(function() {
+        $("#enrollment-code-btn").click( function(){
+            jQuery.ajax({
+                type: 'POST',
+                url: window.location.origin + "/taleem/allow_entrance",
+                data: {'exam_id': {{ exam_id }}, 'code':  $("#enrollment-code-input").val()},
+                success: function (res) {
+                    if (res.status === 200) {
+                        $("#enrollment-code-input").removeClass("is-invalid");
+                        $("#code-help").addClass("hidden");
+                        location.reload();
+                    } else {
+                        $("#enrollment-code-input").addClass("is-invalid");
+                        $("#code-help").removeClass("hidden");
+                        $("#code-help").text(res.text);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Something went wrong!');
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    #enrollment-code-btn {
+        color: white !important;
+        background-color: #2C1C59 !important;
+    }
+
+    #enrollment-code-btn:hover {
+        color: white !important;
+        background-color: #2C1C59 !important;
+    }
+</style>
+
+    <div class="sequence proctored-exam instructions message-left-bar" data-exam-id="{{exam_id}}" data-exam-started-poll-url="{{exam_started_poll_url}}">
+        <div class="form-group row m-0">
+            <div class="col-sm-12">
+                <h3>
+                    {% blocktrans %}Please enter the enrollment code which your instructor has provided you{% endblocktrans %}
+                </h3>
+            </div>
+            <div class="col-sm-3" style="margin-top: 3px;">
+                <input type="text" class="form-control" id="enrollment-code-input">
+            </div>
+            <div class="col-sm-9">
+                <button type="button" class="btn-secondary" id="enrollment-code-btn" style="color: white; background-color: #2C1C59;">
+                    {% trans "Submit" %}
+                </button>
+            </div>
+            <div class="col-sm-3">
+                <small id="code-help" class="text-danger hidden">
+                </small>
+            </div>
+        </div>
+    </div>
+
+{% if not hide_extra_time_footer %}
+  {% include 'timed_exam/footer.html' %}
+{% endif %}

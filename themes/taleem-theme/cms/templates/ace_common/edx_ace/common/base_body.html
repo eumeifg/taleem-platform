@@ -1,0 +1,217 @@
+{% load i18n %}
+{% load ace %}
+
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
+{# This is preview text that is visible in the inbox view of many email clients but not visible in the actual #}
+{# email itself. #}
+
+<div lang="{{ LANGUAGE_CODE|default:"en" }}" style="
+    display:none;
+    font-size:1px;
+    line-height:1px;
+    max-height:0px;
+    max-width:0px;
+    opacity:0;
+    overflow:hidden;
+    visibility:hidden;
+">
+    {% block preview_text %}{% endblock %}
+</div>
+
+{% for image_src in channel.tracker_image_sources %}
+    <img src="{image_src}" alt="" role="presentation" aria-hidden="true" />
+{% endfor %}
+
+{% if request.user %}
+    {% google_analytics_tracking_pixel %}
+{% endif %}
+
+<div bgcolor="#f5f5f5" lang="{{ LANGUAGE_CODE|default:"en" }}" dir="{{ LANGUAGE_BIDI|yesno:"rtl,ltr" }}" style="
+    margin: 0;
+    padding: 0;
+    min-width: 100%;
+">
+    <!-- Hack for outlook 2010, which wants to render everything in Times New Roman -->
+    <!--[if mso]>
+    <style type="text/css">
+    body, table, td {font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;}
+    </style>
+    <![endif]-->
+
+    <!--[if (gte mso 9)|(IE)]>
+    <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+    <td>
+    <![endif]-->
+
+    <!-- CONTENT -->
+    <table class="content" role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" bgcolor="#e9eaf4" width="100%" style="
+        font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 1em;
+        line-height: 1.5;
+        max-width: 600px;
+        padding: 0 0 0 0;
+    ">
+        <tr>
+            <!-- HEADER -->
+            <td class="header" style="
+                padding: 20px;
+            ">
+                {% block header %}
+                <table role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="70">
+                            <a href="{% with_link_tracking homepage_url %}"><img
+                                    src="{{ site_url }}static/taleem-theme/images/email/logo-colors.png" width="60"
+                                    height="35" alt="{% filter force_escape %}{% blocktrans %}Go to {{ platform_name }} Home Page{% endblocktrans %}{% endfilter %}"/></a>
+                        </td>
+                        <td align="right" style="text-align: {{ LANGUAGE_BIDI|yesno:"left,right" }};">
+                            <a class="login" href="{% with_link_tracking dashboard_url %}" style="color: #281958; text-decoration: none;">{%  trans "Account" %}</a>
+                            <span style="color: #281958;"> - </span>
+                            <a class="login" href="{% with_link_tracking contact_url %}" style="color: #281958; text-decoration: none;">{%  trans "Contact" %}</a>
+                        </td>
+                    </tr>
+                </table>
+                {% endblock %}
+            </td>
+        </tr>
+
+        <tr>
+            <!-- MAIN -->
+            <td class="main" bgcolor="#281958" style="
+                padding: 30px 20px;
+                box-shadow: 0 5px 5px rgba(0,0,0,0.25);
+                border-radius: 0 0 15px 15px;
+            ">
+                {% block content %}{% endblock %}
+            </td>
+        </tr>
+
+        <tr>
+            <!-- FOOTER -->
+            <td class="footer" style="padding-top: 20px;">
+                <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <!-- SOCIAL -->
+                            <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="25%">
+                                <tr>
+                                    {% if social_media_urls.Linkedin %}
+                                        <td>
+                                            <a href="{{ social_media_urls.Linkedin|safe }}">
+                                                <img src="{{ site_url }}static/taleem-theme/images/email/linkedin-in-brands.png" width="20" height="20"
+                                                     alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on LinkedIn{% endblocktrans %}{% endfilter %}"/>
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    {% if social_media_urls.Twitter %}
+                                        <td>
+                                            <a href="{{ social_media_urls.Twitter|safe }}">
+                                                <img src="{{ site_url }}static/taleem-theme/images/email/twitter-brands.png" width="20" height="20"
+                                                     alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on Twitter{% endblocktrans %}{% endfilter %}"/>
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    {% if social_media_urls.Facebook %}
+                                        <td>
+                                            <a href="{{ social_media_urls.Facebook|safe }}">
+                                                <img src="{{ site_url }}static/taleem-theme/images/email/facebook-f-brands.png" width="15" height="20"
+                                                     alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on Facebook{% endblocktrans %}{% endfilter %}"/>
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    {% if social_media_urls.Youtube %}
+                                        <td>
+                                            <a href="{{ social_media_urls.Youtube|safe }}">
+                                                <img src="{{ site_url }}static/taleem-theme/images/email/youtube-brands.png" width="20" height="20"
+                                                     alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on Youtube{% endblocktrans %}{% endfilter %}"/>
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                    {% if social_media_urls.Instagram %}
+                                        <td>
+                                            <a href="{{ social_media_urls.Instagram|safe }}">
+                                                <img src="{{ site_url }}static/taleem-theme/images/email/instagram-brands.png" width="20" height="20"
+                                                     alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on Instagram{% endblocktrans %}{% endfilter %}"/>
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr style="padding-top: 10px; padding-bottom: 10px">
+                        <!-- COPYRIGHT -->
+                        <td style="text-align: center;">
+                            <p style="color:#281958; font-size: 0.8em;">&copy;
+                                {% filter force_escape %}
+                                    {% blocktrans %}2021 Ta3leem Company Ltd.{% endblocktrans %}
+                                {% endfilter %}
+                            </p>
+                            <p style="color: #281958; font-size: 0.8em;">
+                                {% filter force_escape %}
+                                    {% blocktrans %}Al-Jadriya, Baghdad - Iraq{% endblocktrans %}
+                                {% endfilter %}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr class="main" bgcolor="#281958">
+                        <td style="padding: 5px;">
+                            <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td>
+                                        <a href="#">
+                                            <img src="{{ site_url }}static/taleem-theme/images/email/google-play-white.png" width="20" height="20"
+                                                style="padding-right: 5px; padding-left: 5px" alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on Play Store{% endblocktrans %}{% endfilter %}"/>
+                                        </a>
+                                    </td>
+                                    <td align="center">
+                                        <a href="#">
+                                            <img src="{{ site_url }}static/taleem-theme/images/email/apple-brands.png" width="20" height="25"
+                                                style="padding-right: 5px; padding-left: 5px" alt="{% filter force_escape %}{% blocktrans %}{{ platform_name }} on App Store{% endblocktrans %}{% endfilter %}"/>
+                                        </a>
+                                    </td>
+                                    <td align="center">
+                                        <a href="https://ta3leem.iq" style="
+                                        text-decoration: none;
+                                        color: white;
+                                        display: inline-flex;
+                                        text-align: center;
+                                        font-weight: 400;
+                                        font-size: 0.9em;">
+                                            <span>
+                                                www.ta3leem<span style="color: #FFBAC0;">.</span><span style="color: #00C3FF;">iq</span>
+                                            </span>
+                                            <img src="{{ site_url }}static/taleem-theme/images/email/globe.png" width="20" height="20"
+                                                 style="padding-left: 3px; padding-right: 3px"/>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% if unsubscribe_url %}
+                        <tr>
+                            <td>
+                                <a href="{% with_link_tracking unsubscribe_url %}">{% trans "Unsubscribe from these emails." as tmsg %}{{ tmsg | force_escape }}</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!--[if (gte mso 9)|(IE)]>
+    </td>
+    </tr>
+    </table>
+    <![endif]-->
+
+</div>
+
+{# Debug info that is not user-visible #}
+<span id="ace-message-id" style="display:none;">{{ message.log_id }}</span>
+<span id="template-revision" style="display:none;">{{ template_revision }}</span>

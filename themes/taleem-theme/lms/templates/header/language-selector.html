@@ -1,0 +1,81 @@
+<%!
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangoapps.lang_pref.api import header_language_selector_is_enabled, released_languages
+%>
+
+% if header_language_selector_is_enabled():
+    <% languages = released_languages() %>
+    % if len(languages) > 1:
+        % if len(languages) == 2:
+            <form action="/i18n/setlang/" method="post" class="settings-language-form" id="toggle-language-form">
+                <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
+                % if user.is_authenticated:
+                    <input title="preference api" type="hidden" class="url-endpoint" value="${reverse('preferences_api', kwargs={'username': user.username})}" data-user-is-authenticated="true">
+                % else:
+                    <input title="session update url" type="hidden" class="url-endpoint" value="${reverse('session_language')}" data-user-is-authenticated="false">
+                % endif
+                
+                % for language in languages:
+                    % if language[0] != LANGUAGE_CODE:
+                        <input type="hidden" id="language" name="language" value="${language[0]}">
+                        <a class="lang-toggle-btn btn" onclick="toggleLanguage()"><label><span class="sr">${_("Choose Language")}</span></label>${language[1]}</a>
+                    % endif
+                % endfor
+            </form>
+        % else:
+            <form action="/i18n/setlang/" method="post" class="settings-language-form" id="language-settings-form">
+                <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
+                % if user.is_authenticated:
+                    <input title="preference api" type="hidden" class="url-endpoint" value="${reverse('preferences_api', kwargs={'username': user.username})}" data-user-is-authenticated="true">
+                % else:
+                    <input title="session update url" type="hidden" class="url-endpoint" value="${reverse('session_language')}" data-user-is-authenticated="false">
+                % endif
+                <label><span class="sr">${_("Choose Language")}</span>
+                <select class="input select language-selector" id="settings-language-value" name="language">
+                    % for language in languages:
+                        % if language[0] == LANGUAGE_CODE:
+                            <option value="${language[0]}" selected="selected">${language[1]}</option>
+                        % else:
+                            <option value="${language[0]}" >${language[1]}</option>
+                        % endif
+                    % endfor
+                </select>
+                </label>
+            </form>
+        % endif
+    % endif
+% endif
+
+<script>
+    function toggleLanguage(event) {
+        let lang = $('#toggle-language-form #language').val(),
+        url = $('#toggle-language-form .url-endpoint').val(),
+        is_user_authenticated = JSON.parse($('#toggle-language-form .url-endpoint').data('user-is-authenticated'));
+        $.ajax({
+            type: 'PATCH',
+            data: JSON.stringify({'pref-lang': lang}),
+            url: url,
+            dataType: 'json',
+            contentType: 'application/merge-patch+json',
+            notifyOnError: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', $.cookie('csrftoken'));
+            }
+        }).done(function() {
+            console.log('lang : ' + lang);
+            console.log('authenticated : ' + is_user_authenticated);
+            if (is_user_authenticated) {
+                $('#toggle-language-form').submit();
+            } else {
+                location.reload();
+            }
+        }).fail(function() {
+            location.reload();
+        });
+        event.preventDefault();
+        console.log('language changed!');
+    }
+</script>

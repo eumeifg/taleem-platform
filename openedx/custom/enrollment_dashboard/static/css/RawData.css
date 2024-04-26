@@ -1,0 +1,90 @@
+.rawContent {
+    padding-top: 1vh;
+    display: flex;
+     justify-content: center;
+}
+
+.rawMain {
+    padding-right: 1vw;
+    padding-left: 3vw;
+    padding-top: 2vh;
+    height: 70vh;
+    width: 70vw;
+    border: solid 1px black;
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+}
+
+.rawImages {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 60vh;
+    width: 8vw;
+    text-align: center;
+    gap: 6px;
+}
+
+.rawImages img {
+    margin: auto;
+    height: 10vh;
+    width: 5vw;
+}
+
+.rawHead {
+    text-align: center;
+    font-size: 4vh;
+    font-weight: 900;
+}
+
+.rawDetails {
+    margin-top: 2vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.rawDetails div {
+    margin-top: 2vh;
+    margin-left: 5px;
+}
+
+.rawIcon {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+}
+
+.rawFinish {
+    margin-top: 3vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.rawFinish div {
+    margin-left: 2vw;
+}
+
+.rawloginButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 4vh;
+}
+
+.rawloginButtonTag {
+    min-width: 5vw;
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    margin-right: 2vw;
+    background-color: #fffffd;
+    cursor:pointer;
+    user-select: none;
+    text-decoration: none;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+}

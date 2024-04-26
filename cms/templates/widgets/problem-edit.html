@@ -1,0 +1,32 @@
+<%! from django.utils.translation import ugettext as _ %>
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+
+<% isLaTexProblem='source_code' in editable_metadata_fields and editable_metadata_fields['source_code']['explicitly_set'] and enable_latex_compiler %>
+
+% if isLaTexProblem:
+<div class="wrapper-comp-editor latex-problem" id="editor-tab">
+% else:
+<div class="wrapper-comp-editor" id="editor-tab">
+% endif
+<section class="problem-editor editor" id="problem-editor">
+    <div class="row">
+        <div class="editor-bar">
+            <ul class="editor-tabs">
+                <li><a href="#" class="xml-tab advanced-toggle" data-tab="xml">${_("Advanced XML Editor")}</a></li>
+                <li><a href="#" class="advanced-toggle toggle-direction" data-tab="xml">${_("Toogle Direction")}</a></li>
+            </ul>
+        </div>
+        %if enable_markdown:
+            <textarea hidden class="markdown-box">${markdown}</textarea>
+        %endif
+        <div id='quiz-maker-editor' class='quiz-maker-editor quiz-maker-ltr'></div> 
+    </div>
+    <textarea class="xml-box" id="xml-box" rows="8" cols="40">${data}</textarea>
+</section>
+
+<script type="text/template" id="simple-editor-cheatsheet">
+
+</script>
+</div>
+<%include file="metadata-edit.html" />

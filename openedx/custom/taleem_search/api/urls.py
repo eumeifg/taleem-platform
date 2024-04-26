@@ -1,0 +1,55 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path(
+        "categories/",
+        views.SearchCategoryListView.as_view(),
+        name="search_categories"
+    ),
+    path(
+        "category/<int:category_id>/values/",
+        views.SearchCategoryValueListView.as_view(),
+        name="search_category_value"
+    ),
+    path(
+        "auto-complete/courses/",
+        views.CourseSearchAutoCompleteView.as_view(),
+        name="auto_complete_course_search"
+    ),
+    path(
+        "advertised/courses/",
+        views.AdvertisedCourseListView.as_view(),
+        name="advertised_courses"
+    ),
+    path(
+        "popular/courses/",
+        views.PopularCourseListView.as_view(),
+        name="popular_courses"
+    ),
+    path(
+        "courses/",
+        views.CourseSearchView.as_view(),
+        name="search_courses"
+    ),
+    path(
+        "auto-complete/exams/",
+        views.ExamSearchAutoCompleteView.as_view(),
+        name="auto_complete_exam_search"
+    ),
+    path(
+        "exams/",
+        views.ExamSearchView.as_view(),
+        name="search_exams"
+    ),
+    path(
+        "auto-complete/live/courses/",
+        views.LiveCourseSearchAutoCompleteView.as_view(),
+        name="auto_complete_live_course_search"
+    ),
+    path(
+        "live/courses/",
+        views.LiveCourseSearchView.as_view(),
+        name="search_live_courses"
+    ),
+]

@@ -1,0 +1,53 @@
+.detContent {
+    padding-top: 1vh;
+    display: flex;
+    justify-content: center;
+}
+
+.detMain {
+    padding-right: 1vw;
+    padding-left: 3vw;
+    padding-top: 2vh;
+    height: 50vh;
+    width: 45vw;
+    border: solid 1px black;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+
+.detValue {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+     height: 3vh;
+     width: 30vw;
+}
+
+.detId {
+    margin-left: 3vw;
+}
+
+.detbuttonLine {
+    padding: 5px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 5vh;
+}
+
+.detloginButtonTag {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    margin-right: 2vw;
+    background-color: #fffffd;
+    cursor:pointer;
+    user-select: none;
+    text-decoration: none;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+}

@@ -1,0 +1,280 @@
+<%page expression_filter="h"/>
+
+<%!
+import json
+from django.utils.translation import ugettext as _
+from openedx.core.djangolib.js_utils import (
+    dump_js_escaped_json, js_escaped_string
+)
+from lms.djangoapps.courseware.courses import get_course_about_section
+%>
+
+% if display_name is not UNDEFINED and display_name is not None:
+    <h3 class="hd hd-2">${display_name}</h3>
+% endif
+
+<div
+    id="video_${id}"
+    class="video closed taleem-player"
+    data-metadata='${metadata}'
+    data-bumper-metadata='${bumper_metadata}'
+    data-autoadvance-enabled="${autoadvance_enabled}"
+    data-poster='${poster}'
+    tabindex="-1"
+>
+    <div class="focus_grabber first"></div>
+
+    <div class="tc-wrapper">
+      <div class="video-wrapper">
+          <span tabindex="0" class="spinner" aria-hidden="false" aria-label="${_('Loading video player')}"></span>
+          <span tabindex="-1" class="btn-play las la-lg la-youtube la-2x is-hidden" aria-hidden="true" aria-label="${_('Play video')}"></span>
+          <div class="video-player-pre"></div>
+          <div class="video-player">
+              <div id="${id}">
+                <div id="watermark">
+                  ${user.email if user and not user.is_anonymous else 'Anonymous'}
+                </div>
+              </div>
+              <h4 class="hd hd-4 video-error is-hidden">${_('No playable video sources found.')}</h4>
+              <h4 class="hd hd-4 video-hls-error is-hidden">
+                  ${_('Your browser does not support this video format. Try using a different browser.')}
+              </h4>
+          </div>
+          <div class="video-player-post"></div>
+          <div class="closed-captions"></div>
+          <div class="video-controls is-hidden">
+              <div>
+                  <div class="vcr"><div class="vidtime">0:00 / 0:00</div></div>
+                  <div class="secondary-controls"></div>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div class="focus_grabber last"></div>
+
+    % if download_video_link or track or handout or branding_info:
+    <h3 class="hd hd-4 downloads-heading sr" id="video-download-transcripts_${id}">${_('Downloads and transcripts')}</h3>
+    <div class="wrapper-downloads" role="region" aria-labelledby="video-download-transcripts_${id}">
+        % if download_video_link:
+        <div class="wrapper-download-video">
+            <h4 class="hd hd-5">${_('Video')}</h4>
+            <a class="btn-link video-sources video-download-button" href="${download_video_link}">
+                ${_('Download video file')}
+            </a>
+        </div>
+        % endif
+        % if track:
+        <div class="wrapper-download-transcripts">
+            <h4 class="hd hd-5">${_('Transcripts')}</h4>
+            % if transcript_download_format:
+            <ul class="list-download-transcripts">
+                % for item in transcript_download_formats_list:
+                    <li class="transcript-option">
+                        <% dname = _("Download {file}").format(file=item['display_name']) %>
+                        <a class="btn btn-link" href="${track}" data-value="${item['value']}">${dname}</a>
+                    </li>
+                % endfor
+            </ul>
+            % else:
+            <a class="btn-link external-track" href="${track}">${_('Download transcript')}</a>
+            % endif
+        </div>
+        % endif
+        % if handout:
+        <div class="wrapper-handouts">
+            <h4 class="hd hd-5">${_('Handouts')}</h4>
+            <a class="btn-link" href="${handout}">${_('Download Handout')}</a>
+        </div>
+        % endif
+        % if branding_info:
+        <div class="branding">
+            <span class="host-tag">${branding_info['logo_tag']}</span>
+            <a href="${branding_info['url']}"><img class="brand-logo" src="${branding_info['logo_src']}" alt="${branding_info['logo_tag']}" /></a>
+        </div>
+        % endif
+    </div>
+    % endif
+
+% if lms_view and user_id and not is_rendering_xblock:
+  <!-- Popup for notes-->
+  <div class="container">
+    <div id="popup-add-note" class="white-popup mfp-hide">
+      <h2>${_('Take a note')}</h2>
+      <form>
+        <div class="form-group">
+          <label for="input-time">${_('Video time')}</label>
+          <input type="text" class="form-control" id="input-time" readonly>
+        </div>
+        <div class="form-group">
+          <label for="input-note">${_('Note')}</label>
+          <textarea class="form-control" id="input-note" placeholder="${_('Enter text here.')}">
+          </textarea>
+        </div>
+
+        <a class="btn btn-primary" id="btn-note-submit">${_('Submit')}</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="popup-edit-note" class="white-popup mfp-hide">
+      <h2>${_('Edit a note')}</h2>
+      <form>
+        <input type="hidden" value="" id="edit-input-id">
+        <div class="form-group">
+          <label for="edit-input-time">${_('Video time')}</label>
+          <input type="text" class="form-control" id="edit-input-time" readonly>
+        </div>
+        <div class="form-group">
+          <label for="edit-input-note">${_('Note')}</label>
+          <textarea class="form-control" id="edit-input-note" placeholder="${_('Enter text here.')}">
+          </textarea>
+        </div>
+
+        <a class="btn btn-primary" id="btn-note-save">${_('Save')}</a>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Video Tabs -->
+  <div class="video-tab">
+    <a class="tablinks active" onclick="openTab(event, 'overview')">${_('Overview')}</a>
+    % if get_course_about_section(request, course, "video"):
+    <a href="#video-modal" class="tablinks media course-preview-link" rel="leanModal">${_('Course Preview')}</a>
+    % endif
+    <a class="tablinks notes-tablink" onclick="openTab(event, 'notes')">${_('Notes')}</a>
+    <div class="pull-right rating-bar">
+      <div class='video_rating star'></div>
+      <div>(${_("Avg")} <span class="avg-rating">-</span> ${_("stars")}, <span class="num-reviews">-</span> ${_("Reviews")})</div>
+    </div>
+    <div class="pull-right rating-bar" style="margin-right: 10px;">
+      <span class="btn-like las la-2x la-thumbs-up"></span>
+      <div><span class="total-likes"></span> ${_('Likes')}</div>
+    </div>
+  </div>
+
+  <div id="overview" class="video-tabcontent">
+    <h3>${_('Overview')}</h3>
+    <p>${overview}</p>
+  </div>
+
+  <div id="notes" class="video-tabcontent hidden">
+    <h3>${_('Notes')}</h3>
+    <p class="tab-sub--title">
+      ${_('Notes taken during the video play.')}
+      <a class="btn btn-primary pull-right" id="btn-add-note">${_('Take a note')}</a>
+    </p>
+    <table class="tbl-notes-list" width="100%">
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  </div>
+
+  <%include file="video_modal.html" />
+
+  <script>
+  function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("video-tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].className = "video-tabcontent hidden";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).className = "video-tabcontent";
+    evt.currentTarget.className += " active";
+  }
+  </script>
+  <!-- /Video Tabs -->
+
+  % if visual_completion == 'manual':
+  <% metadict = json.loads(metadata) %>
+  <div class="manual-completion-wrapper">
+      <button class="mark-as-done btn btn-primary" data-completion-url="${metadict['publishCompletionUrl']}"
+          data-checked="${'true' if done_state else 'false'}" ${'disabled' if done_state else ''}>
+        % if not done_state:
+          Mark as done
+        % else:
+          Marked as done
+        % endif
+      </button>
+  </div>
+  <script>
+  $(".mark-as-done").click(function(){
+    var el = $(this);
+    var handlerUrl = $(this).data('completion-url');
+    $.ajax({
+      type: 'POST',
+      url: handlerUrl,
+      data: JSON.stringify({
+        completion: 1.0,
+      }),
+    }).then(function() {
+      el.text("Marked as done");
+      el.prop("disabled", true);
+    });
+
+  });
+  </script>
+  % endif
+% endif
+
+% if cdn_eval:
+<script>
+  //TODO: refactor this js into a separate file.
+  function sendPerformanceBeacon(id, expgroup, value, event_name) {
+    var data = {event: event_name, id: id, expgroup: expgroup, value: value, page: "html5vid"};
+    $.ajax({method: "POST", url: "/performance", data: data});
+  }
+  var cdnStartTime;
+  var salt = Math.floor((1 + Math.random()) * 0x100000).toString(36);
+  var id = "${id | n, js_escaped_string}";
+  function initializeCDNExperiment() {
+    sendPerformanceBeacon(id + "_" + salt, ${cdn_exp_group | n, dump_js_escaped_json}, "", "load");
+    cdnStartTime = Date.now();
+    $.each(['loadstart', 'abort', 'error', 'stalled', 'loadedmetadata',
+                    'loadeddata', 'canplay', 'canplaythrough', 'seeked'],
+                    function(index, eventName) {
+      $("#video_" + id).bind("html5:" + eventName, null, function() {
+        timeElapsed = Date.now() - cdnStartTime;
+        sendPerformanceBeacon(id + "_" + salt, ${cdn_exp_group | n, dump_js_escaped_json}, timeElapsed, eventName);
+      });
+    });
+  }
+
+  $("#video_" + id).bind("initialize", null, initializeCDNExperiment);
+  if ($("#video_" + id).hasClass("is-initialized")) {
+    initializeCDNExperiment();
+  }
+</script>
+% endif
+
+<script>
+  $( document ).ready(function() {
+    hideVideoControls();
+  });
+  var videoid = "${id | n, js_escaped_string}";
+  function hideVideoControls() {
+    $("#video_" + videoid + " .video-wrapper .video-controls").css('opacity', '0'); // hide
+    console.log("Timeout:show");
+    var idleTimeout = null;
+    $("#video_" + videoid + " .video-wrapper").mousemove(function( event ) {
+      clearTimeout(idleTimeout);
+      $("#video_" + videoid + " .video-wrapper .video-controls").css('opacity', '0.8'); // show
+      idleTimeout = setTimeout(function () {
+        console.log("Timeout:hide");
+        $("#video_" + videoid + " .video-wrapper .video-controls").css('opacity', '0'); // hide
+      }, 5000);
+    }).mouseleave(function() {
+      console.log("Timeout:leave");
+      clearTimeout(idleTimeout);
+      $("#video_" + videoid + " .video-wrapper .video-controls").css('opacity', '0'); // hide
+    });
+  }
+</script>

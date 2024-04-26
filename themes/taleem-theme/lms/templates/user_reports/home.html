@@ -1,0 +1,186 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils import timezone
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+  <style>
+    .reports a.reports-btn {
+      margin: 20px;
+      margin-top: 40px;
+      padding: 5px 10px;
+      color: #281958;
+      border: 1px solid #281958;
+      border-radius: 20px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .reports a.reports-btn:hover, .reports a.reports-btn:focus {
+      background: #281958;
+      color: #f3f4f9;
+      text-decoration: none;
+    }
+    .reports .reports-retry {
+      display: flex;
+      justify-content: center;
+    }
+    .reports a.card {
+      text-decoration: none;
+    }
+    .reports a.card:hover {
+      background: #f3f4f9;
+    }
+    .reports .timed-exam-details .exam-item .card-header:hover {
+      background: #f3f4f9;
+    }
+    .reports .timed-exam-details .exam-item .exam-name {
+      font-weight: 700;
+      color: #281958;
+    }
+    .reports .timed-exam-details .exam-item .exam-avg-grade, .reports .timed-exam-details .exam-item .exam-absent-students {
+      font-weight: 700;
+      color: #fc0;
+    }
+    .reports .courses-assignments-details .assignment-item .assignment-name {
+      font-weight: 700;
+      color: #281958;
+    }
+    .reports .courses-assignments-details .assignment-item .submitted-assign-num,
+    .reports .courses-assignments-details .assignment-item .pending-assign-num,
+    .reports .courses-assignments-details .assignment-item .missed-assign-num {
+      font-weight: 700;
+      color: #fc0;
+    }
+    .reports .reports-wrapper {
+      position: relative;
+      min-height: 50vh;
+    }
+    .reports .reports-wrapper .loading-block {
+      display: none;
+    }
+    .reports .report-type {
+      background-color: #281958;
+      color: #f3f4f9;
+      font-size: 12px;
+    }
+    .reports .reports-wrapper.loading .loading-block {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: #2c1c59;
+      background: rgb(233, 234, 244);
+      background: radial-gradient(
+          circle,
+          rgba(233, 234, 244, 1) 0%,
+          rgba(255, 255, 255, 0) 100%
+      );
+    }
+    .border-left-purple {
+      border-left: 0.25rem solid #281958 !important;
+    }
+    .text-purple {
+      color: #281958 !important;
+    }
+    .bg-purple {
+      background-color: #281958 !important;
+    }
+    .text-yellow {
+      color: #fc0 !important;
+    }
+    .opacity-25 {
+      opacity: .25!important;
+    }
+
+  </style>
+</%block>
+
+<%block name="pagetitle">${_("Reports and Statistics")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+  <div class="container-fluid reports" id="reports">
+      <!-- Report Heading -->
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h2 mb-0 text-gray-800">
+          ${_("Reports and Statistics")}
+          % if role == 'teacher':
+          <span class="badge report-type">${_("Teacher")}</span>
+          % else:
+          <span class="badge report-type">${_("Student")}</span>
+          % endif
+        </h1>
+        <div>
+            <a href="/dashboard" class="reports-btn"><i class="las la-undo mx-1"></i>${_("Back to dashboard")}</a>
+        </div>
+      </div>
+      <div class="reports-wrapper">
+        <%include file="student.html"/>
+        <%include file="teacher.html"/>
+        <div class="reports-retry" style="display: none;"><a onclick="loadReportsData();" class="reports-btn"><i class="las la-redo-alt mx-1"></i>${_("Try Again")}</a></div>
+        <div class="loading-block"><i class="las la-4x la-spin la-sync"></i></div>
+      </div>
+  </div>
+</main>
+
+
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+
+    <!-- Page level custom js -->
+    <script type="text/javascript">
+      function loadReportsData() {
+        $('#reports #student-report').slideUp('slow');
+        $('#reports #teacher-report').slideUp('slow');
+        $('#reports .reports-wrapper').addClass('loading');
+        $('#reports .reports-retry').hide();
+        // Load courses and replace them in the courses-wrapper
+        var url = '/taleem/dashboard-reports/';
+
+        jQuery.ajax({
+          type: "GET",
+          url: url,
+          success: function (res) {
+            var report = res;
+            if (report.user_type == 'teacher') {
+              reportsLoadTeacherReport(report.reports_data);
+            } else {
+              reportsLoadStudentReport(report.reports_data);
+            }
+
+            // scroll top
+            $('html, body').animate({
+              scrollTop: $(".reports").offset().top
+            }, 500);
+          },
+          error: function (xhr) { // if error occured
+            console.error(xhr.statusText + xhr.responseText);
+            alert("Error occured. please try again");
+            $('#reports .reports-retry').show();
+          },
+          complete: function () {
+            $("#reports .reports-wrapper").removeClass('loading');
+          },
+        });
+      }
+
+      $(function () {
+        loadReportsData();
+      })
+    </script>
+</%block>

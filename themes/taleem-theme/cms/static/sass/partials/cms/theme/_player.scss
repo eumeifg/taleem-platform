@@ -1,0 +1,246 @@
+.taleem-theme {
+    .xmodule_display.xmodule_VideoBlock {
+        .video .video-wrapper {
+            .video-controls {
+                position: absolute;
+                width: 100%;
+                bottom: 0;
+                border: 0;
+                background: $valhalla;
+                opacity: 0;
+                color: $porcelain;
+                transition: opacity 0.7s ease-in-out 0s;
+
+                &::before {
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    width: 50px;
+                    height: 50px;
+                    right: 10px;
+                    top: -70px;
+                    background: url(/static/taleem-theme/images/logo-sm.png);
+                    background-position: center center;
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                }
+            }
+
+            &:hover .video-controls {
+                opacity: 0.8;
+            }
+
+            .video-controls {
+                .slider {
+                    border: 1px solid $haiti;
+                    background: $haiti;
+
+                    .ui-slider-handle {
+                        border: 1px solid $viking;
+                        border-radius: 10px;
+                        background: $viking;
+
+                        &:focus,
+                        &:hover {
+                            background-color: $cornflower_blue;
+                            border-color: $cornflower_blue;
+                        }
+                    }
+
+                    .ui-widget-header {
+                        background: $viking;
+                        background: linear-gradient(
+                            90deg,
+                            rgba(111, 113, 241, 1) 0%,
+                            rgba(83, 202, 227, 1) 100%
+                        );
+                        border: $viking;
+                        box-shadow: none;
+                        top: 0;
+                        left: 0;
+                    }
+                }
+
+                .control {
+                    background: none;
+
+                    &:hover,
+                    &:focus {
+                        background: $haiti;
+                    }
+                }
+
+                .secondary-controls {
+                    border: 0;
+
+                    .speeds {
+                        .speed-button {
+                            .label {
+                                display: none;
+                                vertical-align: middle;
+                            }
+
+                            .value {
+                                vertical-align: middle;
+                            }
+
+                            .icon {
+                                margin: 0 5px;
+                                vertical-align: middle;
+                            }
+                        }
+
+                        &.is-opened .control .icon {
+                            transform: rotate(0deg);
+                        }
+                    }
+
+                    .volume,
+                    .add-fullscreen,
+                    .grouped-controls,
+                    .auto-advance,
+                    .quality-control {
+                        border: 0;
+                    }
+
+                    .menu-container .menu {
+                        width: 100%;
+                        bottom: 45px;
+                        background-color: $haiti;
+
+                        li {
+                            .speed-option,
+                            .control-lang {
+                                background: $haiti;
+                            }
+
+                            &.is-active {
+                                .speed-option,
+                                .control-lang {
+                                    color: $viking;
+                                    border-color: $viking;
+                                    border-radius: 0 !important;
+                                }
+                            }
+                        }
+                    }
+
+                    .volume .volume-slider-container {
+                        width: 100%;
+                        bottom: 45px;
+                        background-color: $haiti;
+
+                        .volume-slider {
+                            .ui-slider-handle {
+                                border: 1px solid $viking;
+                                border-radius: 10px;
+                                background: $viking;
+
+                                &:hover,
+                                &:focus {
+                                    background: $cornflower_blue;
+                                    border-color: $cornflower_blue;
+                                }
+                            }
+
+                            .ui-slider-range {
+                                background: $viking;
+                                background: linear-gradient(
+                                    0deg,
+                                    rgba(111, 113, 241, 1) 0%,
+                                    rgba(83, 202, 227, 1) 100%
+                                );
+                                border: 1px solid $viking;
+                                left: 0;
+                                bottom: 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .fa {
+                font-family: "Line Awesome Free";
+                font-weight: 900;
+                font-size: 24px;
+                -moz-osx-font-smoothing: grayscale;
+                -webkit-font-smoothing: antialiased;
+                display: inline-block;
+                font-style: normal;
+                font-variant: normal;
+                text-rendering: auto;
+                line-height: 1;
+
+                &.fa-caret-right:before {
+                    content: "\f050";
+                }
+
+                &.fa-arrows-alt:before {
+                    content: "\f065";
+                }
+            }
+        }
+
+        .contextmenu,
+        .submenu {
+            border: 1px solid $valhalla;
+            background: $valhalla;
+            color: $porcelain;
+            opacity: 0.8;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .contextmenu {
+            .menu-item > span,
+            .submenu-item > span {
+                color: $porcelain;
+            }
+        }
+
+        .submenu {
+            .menu-item > span,
+            .submenu-item > span {
+                color: $porcelain;
+            }
+        }
+
+        .contextmenu {
+            .menu-item:focus,
+            .submenu-item:focus {
+                background: $haiti;
+                color: $white;
+            }
+        }
+
+        .submenu {
+            .menu-item:focus,
+            .submenu-item:focus {
+                background: $haiti;
+                color: $white;
+            }
+        }
+
+        .contextmenu .submenu-item.is-opened,
+        .submenu .submenu-item.is-opened {
+            background: $haiti;
+            color: $white;
+        }
+
+        .contextmenu {
+            .menu-item,
+            .submenu-item {
+                border-top: 1px solid $haiti;
+                cursor: pointer;
+            }
+        }
+
+        .submenu {
+            .menu-item,
+            .submenu-item {
+                border-top: 1px solid $haiti;
+                cursor: pointer;
+            }
+        }
+    }
+}

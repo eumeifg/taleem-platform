@@ -1,0 +1,164 @@
+html {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.taleem-theme {
+    .content-wrapper {
+        max-width: initial;
+        margin: $baseline 0;
+        padding: 0;
+
+        @include media-breakpoint-up(md) {
+            padding: 0 20px 10px;
+        }
+    }
+
+    .wrapper-preview-menu {
+        background-color: #281958;
+    }
+
+    button {
+        box-shadow: none !important;
+        border-radius: 5px;
+    }
+
+    .account-activation {
+        .message-copy {
+            left: 0;
+        }
+
+        &.info {
+            &.aa-icon .message-copy::before {
+                content: none;
+            }
+        }
+
+        &.success {
+            &.aa-icon .message-copy::before {
+                content: none;
+            }
+        }
+
+        &.error {
+            &.aa-icon .message-copy::before {
+                content: none;
+            }
+        }
+    }
+}
+#download-excel {
+	&:focus {
+		color: #fff;
+	}
+}
+
+.loader {
+	&:after {
+		content: '';
+		background: url('/static/taleem-theme/images/loader.gif');	
+		background-repeat: no-repeat;
+		background-size: contain;
+		position: absolute;
+		z-index: 9;
+		left: 0;
+		right: 0;
+		width: 60px;
+		height: 60px;
+		margin: 0 auto;
+		top: 50%;
+		border-radius: 50%;
+	}
+	&:before {
+		content: '';
+		width: 100%;
+		height: 100%;
+		background: #747474;
+		z-index: 9;
+		position: fixed;
+		opacity: 0.5;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+	}
+	position: fixed;
+}
+
+#teacher-data-table_filter {
+	text-align: left;
+	input {
+		&.form-control {
+			&.form-control-sm {
+				max-width: -webkit-fill-available;
+				width: 100%;
+				padding: 2px 12px;
+				border: 1px solid #c8c8c8;
+				border-radius: 3px;
+                box-shadow: none;
+			}
+		}
+	}
+}
+#download-excel {
+		vertical-align: bottom;
+		padding: 4px 20px;
+		width: fit-content;
+		height: auto;
+		font-size: 17px;
+	}
+	.date-full {
+		width: 100%;
+	}
+	.download_csv_btn {
+		margin-top: 100px;
+	}
+    #teacher-data-table_wrapper .dataTables_paginate .paginate_button,
+    #teacher-data-table_wrapper .dataTables_paginate .paginate_button:hover{
+    padding: 0 !important;
+    margin-top: 10px;
+}
+
+#teacher-data-table_wrapper {
+	.dataTables_wrapper {
+		.dataTables_paginate {
+			.paginate_button {
+				box-shadow: none;
+				background: transparent;
+				outline: none;
+				&:active {
+					background: transparent;
+					box-shadow: none;
+					outline: none;
+					a {
+						background: transparent;
+					}
+				}
+			}
+		}
+	}
+	.dataTables_paginate {
+		.paginate_button {
+			padding: 0 !important;
+			margin-top: 10px;
+			border: none;
+			border-radius: 15px;
+			&:hover {
+				padding: 0 !important;
+				margin-top: 10px;
+				border: none;
+				border-radius: 15px;
+			}
+		}
+	}
+}
+
+.card-body {
+	h5 {
+		max-width: fit-content;
+		padding: 2px 15px;
+		border: 1px solid #c8c8c8;
+		color: #281958;
+		border-radius: 3px;
+	}
+}
+

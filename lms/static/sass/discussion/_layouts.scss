@@ -1,0 +1,72 @@
+// Layouts for discussion pages
+.discussion-user-profile-board {
+  .discussion-profile-title {
+    margin-bottom: $baseline / 5;
+    font-size: $forum-x-large-font-size;
+  }
+
+  .discussion-profile-count {
+    margin-top: $baseline / 4;
+  }
+
+  .discussion-profile-info {
+    @include margin-right($baseline);
+  }
+
+  .user-name {
+    @include margin-right($baseline);
+
+    font-size: $forum-x-large-font-size;
+  }
+
+  .user-roles {
+    font-size: $forum-small-font-size;
+    font-style: italic;
+  }
+}
+
+.forum-nav {
+  @include media-breakpoint-up(md) {
+    max-width: 300px;
+    width: 25%;
+  }
+}
+
+.discussion-column {
+  flex-grow: 1;  // This column should consume all the available space
+  margin-bottom: $baseline;
+
+  @include media-breakpoint-up(md) {
+    @include margin-left($baseline);
+
+    min-height: 500px;
+    margin-bottom: 0;
+    width: 75%;
+  }
+
+  .new-post-article {
+    margin-top: -$baseline;
+  }
+}
+
+.search-alert {
+  display: block;
+  margin: 10px;
+  position: relative;
+  padding: 1rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ffecb5;
+  border-radius: .25rem;
+  color: #664d03;
+  background-color: #fff3cd;
+  button.btn-link.dismiss.control.control-dismiss {
+    border: 1px solid #ffecb5;
+    color: #664d03;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+  p.message {
+    margin: 0 20px 0 0;
+  }
+}

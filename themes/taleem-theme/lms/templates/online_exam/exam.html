@@ -1,0 +1,195 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.urls import reverse
+  from openedx.core.djangolib.markup import HTML
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="bodyclass">view-in-course view-courseware courseware</%block>
+
+<%block name="header_extras">
+  <%static:css group='style-course-vendor'/>
+  <%static:css group='style-course'/>
+  <script type="text/javascript" src="${static.url('js/jquery.autocomplete.js')}" async></script>
+  <script type="text/javascript" src="${static.url('js/src/tooltip_manager.js')}" async></script>
+
+  <link href="${static.url('css/vendor/jquery.autocomplete.css')}" rel="preload" type="text/css">
+
+  ${HTML(problems[0].render('student_view').head_html())}
+  <style>
+  .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+  .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+  .taleem-theme .course-wrapper {border: none !important;}
+  .content-wrapper {background-color:#fff;}
+  .problem-action-buttons-wrapper {display: none;}
+  .problem .submission-feedback {display: none !important;}
+  .btn {background-image: none;}
+  .btn-primary:hover, .btn-brand:hover, .btn-primary.is-hovered, .is-hovered.btn-brand, .btn-primary:focus, .btn-brand:focus, .btn-primary.is-focused, .is-focused.btn-brand {
+    border-color: #fc0;
+    background-color: #fc0 !important;
+    color: #fcfcfc;
+    background-image: none !important;
+  }
+  #overlay, #loading-overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,1);
+    z-index: 2;
+    cursor: pointer;
+  }
+  #overlay-text, #loading-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    line-height: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+  }
+  #exam-timer {
+    font-size: 24px;
+    background-color: #f7f4f4;
+    padding: 6px 20px;
+    border-radius: 5px;
+  }
+  #connection-status {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+  }
+  .exam-problem {display: none;}
+  .xmodule_display.xmodule_ProblemBlock div.problem .notification {float: none !important;}
+  .xblock-iframe {overflow: hidden;}
+  </style>
+</%block>
+
+<%block name="pagetitle">${_("Online Exam")}</%block>
+
+<div class="exam p-4">
+
+  <div class="row">
+    <div class="col-12">
+      <div class="px-4 font-weight-bold h5">${exam.display_name}</div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-6">
+      <div class="connection-wrapper p-4">
+        <div class="connection">
+          <span class="mr-2 bg-success" id="connection-status"></span>
+          <span class="font-weight-bold">${_("Network Connection")}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6">
+      <div class="timer-wrapper p-4">
+        <div class="timer text-right">
+          <span class="font-weight-bold" id="exam-timer">00:00:00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="exam-problems">
+    % for problem in problems:
+    <div class="exam-problem" data-url="${reverse('xblock_view', args=(course_id, str(problem.location), 'student_view'))}">
+      <div class="course-wrapper chromeless">
+        <section class="course-content" id="course-content"\
+        % if enable_completion_on_view_service:
+          data-enable-completion-on-view-service="true" \
+        % else:
+          data-enable-completion-on-view-service="false" \
+        % endif
+        style="display: block; width: auto; margin: 0;"
+        >
+          <main id="main" tabindex="-1" aria-label="Content" class="question-body">
+          </main>
+        </section>
+      </div>
+    </div>
+    % endfor
+  </div>
+
+    <nav class="sequence-bottom text-right mt-2" aria-label="Section">
+      <div class="row">
+        <div class="col-7">
+          <button class="btn btn-primary sequence-nav-button button-previous" disabled>
+            <span class="icon fa fa-chevron-prev" aria-hidden="true"></span>
+            <span class="ml-2">${_("Previous")}</span>
+          </button>
+
+          <button class="btn btn-primary sequence-nav-button button-next">
+            <span class="mr-2">${_("Next")}</span>
+            <span class="icon fa fa-chevron-next" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="col-5">
+          <button class="btn btn-primary exam-submit">
+            <span class="icon fa fa-stop-circle" aria-hidden="true"></span>
+            <span class="ml-2">${_("Stop & Submit Exam")}</span>
+          </button>
+        </div>
+
+      </div>
+
+    </nav>
+
+</div><!-- exam-->
+
+<div id="overlay">
+    <div id="overlay-text">${_("Your browser doesn't support online exam. Please use the latest version of Google Chrome.")}</div>
+</div>
+
+<div id="loading-overlay">
+    <div id="loading-icon">
+        <i class="las la la-spin la-sync"></i>
+    </div>
+</div>
+
+<%block name="js_extra">
+  <script>
+    var examID = "${exam.id}";
+    var attemptStatusEndpoint = "${attempt_status_endpoint}";
+    var isProctored = ${'true' if exam.is_proctored else 'false'};
+    var logTabActivityEndpoint = "${reverse('online_exam:log_tab_activity')}";
+    var logConnectionStatusEndpoint = "${reverse('online_exam:log_connection_status')}";
+    var logWebcamSnapshotEndpoint = "${reverse('online_exam:log_webcam_snapshot')}";
+    var messages = {
+      'ok': "${_('OK')}",
+      'title': "${_('Alarm')}",
+      'warning': "${_(' minutes remaining.')}",
+    };
+    var translateMessage = function(msg) {
+      return msg in messages ? messages[msg] : msg;
+    }
+  </script>
+
+  <script type="text/javascript" src="${static.url('common/js/vendor/jquery.scrollTo.js')}" async></script>
+  <script type="text/javascript" src="${static.url('js/vendor/flot/jquery.flot.js')}" async></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script type="text/javascript" src="${static.url('assets/js/webcam.min.js')}" async></script>
+  <script type="text/javascript" src="${static.url('assets/js/online_exam.js')}" async></script>
+
+  <%static:js group='courseware'/>
+  <%include file="/mathjax_include.html" args="disable_fast_preview=True"/>
+  ${HTML(problems[0].render('student_view').foot_html())}
+
+</%block>

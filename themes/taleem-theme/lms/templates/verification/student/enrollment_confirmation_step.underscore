@@ -1,0 +1,17 @@
+<div class="wrapper-content-main enrollment-confirmation-step">
+  <article class="content-main">
+    <h3 class="title"><%- _.sprintf( gettext( "Congratulations! Your images has been submitted on %(platformName)s" ), { platformName: platformName } ) %></h3>
+    <div class="instruction">
+      <p><%- gettext( "You will receive the email regarding the updates of verification." ) %></p>
+    </div>
+
+
+    <div class="enrollment-status-footer">
+      <h4 class="title"><%- gettext( "Verified Status" ) %></h4>
+      <p class="verify-pending-msg">
+        <%- gettext( "Thank you for submitting your photos. We will review them shortly." ) %>
+        <a class="action action-primary" href="/dashboard"><%- gettext("Go to your Dashboard") %></a>
+      </p>
+    </div>
+  </article>
+</div>

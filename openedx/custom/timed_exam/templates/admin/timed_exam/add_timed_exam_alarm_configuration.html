@@ -1,0 +1,83 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n static admin_urls %}
+{% load timed_exam_tags %}
+
+{% block extrastyle %}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/add_timed_edam_alarm_configuration.css' %}"/>
+    <style>
+        .form-row {
+            overflow: hidden;
+            padding: 10px;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; {% trans "Add Timed Exam Alarm Configuration" %}
+</div>
+{% endblock %}
+
+{% block content %}
+
+<h1>{{ "Timed Exam Alarm Configurations" }}</h1>
+
+<div id="content-main">
+
+    <ul class="object-tools">
+        <li>
+            <a href="#" id="add-timed-exam-alarm-configuration" class="historylink">Add a new configuration</a>
+        </li>
+    </ul>
+    <div class="forms-panel">
+        <form action="" method="post" enctype="multipart/form-data" id="timed-exam-alarm-configuration-form" data-alarm-count="{{ timed_exam_alarm_configurations.count }}">
+            <fieldset id="alarm-time-input-container" class="module aligned">
+                {% for timed_exam_alarm_configuration in timed_exam_alarm_configurations %}
+                    <div class="form-row">
+                        <div>
+                            <label for="alarm_time_{{ forloop.counter }}">{{ forloop.counter|alarm_label }}</label>
+                            <input
+                                type="number"
+                                name="alarm_time_{{ forloop.counter }}"
+                                id="alarm_time_{{ forloop.counter }}"
+                                value="{{ timed_exam_alarm_configuration.alarm_time }}"
+                                min="5"
+                                max="60"
+                                style="width: 10em;"
+                                required
+                                placeholder="Alarm time"
+                                data-id="{{ timed_exam_alarm_configuration.id }}"
+                            />
+                            <a href="#delete" class="deletelink delete_count_{{ forloop.counter }} {% if count > forloop.counter %} btn-disable {% endif %} " data-id="{{ timed_exam_alarm_configuration.id }}" style="margin-left:15px;">Delete</a>
+                       </div>
+                   </div>
+                {% endfor %}
+            </fieldset>
+
+            <div style="display: none" id="removed-alarm-time-input-container">
+
+            </div>
+
+            {% csrf_token %}
+            <div class="submit-row">
+              <input style="float: right" type="submit" class="default" value="Save"/>
+            </div>
+
+        </form>
+    </div>
+
+ </div>
+
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script src="{% static 'admin/js/add_timed_edam_alarm_configuration.js' %}" > </script>
+{% endblock %}

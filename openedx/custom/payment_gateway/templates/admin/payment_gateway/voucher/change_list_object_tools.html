@@ -1,0 +1,18 @@
+
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if has_add_permission %}
+  <li>
+    {% url 'admin:payment_gateway_add_vouchers' as add_in_bulk_url %}
+    <a href="{% add_preserved_filters add_in_bulk_url is_popup to_field %}" class="addlink">
+      {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }} in Bulk{% endblocktrans %}
+    </a>
+
+    {% url cl.opts|admin_urlname:'add' as add_url %}
+    <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink" style="margin: 0 1em;">
+      {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+    </a>
+  </li>
+  {% endif %}
+{% endblock %}

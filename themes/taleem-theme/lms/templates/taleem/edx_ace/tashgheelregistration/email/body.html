@@ -1,0 +1,53 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <div class="image-block col-md-6">
+            <img src="{{ site_url }}static/taleem-theme/images/email/batch_enroll.png" alt="" style="margin-left: auto; margin-right: auto; display: block; width: 50%;">
+        </div>
+    </tr>
+    <tr>
+        <td style="text-align: center;">
+            <h3 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {% filter force_escape %}
+                {% blocktrans %}You have been registered in our system.{% endblocktrans %}
+                {% endfilter %}
+            </h3>
+
+            <p style="color: #ffffff; text-align: center; font-weight: 200;">
+                {% blocktrans %}
+                Hi {{ username }}, You have been registered in our system. Please change your password for security purpose. Here is your temporary password <strong> {{ password }} </strong>
+                {% endblocktrans %}
+                <br />
+            </p>
+
+
+
+            {# xss-lint: disable=django-trans-missing-escape #}
+                {% trans "Access to Login" as course_cta_text %}
+
+                {# email client support for style sheets is pretty spotty, so we have to inline all of these styles #}
+                <a href="{{ site_url }}" style="
+                    color: #281958;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    -webkit-border-radius: 25px;
+                    -moz-border-radius: 4px;
+                    background-color: #FFCC00;
+                    border-top: 12px solid #FFCC00;
+                    border-bottom: 12px solid #FFCC00;
+                    border-right: 50px solid #FFCC00;
+                    border-left: 50px solid #FFCC00;
+                    display: inline-block;
+                ">
+                    {# old email clients require the use of the font tag :( #}
+                    <font><b style="font-weight: 400;">{{ course_cta_text }}</b></font>
+                </a>
+
+        </td>
+    </tr>
+</table>
+{% endblock %}

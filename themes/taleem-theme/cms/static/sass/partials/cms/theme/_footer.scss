@@ -1,0 +1,154 @@
+.image-logo {
+    max-width: 100px;
+    height: auto;
+}
+
+.image-qr {
+    max-width: 165px;
+    height: auto;
+}
+
+.wrapper-sock {
+    border-top: 0;
+}
+
+.footer-top {
+    padding-top: 40px;
+    padding-bottom: 40px;
+
+    &.container {
+        max-width: 1500px;
+        padding-left: 15px;
+        padding-right: 15px;
+
+        .row {
+            display: flex;
+            border: 0;
+            background: none;
+            box-shadow: none;
+            width: auto;
+        }
+    }
+}
+
+.footer-nav {
+
+    ul {
+        display: block;
+        @include text-align(right);
+
+        li {
+            display: inline-block;
+            vertical-align: middle;
+
+            a {
+                color: white;
+
+                &:hover {
+                    color: #f6d346;
+                    text-decoration: none;
+                }
+            }
+        }
+
+        .fa,
+        .ico {
+            font-size: 20px;
+        }
+    }
+}
+
+.footer-share-nav {
+
+    ul {
+        display: block;
+        @include text-align(left);
+
+        li {
+            display: inline-block;
+            vertical-align: middle;
+
+            a {
+                color: white;
+
+                &:hover {
+                    color: #f6d346;
+                    text-decoration: none;
+                }
+            }
+        }
+
+        .fa,
+        .ico {
+            font-size: 20px;
+        }
+    }
+}
+
+.footer-logo-block {
+    @include text-align(left);
+}
+
+.footer-qr-block {
+    @include text-align(right);
+}
+
+.wrapper-footer {
+    box-shadow: none;
+    border: 0;
+    margin: 0;
+    background: #281958;
+    color: #fff;
+    width: auto;
+
+    a {
+        color: #fff;
+
+        &:hover {
+            color: #f6d346;
+        }
+    }
+
+    footer {
+
+        &#footer-openedx {
+
+            .copyright {
+                color: #fff;
+            }
+
+            a {
+                color: #fff;
+
+                &:hover {
+                    color: #f6d346;
+                }
+            }
+
+            .colophon {
+
+                .nav-colophon {
+
+                    li {
+
+                        a {
+                            color: #fff;
+
+                            &:hover {
+                                color: #f6d346;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        nav {
+            ul {
+                li {
+                    padding: 5px;
+                }
+            }
+        }
+    }
+}

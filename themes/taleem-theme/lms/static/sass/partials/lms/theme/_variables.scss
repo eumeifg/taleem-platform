@@ -1,0 +1,65 @@
+// ----------------------------
+// #CONFIG
+// ----------------------------
+$static-path: '..';
+
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap');
+@import 'colors';
+
+// Fonts
+$arabic-font: 'Almarai', sans-serif;
+$font-family: $arabic-font;
+$font-family-sans-serif: $arabic-font;
+$serif: $arabic-font;
+
+// Theme colors
+$primary: $deep_purple;
+$success: $green;
+$action-primary-bg: $primary;
+
+// Link Style
+$link-color: $deep_purple;
+$link-hover-color: $deep_yellow;
+
+// Blue
+$blue: $primary;
+$uxpl-blue-hover-active: $link-hover-color;
+$m-blue-l1: $blue;
+$m-blue-l2: $blue;
+$m-blue-l3: $blue;
+$m-blue-l6: $blue;
+$m-blue-d1: $blue;
+$m-blue-d3: $blue;
+$m-blue-d4: $blue;
+$m-blue-d5: $blue;
+$m-blue-d6: $blue;
+
+// Grid containers
+//
+// Define the maximum width of `.container` for different screen sizes.
+
+$container-max-widths: (
+  xs: 480px,
+  sm: 768px,
+  md: 992px,
+  lg: 1200px,
+  xl: 1920px
+);
+
+// Form input
+$input-box-shadow: inset 0 1px 1px rgba($primary, 0.075) !default;
+
+// Drop down
+$dropdown-link-color: $primary;
+$dropdown-link-hover-color: $deep_yellow;
+$dropdown-link-hover-bg: $gray_20;
+
+$dropdown-link-active-color: $primary;
+$dropdown-link-active-bg: $gray_20;
+
+// Header logo
+$header-logo-width: auto;
+$header-logo-height: 70px;
+
+// Initialize the Open edX Bootstrap theme
+@import 'edx-bootstrap/sass/open-edx/theme';

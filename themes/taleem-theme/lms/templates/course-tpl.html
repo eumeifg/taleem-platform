@@ -1,0 +1,55 @@
+<%def name="online_help_token()"><% return "course" %></%def>
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.urls import reverse
+from six import text_type
+from openedx.core.djangolib.js_utils import dump_js_escaped_json
+%>
+
+<script id="course-template" type="template">
+  <div class="course-list-item col-md-3 my-3">
+    <article class="course" id="{{id}}" role="region" aria-label="{{display_name_with_default}}">
+      <div>
+        <header class="course-image">
+          <div class="cover-image">
+            <a class="course-cover" href="{{course_link}}">
+              <img src="{{course_image_url}}" alt="{{display_name_with_default}} {{display_number_with_default}}" />
+            </a>
+          </div>
+          % if user.is_authenticated:
+          <span class="wishlist-btn">
+            <span data-course_id="{{id}}" class="wishlist-icon lar la-lg la-heart"></span>
+          </span>
+          % endif
+        </header>
+        <div class="course-info" aria-hidden="true">
+          <h2 class="course-name">
+            <span class="course-organization">{{display_org_with_default}}</span>
+            <a href="{{course_link}}">
+              <span class="course-title">{{display_name_with_default}}</span>
+            </a>
+          </h2>
+          <div class="course-date advertised_start" aria-hidden="true">${_("Starts")}: {{advertised_start}}</div>
+          <div class="course-date localized_datetime no-advertised_start" aria-hidden="true" data-format="shortDate" data-datetime="{{course_date_string}}" data-language="${LANGUAGE_CODE}" data-string="${_("Starts: {date}")}"></div>
+          
+          <div class="important-course-rating-item">
+            <span class="important-dates-item-text">
+              <span class='course-rating' id="{{id}}-star" data-isUserEnrolled="false" data-courseRatingURL="{{course_rating_url}}" data-userRating="{{user_rating}}"></span>
+            </span>
+            <div>(${_("Avg")} <span class="avg-rating">{{avg_rating}}</span> ${_("stars")}, <span class="num-reviews">{{num_reviews}}</span> ${_("Reviews")})</div>
+          </div>
+
+        </div>
+        <div class="sr">
+          <ul>
+            <li>{{display_org_with_default}}</li>
+            <li>{{display_number_with_default}}</li>
+            <li class="advertised_start">${_("Starts")}: <time itemprop="startDate">{{advertised_start}}</time></li>
+            <li class="no-advertised_start">${_("Starts")}: <time class="localized_datetime" itemprop="startDate" data-format="shortDate" data-datetime="{{course_date_string}}" data-language="${LANGUAGE_CODE}"></time></li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </div>
+</script>

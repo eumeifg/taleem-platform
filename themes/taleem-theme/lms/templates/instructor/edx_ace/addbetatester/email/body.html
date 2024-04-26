@@ -1,0 +1,72 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <div class="image-block col-md-6">
+            <img src="{{ site_url }}static/taleem-theme/images/email/batch_enroll.png" alt="" style="margin-left: auto; margin-right: auto; display: block; width: 50%;">
+        </div>
+    </tr>
+    <tr>
+        <td style="text-align: center;">
+            <h3 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {% filter force_escape %}
+                {% blocktrans %}You have been invited to be a beta tester for {{ course_name }}{% endblocktrans %}
+                {% endfilter %}
+            </h3>
+
+            <p style="color: #ffffff; text-align: center; font-weight: 100;">
+                {% filter force_escape %}
+                {% blocktrans %}The invitation has been sent by a member of the Ta3leem staff.{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+
+            {% if auto_enroll %}
+                <p style="color: #ffffff; text-align: center; font-weight: 100;">
+                    {% filter force_escape %}
+                    {% blocktrans %}To start accessing course materials, please visit:{% endblocktrans %}
+                    {% endfilter %}
+                    <br />
+                </p>
+
+                {% include "ace_common/edx_ace/common/return_to_course_cta.html" with course_cta_text=display_name|default:course.display_name_with_default course_cta_url=course_url %}
+            {% elif course_about_url is not None %}
+                <p style="color: #ffffff; text-align: center; font-weight: 100;">
+                    {% filter force_escape %}
+                    {% blocktrans %}To enroll in this course and begin the beta test:{% endblocktrans %}
+                    {% endfilter %}
+                    <br />
+                </p>
+                {% filter force_escape %}
+                {% blocktrans asvar course_cta_text %}Visit {{ course_name }}{% endblocktrans %}
+                {% endfilter %}
+
+                {% include "ace_common/edx_ace/common/return_to_course_cta.html" with course_cta_text=course_cta_text course_cta_url=course_about_url %}
+            {% else %}
+                <p style="color: #ffffff; text-align: center; font-weight: 100;">
+                    {% filter force_escape %}
+                    {% blocktrans %}To enroll in this course and begin the beta test:{% endblocktrans %}
+                    {% endfilter %}
+                    <br />
+                </p>
+                {% filter force_escape %}
+                {% blocktrans asvar course_cta_text %}Visit {{ site_name }}
+                {% endblocktrans %}
+                {%endfilter%}
+
+                {% include "ace_common/edx_ace/common/return_to_course_cta.html" with course_cta_text=course_cta_text course_cta_url=course_url %}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div style="text-align: center;">
+                <img style="height: 150px;" src="{{ course_qr_code }}">
+            </div>
+        </td>
+    </tr>
+</table>
+{% endblock %}

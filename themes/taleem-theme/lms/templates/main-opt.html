@@ -1,0 +1,195 @@
+## coding=utf-8
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+<%!
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+%>
+
+<!DOCTYPE html>
+<!--[if lte IE 9]><html class="ie ie9 lte9" lang="${LANGUAGE_CODE}"><![endif]-->
+<!--[if !IE]><!--><html lang="${LANGUAGE_CODE}"><!--<![endif]-->
+<head dir="${static.dir_rtl()}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <%def name="pagetitle()" />
+    <%block name="title">
+      <title>
+       ${static.get_page_title_breadcrumbs(self.pagetitle())}
+      </title>
+    </%block>
+
+    <% ga_id = settings.GOOGLE_ANALYTICS_TRACKING_ID %>
+    % if ga_id:
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=${ga_id}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${ga_id}');
+      </script>
+    % endif
+
+    % if not allow_iframing:
+      <script type="text/javascript">
+        /* immediately break out of an iframe if coming from the marketing website */
+        (function(window) {
+          if (window.location !== window.top.location) {
+            window.top.location = window.location;
+          }
+        })(this);
+      </script>
+    % endif
+
+    <%
+      jsi18n_path = "js/i18n/{language}/djangojs.js".format(language=LANGUAGE_CODE)
+    %>
+    <script type="text/javascript" src="${static.url(jsi18n_path)}" async></script>
+
+    <link rel="icon" type="image/x-icon" href="${static.url(static.get_value('favicon_path', settings.FAVICON_PATH))}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+
+    <meta name="path_prefix" content="${EDX_ROOT_URL}">
+    <% google_site_verification_id = configuration_helpers.get_value('GOOGLE_SITE_VERIFICATION_ID', settings.GOOGLE_SITE_VERIFICATION_ID) %>
+    % if google_site_verification_id:
+      <meta name="google-site-verification" content="${google_site_verification_id}" />
+    % endif
+
+    <% ga_acct = static.get_value("GOOGLE_ANALYTICS_ACCOUNT", settings.GOOGLE_ANALYTICS_ACCOUNT) %>
+    % if ga_acct:
+      <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', '${ga_acct | n, js_escaped_string}']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+      </script>
+    % endif
+
+    <%include file="head_style.html" />
+    <%block name="head_extra"/>
+</head>
+
+<body class="${static.dir_rtl()} <%block name='bodyclass'/> lang_${LANGUAGE_CODE} taleem-theme" dir="${static.dir_rtl()}">
+
+<div id="page-prompt"></div>
+  % if not disable_window_wrap:
+  <div class="window-wrap bootstrap-wrapper" dir="${static.dir_rtl()}">
+  % endif
+
+  % if not disable_header:
+    <%include file="${static.get_template_path('header/header-opt.html')}" args="online_help_token=online_help_token" />
+    <%include file="/preview_menu.html" />
+  % endif
+
+  <%include file="/page_banner.html" />
+
+  <div class="marketing-hero"><%block name="marketing_hero"></%block></div>
+
+  <div class="content-wrapper main-container" id="content" dir="${static.dir_rtl()}">
+    ${self.body()}
+    <%block name="bodyextra"/>
+  </div>
+
+  % if not disable_footer:
+    <%include file="${static.get_template_path('footer-opt.html')}" />
+  % endif
+
+% if not disable_window_wrap:
+  </div>
+% endif
+
+  <%block name="footer_extra"/>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="${static.url('assets/js/bootstrap.min.js')}" async></script>
+  <script type="text/javascript" src="${static.url('assets/js/lazysizes.min.js')}" async></script>
+
+  <!--Tawk.to support chat widget-->
+  % if settings.TAWK_WIDGET_LINK_AR and settings.TAWK_WIDGET_LINK_EN and \
+    not (disable_support_chat or disable_footer):
+    <%include file="widgets/tawk_widget.html"/>
+  % endif
+
+  <!--Common custom JS-->
+  <script>
+    var defaultImage = "${static.url('images/placeholder.png')}";
+    window.addEventListener("load", event => {
+        var courseImages = document.querySelectorAll('.course-cover>img');
+        courseImages.forEach((image) => {
+          var isLoaded = image.complete && image.naturalHeight !== 0;
+          if (!isLoaded) {
+              image.src = defaultImage;
+          }
+        });
+    });
+
+    $(document).ready(function(){
+      // Ajax setup
+      $.ajaxSetup({
+        headers: {
+            'X-CSRFToken': "${csrf_token}"
+        },
+        dataType: 'json',
+        content: {
+            script: false
+        }
+      });
+
+      // ************ Wishlist New: Add/Remove Favorite
+      $(".wishlist-icon").click(function(e){
+          var course_id = $(this).data('course_id');
+          var url = ($(this).hasClass('las')) ? '/api/wishlist/remove/': '/api/wishlist/add/';
+          var method = ($(this).hasClass('las')) ? 'DELETE': 'POST';
+          var $el = $(this);
+          jQuery.ajax({
+              type: method,
+              url: url,
+              data: {'course_key': course_id},
+              success: function (res) {
+                  $el.toggleClass('las');
+                  $el.toggleClass('lar');
+              },
+              error: function (xhr) { // if error occured
+                  alert('Something went wrong!');
+              }
+          });
+      });
+
+      $(".lang-toggle-btn").click(function(event) {
+        let lang = $('#toggle-language-form #language').val(),
+        url = $('#toggle-language-form .url-endpoint').val(),
+        is_user_authenticated = JSON.parse($('#toggle-language-form .url-endpoint').data('user-is-authenticated'));
+        $.ajax({
+          type: 'PATCH',
+          data: JSON.stringify({'pref-lang': lang}),
+          url: url,
+          dataType: 'json',
+          contentType: 'application/merge-patch+json',
+          notifyOnError: false,
+        }).done(function() {
+          if (is_user_authenticated) {
+            $('#toggle-language-form').submit();
+          } else {
+            location.reload();
+          }
+        }).fail(function() {
+          location.reload();
+        });
+        event.preventDefault();
+      });
+
+    });
+  </script>
+  <%block name="js_extra"/>
+
+</body>
+</html>

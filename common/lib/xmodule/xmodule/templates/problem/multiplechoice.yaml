@@ -1,0 +1,58 @@
+---
+metadata:
+    display_name: Multiple Choice
+    markdown: |
+
+        {
+            "type": "multi-choice",
+            "config": {
+                "title": "Add the question text, or prompt, here. This text is required.",
+                "description": "You can add an optional tip or note related to the prompt like this.",
+                "explanation": "",
+                "hints": [
+
+                ],
+                "hasCustomScript": false,
+                "script": "",
+                "options": [
+                    {
+                        "id": "0mGaA64ux",
+                        "correct": "false",
+                        "label": "an incorrect answer",
+                        "name": "QQhrqxhsny",
+                        "hint": ""
+                    },
+                    {
+                        "id": "bqz6pwFtF_",
+                        "correct": "true",
+                        "label": "the correct answer",
+                        "name": "mh3W0zwvsO",
+                        "hint": ""
+                    },
+                    {
+                        "id": "-kT4w7j5bN",
+                        "correct": "false",
+                        "label": "an incorrect answer",
+                        "name": "i2AgpxpzW-",
+                        "hint": ""
+                    }
+                ],
+                "partialCredit": null,
+                "isShuffled": false
+            }
+        }
+
+
+data:   |
+        <problem>
+            <multiplechoiceresponse>
+                <p>You can use this template as a guide to the simple editor markdown and OLX markup to use for multiple choice problems. Edit this component to replace this template with your own assessment.</p>
+                <label>Add the question text, or prompt, here. This text is required.</label>
+                <description>You can add an optional tip or note related to the prompt like this.</description>
+                <choicegroup>
+                    <choice correct="false">an incorrect answer</choice>
+                    <choice correct="true">the correct answer</choice>
+                    <choice correct="false">an incorrect answer</choice>
+                </choicegroup>
+            </multiplechoiceresponse>
+        </problem>

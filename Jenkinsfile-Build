@@ -1,0 +1,49 @@
+pipeline {
+    agent {
+        kubernetes {
+            cloud "eks-ta3leem-staging"
+            inheritFrom "jenkins-ta3leem-staging"
+            yamlFile "pipeline/pipelinePod.yaml"
+        }
+    }
+    environment {
+        PATH = "/kaniko:/busybox:$PATH"
+        ECR_REPOSITORY = '310830963532.dkr.ecr.eu-central-1.amazonaws.com'
+        SCANNER_HOME = tool 'sonar'
+        PROJECT_NAME = "creativeadvtech:taleem-platform"
+    }
+    options {
+        ansiColor('xterm')
+    }
+    stages {
+        stage('Make version') {
+            steps {
+                script {
+                    env.shaVersion = sh(returnStdout: true, script: "git rev-parse --short=7 HEAD").trim()
+                    currentBuild.description = "cms-${env.shaVersion} and lms-${env.shaVersion}"
+                }
+            }
+        }
+        stage('Static code analysis') {
+            tools {
+                nodejs 'Nodejs'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube'){
+                    sh '''
+                        $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=$PROJECT_NAME
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                container(name: 'builder', shell: '/busybox/sh') {
+                    sh ''' 
+                    /kaniko/executor --dockerfile Dockerfile.aws --context . --destination=${ECR_REPOSITORY}/ta3leem-openedx:${GIT_COMMIT:0:7}
+                    '''
+                }
+            }
+        }
+    }
+}

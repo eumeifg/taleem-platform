@@ -1,0 +1,67 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+  from student.models import CourseEnrollment
+  from openedx.custom.wishlist.models import Wishlist
+  from openedx.core.djangolib.markup import HTML, Text
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="pagetitle">${_("Voucher Redemption")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Report Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 mb-0 text-gray-800">${_("Voucher Redemption")}</h1>
+        </div>
+
+    <!-- Stats Row -->
+    <div class="messages">
+        <section class="voucher-redemption">
+          <section class="voucher-redemption-container">
+              % if error:
+                  <div class="alert alert-danger pattern-library-shim">
+                      ${error}
+                  </div>
+              %endif
+              <div>
+                  ${Text(_('{course_name} is a paid course, you need to buy this course before accessing.')).format(
+                  course_name=HTML('<strong>{}</strong>').format(course_overview.display_name),
+                  )}
+                  ${_('If you have redemption coupon for the course, please enter them in the form below anf click submit.')}
+              </div>
+          </section>
+        </section>
+    </div>
+    <br />
+
+    <!-- Demographic Charts Row -->
+    <div class="form-row">
+        <div class="col-md-12">
+            <form method="POST" >
+
+             <input type="hidden" name="csrfmiddlewaretoken" value="${ csrf_token }"/>
+              <div class="form-group">
+                <label for="voucher-code" class="required">${_("Voucher Code")}</label>
+                <input type="text" required="required" name="code" class="form-control ${'is-invalid' if form_errors else ''}" id="voucher-code" aria-describedby="emailHelp">
+                  % if form_errors:
+                    %for error_message in form_errors:
+                        <div class="invalid-feedback">${error_message}</div>
+                    %endfor
+                  %else:
+                    <small id="voucher-code-help" class="form-text text-muted">${_("Please enter the voucher code here.")}</small>
+                  %endif
+              </div>
+              <button type="submit" class="btn btn-primary">${_("Submit")}</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%block name="js_extra">
+</%block>

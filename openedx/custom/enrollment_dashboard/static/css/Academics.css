@@ -1,0 +1,84 @@
+.acadContent {
+    padding-top: 1vh;
+    display: flex;
+    justify-content: center;
+}
+
+.acadMain {
+    padding-top: 2vh;
+    height: 40vh;
+    width: 70vw;
+    border: solid 1px black;
+    text-align: center;
+}
+
+.acadOption {
+    text-align: center;
+    margin-top: 3vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.acadDrop {
+    text-align: center;
+    width: 15vw;
+    margin: auto;
+}
+
+.acadValue {
+    display: flex;
+    justify-content: space-around;
+    margin: auto;
+    margin-inline: 5px;
+    align-items: center;
+}
+
+.acadIcon {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+     min-width: 14vw;
+}
+
+table {
+    margin-top: 3vh;
+    width: 100%;
+}
+
+td,th {
+    border: solid 1px black;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+}
+
+hr {
+    margin: auto;
+    width: 2vw;
+}
+
+
+.btnline {
+    display: flex;
+    justify-content: space-around;
+}
+
+.loginbtnTag {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+    cursor:pointer;
+    width: 10vw;
+    margin: auto;
+    margin-top: 4vh;
+    text-decoration: none;
+}

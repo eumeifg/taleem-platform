@@ -1,0 +1,48 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("Honor Code")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="container about">
+        <h1>
+            <%block name="pageheader">${page_header or _("Honor Code")}</%block>
+        </h1>
+        <p>
+            <%block name="pagecontent">
+                <br/><br/>
+                ${_("You agree to Ta3leem's Academic Honor Code or any of its online sites when you register on Ta3leem platform or join any of the educational courses.")}
+                <br/><br/>
+                ${_("In compliance with Ta3leem's Academic Honor Code, I declare and agree to the following:")}
+                <ul>
+                    <li>${_("Complete all tests and tasks myself unless I am expressly authorized to cooperate in completing a task.")}</li>
+                    <li>${_("Keep only one user account and not allow anyone else to use my username or password.")}</li>
+                    <li>${_("Not to engage in any activity that would artificially boost my results or harm the results of others.")}</li>
+                </ul>
+                <h1>
+                    ${_("Violations")}
+                </h1>
+                <br>
+                ${_("If a violation of the Terms of Service or the Honor Code is detected, you may be subject to one or more of the following:")}
+                <ul>
+                    <li>${_("Withholding or invalidating any certificate obtained through the course.")}</li>
+                    <li>${_("Your access to Ta3leem’s website could be terminated.")}</li>
+                    <li>${_("Getting a score of zero or failing to obtain any score.")}</li>
+                    <li>${_("Banning you from joining any courses.")}</li>
+                    <li>${_("Additional actions may be taken at the sole discretion of Ta3leem’s courses Providers.")}</li>
+                    <li>${_("No amounts paid will be refunded for any corrective action taken in response to such violations.")}</li>
+                </ul>
+                ${_("Honor Code violations are determined entirely at the discretion of Ta3leem.")}
+                <br><br>
+                ${_("You may be notified if a determination is made that you have violated the Honor Code and corresponding action will be taken as a result of such violation.")}
+                <br><br>
+                <h1>
+                    ${_("Honor Code Updates")}
+                </h1>
+                <br>
+                ${_("Ta3leem is reviewing this Honor Code and may make updates to it from time to time. Any updates to this Honor Code are applicable upon posting. By making any updates after accessing the Ta3leem website, you indicate your future term acceptance of the modified honor code and any future updates. Be sure to return to this page periodically to ensure that you are familiar with the latest version of Honor Code.")}
+            </%block>
+        </p>
+    </section>
+</main>

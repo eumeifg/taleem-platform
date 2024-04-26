@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %} Thank you for signing into Ta3leem. Please insert the following Pin to proceed to your Ta3leem portal. {% endblocktrans %}
+
+{{ second_password }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

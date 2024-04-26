@@ -1,0 +1,23 @@
+{% extends 'admin/change_list.html' %}
+{% block content %}
+    {{ block.super }}
+    <h2 class="header"> Bulk Upload: </h2>
+    <div class="container">
+        <form action="upload-csv/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ csv_upload_form }}
+            <input type="submit" value="Upload">
+
+            {% if csv_url %}
+                <a class="button default" href="{{ csv_url }}" target="_blank" style="
+                    float: none;
+                    padding: 10px 15px;
+                    margin-left: 10px;
+                    background: #79aec8;
+                ">
+                    Download Sample CSV
+                </a>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

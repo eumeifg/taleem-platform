@@ -1,0 +1,77 @@
+<%def name="online_help_token()"><% return "course" %></%def>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.utils import timezone
+from django.urls import reverse
+from six import text_type
+from lms.djangoapps.courseware.courses import get_course_by_id
+from lms.djangoapps.grades.api import CourseGradeFactory
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.custom.timed_exam.models import TimedExam
+from edx_proctoring.models import ProctoredExamStudentAttempt
+from edx_proctoring.statuses import ProctoredExamStudentAttemptStatus
+from student.models import CourseEnrollment, CourseAccessRole
+from openedx.custom.utils import utc_datetime_to_local_datetime
+from edx_proctoring.models import ProctoredExamReview
+%>
+<%page args="exam" expression_filter="h"/>
+
+<%
+course = CourseOverview.objects.get(id=exam.key)
+teachers = CourseAccessRole.objects.filter(
+  course_id=course.id,
+  role__in=['staff', 'instructor']
+).values_list('user')
+reviewed = ProctoredExamReview.objects.filter(
+  course_id=text_type(course.id),
+).exclude(user__in=teachers).count()
+duration = exam.display_allotted_time if exam else _("Not set")
+if course.start < timezone.now() < course.end:
+  exam_status = _('On Going')
+  badge_class = 'badge-primary'
+elif timezone.now() < course.start:
+  exam_status = _('Scheduled')
+  badge_class = 'badge-warning'
+else:
+  exam_status = _('Ended')
+  badge_class = 'badge-danger'
+
+num_students = CourseEnrollment.objects.filter(
+  course_id=course.id,
+  is_active=True,
+  user__is_staff=False,
+).exclude(user__in=teachers).count()
+num_attempted = ProctoredExamStudentAttempt.objects.filter(
+    proctored_exam__course_id=course.id,
+    status=ProctoredExamStudentAttemptStatus.submitted,
+    user__is_staff=False,
+).exclude(user__in=teachers).order_by().values_list("user").distinct().count()
+%>
+
+<tr>
+  <td>${course.display_name_with_default}</td>
+  <td><span>${duration}</span></td>
+  <td data-order="${course.start.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(course.start).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td data-order="${course.end.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(course.end).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td>
+    <span class="badge badge-${'success' if exam and exam.mode=='ON' else 'danger'}">${exam.get_mode_display() if exam else 'Deleted'}
+    </span>
+  </td>
+  <td><span class="badge ${badge_class}">${exam_status}</span></td>
+  <td>${num_attempted}/${num_students}</td>
+  <td>${reviewed}/${num_attempted}</td>
+  <td class="text-nowrap">
+    <a href="${reverse('timed_exam:reports', args=[text_type(course.id)])}">${_("Review Submission")}</a>
+      <strong> | </strong>
+    <a href="${reverse('timed_exam:hide_exam', args=[exam.key])}">${_("Archive")}</a>
+  </td>
+</tr>

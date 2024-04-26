@@ -1,0 +1,86 @@
+<%def name="online_help_token()"><% return "course" %></%def>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.utils import timezone
+from django.urls import reverse
+from six import text_type
+from opaque_keys.edx.keys import CourseKey
+from lms.djangoapps.courseware.courses import get_course_by_id
+from lms.djangoapps.grades.api import CourseGradeFactory
+from openedx.custom.timed_exam.models import TimedExam
+from edx_proctoring.models import ProctoredExamStudentAttempt
+from edx_proctoring.statuses import ProctoredExamStudentAttemptStatus
+from student.models import CourseEnrollment, CourseAccessRole
+from openedx.custom.utils import utc_datetime_to_local_datetime
+from edx_proctoring.models import ProctoredExamReview
+from openedx.custom.timed_exam.utils import does_timed_exam_has_attempts
+%>
+<%page args="exam" expression_filter="h"/>
+
+<%
+exam_key = CourseKey.from_string(exam.key)
+teachers = CourseAccessRole.objects.filter(
+  course_id=exam_key,
+  role__in=['staff', 'instructor']
+).values_list('user')
+reviewed = ProctoredExamReview.objects.filter(
+  course_id=exam.key,
+).exclude(user__in=teachers).count()
+if exam.release_date < timezone.now() < exam.due_date:
+  exam_status = _('On Going')
+  badge_class = 'badge-primary'
+elif timezone.now() < exam.release_date:
+  exam_status = _('Scheduled')
+  badge_class = 'badge-warning'
+else:
+  exam_status = _('Ended')
+  badge_class = 'badge-danger'
+
+num_students = CourseEnrollment.objects.filter(
+  course_id=exam_key,
+  is_active=True,
+  user__is_staff=False,
+).exclude(user__in=teachers).count()
+num_attempted = ProctoredExamStudentAttempt.objects.filter(
+    proctored_exam__course_id=exam_key,
+    status=ProctoredExamStudentAttemptStatus.submitted,
+    user__is_staff=False,
+).exclude(user__in=teachers).order_by().values_list("user").distinct().count()
+has_attempts = does_timed_exam_has_attempts(exam_key)
+protocol = 'https' if request.is_secure() else 'http'
+exam_edit_url = '{protocol}://{studio_url}/timed-exams/{exam_key}'.format(
+studio_url=settings.CMS_BASE, exam_key=exam.key, protocol=protocol)
+%>
+
+<tr>
+  <td>${exam.display_name}</td>
+  <td><span>${exam.display_allotted_time}</span></td>
+  <td data-order="${exam.release_date.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(exam.release_date).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td data-order="${exam.due_date.timestamp()}">
+    <span class="info-date-block">
+      ${utc_datetime_to_local_datetime(exam.due_date).strftime('%b %d, %Y %I:%M %p')}
+    </span>
+  </td>
+  <td>
+    <span class="badge badge-${'success' if exam.mode=='ON' else 'danger'}">
+      ${exam.get_mode_display()}
+    </span>
+  </td>
+  <td><span class="badge ${badge_class}">${exam_status}</span></td>
+  <td>${num_attempted}/${num_students}</td>
+  <td>${reviewed}/${num_attempted}</td>
+  <td class="text-nowrap">
+    <a href="${reverse('timed_exam:reports', args=[exam.key])}">${_("Review Submission")}</a>
+      <strong> | </strong>
+    <a href="${reverse('timed_exam:hide_exam', args=[exam.key])}">${_("Archive")}</a>
+    % if not has_attempts:
+      <strong> | </strong>
+      <a href="${exam_edit_url}" target="_blank" >${_("Edit")}</a>
+    % endif
+  </td>
+</tr>

@@ -1,0 +1,173 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/datatables.bundle.min.css')}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled), input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled), button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled), .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover, button:focus {background-image: none !important; box-shadow: none; text-shadow: none;}
+    .btn-primary:focus, .btn-primary:hover {background-color: #fc0 !important;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    table.dataTable tbody>tr.selected, table.dataTable tbody>tr>.selected {background-color: #eaf5f8;color: initial;}
+    table caption{caption-side: top;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Teacher Dashboard")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+
+        <!-- Stats Row 1 -->
+        <div class="row">
+            <!-- Total Enrollments -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase text-left mb-1">
+                                    ${_("Total course enrolment")}</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                    ${enrollments_count}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="las la-lg la-calendar la-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollments in last 30 days -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase text-left mb-1">
+                                    ${_("Enrolment in last 30 days")}</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                    ${enrollments_count_last_30_days}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="las la-lg la-calendar la-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Students Row -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">${_("Students")}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                            <label for="datee">${_("Date")}</label>
+                            <input class="form-control form-control-sm created_on"
+                               id="datee" name="date" placeholder="DD-MM-YYYY"
+                               type="text">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center" id="tbl-students" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>${_("Student Name")}</th>
+                                    <th>${_("Student Email")}</th>
+                                    <th>${_("Course Name")}</th>
+                                    <th>${_("Voucher ID")}</th>
+                                    <th>${_("Voucher Code")}</th>
+                                    <th>${_("Voucher Usage Date")}</th>
+                                    <th>${_("Enrollment Date")}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="${static.url('assets/vendor/datatables/datatables.bundle.min.js')}"></script>
+
+    <!-- Page level custom js -->
+    <script>
+        $(document).ready(function() {
+
+            // Init date picker
+            $('#datee')
+                .datepicker({
+                    format: 'dd-mm-yyyy',
+                    autoclose: true,
+                    clearBtn: true
+                })
+                .on('changeDate', function(e) {table.draw();})
+                .on('clearDate', function(e) {table.draw();});
+
+            // Call the dataTables jQuery plugin
+            var table = $('#tbl-students').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "${reverse('get_teacher_dashboard_data')}",
+                    data: function(d) {
+                        d.date_filter = $("#datee").data('datepicker').getFormattedDate('yyyy-mm-dd');
+                    }
+                },
+                pageLength: 5,
+                ordering: false,
+                dom: "<'row'<'col-sm-12 mb-2 text-right'B>>" +
+                     "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="las la-lg la-file-excel mr-2 text-success"></i>' + gettext("Download"),
+                        titleAttr: 'Excel',
+                        title: 'enrollment_report',
+                        charset: 'UTF-8',
+                        exportOptions: {
+                            columns: ':not(.noexport)'
+                        }
+                    }
+                ],
+                language: {
+                    url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+                }
+            });
+        });
+    </script>
+
+</%block>

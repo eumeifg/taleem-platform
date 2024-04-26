@@ -1,0 +1,46 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="100%" align="left" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <td>
+            <p style="color: #ffffff;">
+                {% filter force_escape %}
+                {% blocktrans %}Hello {{full_name}},{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+            <p style="color: #ffffff;">
+                {% trans "Your verification submission was not accepted. You must submit a new photo of yourself and your government-issued photo ID before the verification." as tmsg %}{{ tmsg | force_escape }}
+                <br />
+            </p>
+
+
+            {% if verification_errors %}
+                <p style="color: #ffffff;">
+                    {% trans "Your verification was denied for the following reasons:" as tmsg %}{{ tmsg | force_escape }}
+                </p>
+                <ul>
+                    {% for error in verification_errors %}
+                        <li style="color: #ffffff;">{% trans error %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <p style="color: #ffffff;">
+                <a href="{{verify_link}}" style="color: #ffffff;">{% trans "Resubmit Verification" as tmsg %}{{ tmsg | force_escape }}</a>
+            </p>
+
+            <p style="color: #ffffff;">
+                {% trans "Thank you," as tmsg %}{{ tmsg | force_escape }}
+                <br />
+                {% filter force_escape %}
+                {% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+                {% endfilter %}
+            </p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

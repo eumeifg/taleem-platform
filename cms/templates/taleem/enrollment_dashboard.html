@@ -1,0 +1,190 @@
+<%page expression_filter="h"/>
+<%!
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangolib.js_utils import (
+      dump_js_escaped_json
+  )
+from django.urls import reverse
+%>
+
+<%inherit file="../base.html" />
+<%namespace name='static' file='../static_content.html'/>
+<%def name="online_help_token()"><% return "home" %></%def>
+<%block name="title">${_("Enrollment Dashboard")}</%block>
+<%block name="bodyclass">is-signedin index view-dashboard enrollment-dashboard</%block>
+
+<%block name="requirejs">
+  require(["js/factories/enrollment_dashboard"], function (IndexFactory) {
+      IndexFactory();
+  });
+</%block>
+
+<%block name="content">
+<div class="wrapper-mast wrapper">
+  <header class="mast has-actions">
+    <h1 class="page-header">${_("Enrollment Dashboard")}</h1>
+      <nav class="nav-actions" aria-label="Page Actions">
+        <h3 class="sr">Page Actions</h3>
+        <ul>
+          <li class="nav-item action-item">
+              <a href="${reverse('home')}" class="button new-button">
+                  <span class="icon fa fa-arrow-left icon-inline" aria-hidden="true"></span> <span class="action-button-text">${_("Go to Dashboard")}</span>
+              </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="button new-button new-enrollment-button">
+                <span class="icon fa fa-plus icon-inline" aria-hidden="true"></span>
+                ${_("New Enrollment")}
+            </a>
+          </li>
+        </ul>
+    </nav>
+  </header>
+</div>
+
+<div class="wrapper-content wrapper">
+  % if user.is_active:
+  <section class="content">
+    <article class="content-primary" role="main">
+
+    <ul id="course-index-tabs" class="enrollment-index-tabs">
+        <li class="enrollments-tab active"><a>${_("Enrollments")}</a></li>
+        <li class="pending-enrollments-tab"><a>${_("Pending Enrollments")}</a></li>
+    </ul>
+
+      <div class="wrapper-create-element wrapper-enroll-users">
+        <form class="form-create enroll-users-form" id="enroll-users-form" name="enroll-users-form">
+          <div class="wrap-error">
+            <div id="user-enrollment-error" class="message message-status message-status error" role="alert">
+                <p>${_("Please correct the highlighted fields below.")}</p>
+            </div>
+          </div>
+
+          <div class="wrapper-form">
+            <h3 class="title">${_("Enroll Users")}</h3>
+
+            <fieldset>
+              <legend class="sr">${_("Required Information to Enroll a New User")}</legend>
+
+              <ol class="list-input">
+                <li class="field text required" id="field-email">
+                  <label for="email">${_("Email")}</label>
+                  <input class="email" id="email" type="text" name="email" placeholder="${_('e.g. staff@example.com')}" aria-describedby="tip-email tip-error-email" />
+                  <span class="tip" id="tip-email">${_("The email of the user, you want to enroll.")}</span>
+                  <span class="tip tip-error is-hiding" id="tip-error-email"></span>
+                </li>
+                <li class="field text required" id="field-csv">
+                  <label for="csv">${_("CSV")}</label>
+                  <input class="file_field csv" id="csv" name="csv" type="file" accept=".csv" aria-describedby="tip-csv tip-error-csv"/>
+                  <span class="tip" id="tip-csv">${_("The CSV containing emails you want to enroll.")}</span>
+                  <span class="tip tip-error is-hiding" id="tip-error-csv"></span>
+                </li>
+
+              </ol>
+             <input type="hidden" value="true" class="allow-unicode-enroll-users" />
+             <input type="hidden" value="${course_key_string}" name="course_key_string" />
+
+            </fieldset>
+          </div>
+
+          <div class="actions">
+            <input type="submit" value="${_('Enroll')}" class="action action-primary enroll-users" />
+            <a class="action action-primary right" href="${reverse('taleem_organization:csv_samples', args=('enrollments',))}" target="_blank">${_('Download Sample CSV')}</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="enrollments-wrapper enrollments-tab active">
+        <div class="enrollments">
+            <br />
+            <table id="user-enrollments" class="display data-table" style="width:100%">
+            </table>
+        </div>
+      </div>
+
+      <div class="pending-enrollments-wrapper pending-enrollments-tab">
+        <div class="pending-enrollments">
+            <br />
+            <table id="pending-enrollments" class="display data-table" style="width:100%">
+            </table>
+        </div>
+      </div>
+
+    </article>
+    <aside class="content-supplementary" role="complementary">
+      <div class="bit">
+        <h3 class="title title-3">${_('New to {studio_name}?').format(studio_name=settings.STUDIO_NAME)}</h3>
+        <p>${_('Click Help in the upper-right corner to get more information about the {studio_name} page you are viewing. You can also use the links at the bottom of the page to access our continually updated documentation and other {studio_name} resources.').format(studio_name=settings.STUDIO_SHORT_NAME)}</p>
+
+        <ol class="list-actions">
+          <li class="action-item">
+
+            <a href="${get_online_help_info(online_help_token())['doc_url']}" rel="noopener" target="_blank">${_("Getting Started with {studio_name}").format(studio_name=settings.STUDIO_NAME)}</a>
+          </li>
+        </ol>
+      </div>
+
+      % if course_creator_status=='disallowed_for_this_site' and settings.FEATURES.get('STUDIO_REQUEST_EMAIL',''):
+      <div class="bit">
+        <h3 class="title title-3">${_("Can I create courses in {studio_name}?").format(studio_name=settings.STUDIO_NAME)}</h3>
+        <p>${Text(_("In order to create courses in {studio_name}, you must {link_start}contact {platform_name} staff to help you create a course{link_end}.")).format(
+            studio_name=settings.STUDIO_NAME,
+            platform_name=settings.PLATFORM_NAME,
+            link_start=HTML('<a href="mailto:{email}">').format(email=settings.FEATURES.get('STUDIO_REQUEST_EMAIL','')),
+            link_end=HTML("</a>"),
+          )}</p>
+      </div>
+      % endif
+
+      % if course_creator_status == "unrequested":
+      <div class="bit">
+        <h3 class="title title-3">${_("Can I create courses in {studio_name}?").format(studio_name=settings.STUDIO_NAME)}</h3>
+        <p>${_('In order to create courses in {studio_name}, you must have course creator privileges to create your own course.').format(studio_name=settings.STUDIO_NAME)}</p>
+      </div>
+
+      % elif course_creator_status == "denied":
+      <div class="bit">
+        <h3 class="title title-3">${_("Can I create courses in {studio_name}?").format(studio_name=settings.STUDIO_NAME)}</h3>
+        <p>${Text(_("Your request to author courses in {studio_name} has been denied. Please {link_start}contact {platform_name} Staff with further questions{link_end}.")).format(
+            studio_name=settings.STUDIO_NAME,
+            platform_name=settings.PLATFORM_NAME,
+            link_start=HTML('<a href="mailto:{email}">').format(email=settings.TECH_SUPPORT_EMAIL),
+            link_end=HTML('</a>'),
+          )}</p>
+      </div>
+
+      % endif
+    </aside>
+  </section>
+
+
+  % else:
+  <section class="content">
+    <article class="content-primary" role="main">
+      <div class="introduction">
+        <h2 class="title">${_("Thanks for signing up, {name}!").format(name=user.username)}</h2>
+      </div>
+
+      <div class="notice notice-incontext notice-instruction notice-instruction-verification">
+        <div class="msg">
+          <h3 class="title">${_("We need to verify your email address")}</h3>
+          <div class="copy">
+            <p>${_('Almost there! In order to complete your sign up we need you to verify your email address ({email}). An activation message and next steps should be waiting for you there.').format(email=user.email)}</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <aside class="content-supplementary" role="complementary">
+      <div class="bit">
+        <h3 class="title title-3">${_('Need help?')}</h3>
+        <p>${_('Please check your Junk or Spam folders in case our email isn\'t in your INBOX. Still can\'t find the verification email? Request help via the link below.')}</p>
+      </div>
+    </aside>
+  </section>
+
+  %endif
+</div>
+</%block>

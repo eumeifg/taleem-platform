@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans trimmed %}Your Scheduled Exam has been cancelled{% endblocktrans %}
+{% endautoescape %}

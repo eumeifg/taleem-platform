@@ -1,0 +1,168 @@
+<%page expression_filter="h"/>
+<%inherit file="main.html" />
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.urls import reverse
+
+from openedx.core.djangolib.markup import HTML, Text
+%>
+<%block name="bodyclass">guest-home</%block>
+
+<%block name="header_extras">
+<style type="text/css">
+  .taleem-theme header.global-header {
+    background: transparent;
+    position: absolute;
+    z-index: 100;
+  }
+  .taleem-theme .content-wrapper {
+    margin-top: 0 !important;
+  }
+  .taleem-theme .carousel {
+    padding-top: 0;
+  }
+</style>
+</%block>
+
+<div id="carouselExampleFade" class="carousel home-slider slide carousel-fade" data-ride="carousel" data-pause="true">
+  <div class="carousel-inner">
+
+    <div class="slide carousel-item active">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+              <h1>${_("Learning is the")}<br />${_("process of acquiring")}<br /><strong>${_("new knowledge,")}</strong><br /><strong>${_("skills and value")}</strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem is a platform that provides high-quality educational content.")}</li>
+              <li>${_("- Follow up questions and answers for each student.")}</li>
+              <li>${_("- Follow up the progress of the student and send notifications to the guardian.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img src="${static.url('images/img03.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide carousel-item">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+              <h1>${_("Learning is a")}<br/>${_("process that")}<br/><strong><span class="leads">${_("leads")}</span></strong> ${_("to")} <strong><span class="change">${_("change")}</span></strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem  platform introduces the latest innovative technologies in e-learning.")}</li>
+              <li>${_("- Divide the Courses into small sections that make it easy to find and easy to understand.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img src="${static.url('images/img02.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide slide-3 carousel-item">
+      <div class="container">
+        <div class="row align-items-stretch">
+          <div class="content col-md-6">
+            <h1>${_("Learning is the")}<br />${_("process of acquiring")}<br /><strong>${_("new knowledge,")}</strong><br /><strong>${_("skills and value")}</strong></h1>
+            <ul class="list">
+              <li>${_("- Ta3leem is a platform that provides high-quality educational content.")}</li>
+              <li>${_("- Follow up questions and answers for each student.")}</li>
+              <li>${_("- Follow up the progress of the student and send notifications to the guardian.")}</li>
+            </ul>
+            <div class="btn-box">
+              <a href="/register" class="btn btn-yellow-pill">${_("Start Here")}</a>
+            </div>
+          </div>
+          <div class="image-block col-md-6">
+            <img src="${static.url('images/img03.png')}" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a class="carousel-control-prev carousel-control" href="#carouselExampleFade" role="button" data-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next carousel-control" href="#carouselExampleFade" role="button" data-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+
+% if settings.FEATURES.get('SHOW_RESULT_ANNOUNCEMENT_BANNER', False):
+<%include file="results/announcement.html" />
+% endif
+
+<main id="main" aria-label="Content" tabindex="-1">
+
+    <section class="home">
+      <%include file="${courses_list}" />
+    </section>
+    <section class="home-posts">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-1">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img src="${static.url('images/post-image-1.jpg')}" alt="">
+              </div>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-2">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img src="${static.url('images/post-image-2.jpg')}" alt="">
+              </div>
+            </article>
+          </div>
+          <div class="col-md-4">
+            <article class="home-post">
+              <h3 class="title title-3">نظام إدارة التعلم المدمج قوي ميزات رائعة للدورات التدريبية والوحدات والدروس والاختبارات التي يمكن تخصيصها بدرجة عالية</h3>
+              <div class="img-block">
+                <img src="${static.url('images/post-image-3.jpg')}" alt="">
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+</main>
+
+% if show_homepage_promo_video:
+  <section id="video-modal" class="modal home-page-video-modal video-modal">
+    <div class="inner-wrapper">
+      <iframe title="YouTube Video" width="640" height="360" src="//www.youtube.com/embed/${homepage_promo_video_youtube_id}?showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </section>
+% endif
+
+<%block name="js_extra">
+   <script type="text/javascript">
+      $(window).load(function() {
+         if(getParameterByName('next')) {
+              $('#login').trigger("click");
+         }
+      })
+   </script>
+</%block>
+
+% if show_signup_immediately is not UNDEFINED:
+  ## NOTE: This won't work in production, because anonymous views are cached, so it will
+  ## show either with or without this extra js for 3 minutes at a time.
+<script type="text/javascript">
+  $(window).load(function() {$('#signup_action').trigger("click");});
+</script>
+% endif

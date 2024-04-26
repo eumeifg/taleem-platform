@@ -1,0 +1,319 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.conf import settings
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.timed_exam.utils import get_suspicion_level
+    from openedx.custom.utils import utc_datetime_to_local_datetime, timedelta_to_hhmmss
+    from openedx.core.djangolib.markup import HTML
+%>
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%
+    flow = "right" if get_language_bidi() else "left"
+%>
+
+<html>
+    <head>
+        <style>
+            @page {
+                size: a4 portrait;
+                @frame {
+                    left: 50pt; width: 512pt; top: 300pt; height: 632pt;
+                }
+            }
+            @page overall_report {
+                size: a4 portrait;
+                @frame overall_report_frame {
+                    left: 50pt; top: 30pt; width: 512pt;
+                }
+            }
+            @page violations {
+                size: a4 portrait;
+                @frame overall_report_frame {
+                    left: 50pt; top: 30pt; width: 512pt;
+                }
+            }
+            @page snapshots {
+                size: a4 portrait;
+                @frame snapshots_frame {
+                    left: 50pt; top: 30pt; width: 512pt;
+                }
+                @frame snapshot_c1_frame {
+                    ${flow}: 50pt; top: 70pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c2_frame {
+                    ${flow}: 220pt; top: 70pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c3_frame {
+                    ${flow}: 390pt; top: 70pt; width:170pt; height: 150pt;
+                }
+                @frame snapshot_c4_frame {
+                    ${flow}: 50pt; top: 220pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c5_frame {
+                    ${flow}: 220pt; top: 220pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c6_frame {
+                    ${flow}: 390pt; top: 220pt; width:170pt; height: 150pt;
+                }
+                @frame snapshot_c7_frame {
+                    ${flow}: 50pt; top: 370pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c8_frame {
+                    ${flow}: 220pt; top: 370pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c9_frame {
+                    ${flow}: 390pt; top: 370pt; width:170pt; height: 150pt;
+                }
+                @frame snapshot_c10_frame {
+                    ${flow}: 50pt; top: 520pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c11_frame {
+                    ${flow}: 220pt; top: 520pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c12_frame {
+                    ${flow}: 390pt; top: 520pt; width:170pt; height: 150pt;
+                }
+                @frame snapshot_c13_frame {
+                    ${flow}: 50pt; top: 670pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c14_frame {
+                    ${flow}: 220pt; top: 670pt; width: 170pt; height: 150pt;
+                }
+                @frame snapshot_c15_frame {
+                    ${flow}: 390pt; top: 670pt; width:170pt; height: 150pt;
+                }
+            }
+            @page questions {
+                size: a4 portrait;
+                @frame questions_frame {
+                    left: 50pt; top: 30pt; width: 512pt;
+                }
+            }
+            @font-face {
+                font-family: Almarai;
+                src: url("${static.url('fonts/Almarai/Almarai-Regular.ttf')}");
+            }
+            body {
+                font-family: 'Almarai', Helvetica;
+                font-size: 12px;
+                text-align: ${'right' if get_language_bidi() else 'left'};
+            }
+            table.padded th, table.padded td {padding-bottom: 6px;}
+            .text-center, .text-center td {text-align:center;}
+            .d-block {display: block;}
+            .d-inline-block {display: inline-block;}
+            .snapshot-item {width:214px; margin-bottom: 0px;}
+            .bg-success {background-color:#97D637; color:#fff;}
+            .bg-danger {background-color:#F6848E; color:#fff;}
+            .text-success {color:#97D637;}
+            .text-danger {color:#F6848E;}
+        </style>
+    </head>
+
+<body>
+    <!-- Set Language -->
+    <pdf:language name="${'arabic' if get_language_bidi() else 'english'}"/>
+
+    <!-- Title Page -->
+    <div style="text-align:center; margin-bottom: 30px;">
+        <img src="${static.url('images/footer-logo.png')}"/>
+        <h1 style="text-align:center;">${_("Proctoring Report")}</h1>
+        <p style="text-align:center; margin:0;">${_("of")}</p>
+        <h2 style="text-align:center;">${student.profile.name}</h1>
+    </div>
+
+    <!-- switch page and template -->
+    <pdf:nextpage name="overall_report" />
+    <pdf:nexttemplate name="overall_report">
+
+    <!-- Overall Report -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="margin-bottom: 0;">${_("Overall Report")}</h1><hr/>
+        <p>${_("Exam Name")}: ${course.display_name_with_default}</p>
+        <p>${_("Submission Time")}: ${utc_datetime_to_local_datetime(attempt.completed_at).strftime('%b %d, %Y %I:%M %p')}</p>
+        <p>${_("Score")}: ${score if score is not None else '--'}</p>
+        <%
+            num_session_violations = session_history.count() - 1
+            num_tab_violations = tab_history.filter(event_type='out').count()
+            num_snapshots_taken = webcam_history.count()
+            num_face_not_found = webcam_history.filter(status='face_not_found').count()
+            num_multiple_faces = webcam_history.filter(status__in=['multiple_face_found', 'multiple_people_found']).count()
+            num_unknown_face = webcam_history.filter(status='unknown_face').count()
+            suspicion_level, suspicion_class = get_suspicion_level(
+                num_session_violations,
+                num_tab_violations,
+                num_snapshots_taken,
+                num_face_not_found,
+                num_multiple_faces,
+                num_unknown_face,
+            )
+            num_webcam_violations = num_face_not_found + num_multiple_faces + num_unknown_face
+        %>
+        <p>${_("Session Violations")}: ${num_session_violations}</p>
+        <p>${_("Tab Violations")}: ${num_tab_violations}</p>
+        <p>${_("Webcam Abnormalities")}: ${num_webcam_violations}</p>
+        <p>${_("Suspicion Level")}: <span class="bg-${suspicion_class}">${int(round(suspicion_level))}%</span></p>
+    </div>
+
+    <!-- switch page and template -->
+    <pdf:nextpage name="violations" />
+    <pdf:nexttemplate name="violations">
+
+    <!-- Violations -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="margin-bottom: 0;">${_("Violations happened during the exam")}</h1><hr/>
+        <table class="padded">
+
+            % if get_language_bidi():
+                <tr>
+                    <td>${_("Incident")}</td>
+                    <td>${_("Elapsed Time")}</td>
+                </tr>
+                % for elapsed_time, incident in incidents.items():
+                <tr>
+                    <td>${incident}</td>
+                    <td><strong class="text-danger">${elapsed_time}</strong></td>
+                </tr>
+                % endfor
+            % else:
+                <tr>
+                    <td>${_("Elapsed Time")}</td>
+                    <td>${_("Incident")}</td>
+                </tr>
+                % for elapsed_time, incident in incidents.items():
+                <tr>
+                    <td><strong class="text-danger">${elapsed_time}</strong></td>
+                    <td>${incident}</td>
+                </tr>
+                % endfor
+            % endif
+
+            % if not incidents:
+                <tr><td colspan="2">${_("All good. No incidents to show.")}</td></tr>
+            % endif
+
+        </table>
+
+    </div>
+
+    <!-- switch page and template -->
+    <pdf:nextpage name="snapshots" />
+    <pdf:nexttemplate name="snapshots">
+
+    <!-- Snapshots -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="margin-bottom: 0;">${_("Snapshots taken during the exam")}</h1><hr/>
+        % for record in webcam_history:
+            <%
+                image_url = ''
+                if record.proctored_exam_snapshot.snapshot:
+                    image_url = record.proctored_exam_snapshot.snapshot.url
+            %>
+            % if loop.index and loop.index % 15 == 0:
+                <pdf:nextframe>
+                <h1 style="margin-bottom: 0;">${_("Snapshots taken during the exam")}</h1><hr/>
+            % endif
+            <pdf:nextframe>
+            <div class="d-inline-block">
+                <div class="snapshot-item">
+                    <img class="d-block w-100" src="${image_url}">
+                    <span class="bg-${'success' if record.status == 'face_found' else 'danger'}">
+                        ${timedelta_to_hhmmss(record.proctored_exam_snapshot.created - attempt.started_at)}
+                    </span>
+                </div>
+            </div>
+        % endfor
+
+        % if not webcam_history:
+            <div>${_("Snapshots not available")}</div>
+        % endif
+    </div>
+
+    <!-- switch page and template -->
+    <pdf:nextpage name="questions" />
+    <pdf:nexttemplate name="questions">
+
+    <div>
+        <h1 style="margin-bottom: 0;">${_("Per question analysis")}</h1><hr/>
+        <table class="padded" style="text-align:center;">
+            % if get_language_bidi():
+            <thead>
+                <tr>
+                    <th>${_("Submission Time")}</th>
+                    <th>${_("Possible")}</th>
+                    <th>${_("Earned")}</th>
+                    <th>${_("Student Answer")}</th>
+                    <th>${_("Correct Answer")}</th>
+                    <th>${_("Question")}</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for problem_score in problem_scores:
+                <tr>
+                    <td>${timedelta_to_hhmmss(problem_score["submitted_at"] - attempt.started_at) if problem_score["submitted_at"] else _("Didn't answer")}</td>
+                    <td>${problem_score["max_score_show"]}</td>
+                    <% td_class = 'success' if problem_score['earned'] == problem_score['possible'] else 'danger' if problem_score['earned'] == 0.0 else 'warning' %>
+                    <td class="text-${td_class}">${problem_score["earned_show"]}</td>
+                    <td>
+                        % if problem_score["is_openassessment_problem"]:
+                            ${_("Open response can't be printed")}
+                        % else:
+                            ${HTML(problem_score["student_answer"])}
+                        % endif
+                    </td>
+                    <td>${problem_score["correct_answer"]}</td>
+                    <td>${problem_score["display_name"]}</td>
+                </tr>
+                % endfor
+
+                % if not problem_scores:
+                    <tr><td colspan="6">${_("Problem scores are not available.")}</td></tr>
+                % endif
+            </tbody>
+            % else:
+            <thead>
+                <tr>
+                    <th>${_("Question")}</th>
+                    <th>${_("Correct Answer")}</th>
+                    <th>${_("Student Answer")}</th>
+                    <th>${_("Earned")}</th>
+                    <th>${_("Possible")}</th>
+                    <th>${_("Submission Time")}</th>
+                </tr>
+            </thead>
+            <tbody>
+                % for problem_score in problem_scores:
+                <tr>
+                    <td>${problem_score["display_name"]}</td>
+                    <td>${problem_score["correct_answer"]}</td>
+                    <td>
+                        % if problem_score["is_openassessment_problem"]:
+                            ${_("Open response can't be printed")}
+                        % else:
+                            ${HTML(problem_score["student_answer"])}
+                        % endif
+                    </td>
+                    <% td_class = 'success' if problem_score['earned'] == problem_score['possible'] else 'danger' if problem_score['earned'] == 0.0 else 'warning' %>
+                    <td class="text-${td_class}">${problem_score["earned_show"]}</td>
+                    <td>${problem_score["max_score_show"]}</td>
+                    <td>${timedelta_to_hhmmss(problem_score["submitted_at"] - attempt.started_at) if problem_score["submitted_at"] else _("Didn't answer")}</td>
+                </tr>
+                % endfor
+
+                % if not problem_scores:
+                    <tr><td colspan="6">${_("Problem scores are not available.")}</td></tr>
+                % endif
+            </tbody>
+            % endif
+        </table>
+    </div>
+
+</body>
+</html>

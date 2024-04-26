@@ -1,0 +1,585 @@
+<%page expression_filter="h"/>
+<%inherit file="/main.html" />
+<%namespace name='static' file='/static_content.html'/>
+<%def name="online_help_token()"><% return "courseware" %></%def>
+<%!
+import six
+import waffle
+
+from django.conf import settings
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+
+from edxnotes.helpers import is_feature_enabled as is_edxnotes_enabled
+from openedx.core.djangolib.js_utils import js_escaped_string
+from openedx.core.djangolib.markup import HTML
+from openedx.features.course_experience import course_home_page_title, COURSE_OUTLINE_PAGE_FLAG
+%>
+<%
+   include_special_exams = (
+   request.user.is_authenticated and
+   settings.FEATURES.get('ENABLE_SPECIAL_EXAMS', False) and
+   (course.enable_proctored_exams or course.enable_timed_exams)
+   )
+%>
+
+% if display_reset_dates_banner:
+    <script type="text/javascript">
+        $('.reset-deadlines-banner').css('display', 'flex');
+    </script>
+% endif
+<%def name="course_name()">
+ <% return _("{course_number} Courseware").format(course_number=course.display_number_with_default) %>
+</%def>
+
+<%block name="bodyclass">view-in-course view-courseware courseware ${course.css_class or ''}</%block>
+
+<%block name="title">
+<title data-base-title="${static.get_page_title_breadcrumbs(section_title, course_name())}">
+  ${static.get_page_title_breadcrumbs(sequence_title, section_title, course_name())}
+</title>
+</%block>
+
+<%block name="header_extras">
+<link href="${static.url('assets/vendor/magnific/magnific-popup.css')}" rel="stylesheet" type="text/css">
+<style>
+.white-popup {
+  position: relative;
+  background: #FFF;
+  padding: 20px;
+  width: auto;
+  max-width: 500px;
+  margin: 20px auto;
+}
+.tbl-notes-list td.note {
+  width: 75%;
+}
+.tbl-notes-list td a {
+  cursor: pointer;
+}
+.btn-primary {cursor: pointer;}
+.form-group {margin: 10px 0;}
+#input-note, #edit-input-note {height:100px; width: 100%;}
+.fa-thumbs-up {cursor: pointer;}
+.fa-star {color: #ff4500;}
+.video-tabcontent .tab-sub-title {margin-bottom: 2.5em;}
+.manual-completion-wrapper {margin-top:10px; text-align: right;}
+.video-tab .rating-bar {padding: 14px 0;}
+[dir='rtl'] .mfp-close {left: 0 !important; right: unset !important;}
+.swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+.swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+.swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+.swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+.swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+.swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+</style>
+% for template_name in ["image-modal"]:
+<script type="text/template" id="${template_name}-tpl">
+    <%static:include path="common/templates/${template_name}.underscore" />
+</script>
+% endfor
+
+<script>
+     var proctoredExamSettings = {
+         snapIntervalInSeconds: ${settings.PROCTORING_SNAP_INTERVAL_IN_SECONDS},
+         snapWidth: ${settings.PROCTORING_SNAP_WIDTH},
+         snapHeight: ${settings.PROCTORING_SNAP_HEIGHT},
+     };
+</script>
+
+% if include_special_exams is not UNDEFINED and include_special_exams:
+  % for template_name in ["proctored-exam-status"]:
+    <script type="text/template" id="${template_name}-tpl">
+        <%static:include path="courseware/${template_name}.underscore" />
+    </script>
+  % endfor
+% endif
+
+</%block>
+
+<%block name="headextra">
+<link rel="stylesheet" href="${static.url('assets/vendor/star-rating/star-rating.min.css')}">
+<link rel="stylesheet" type="text/css" href="${static.url('css/vendor/jquery.modal.min.css')}"/>
+<%static:css group='style-course-vendor'/>
+<%static:css group='style-course'/>
+## Utility: Notes
+% if is_edxnotes_enabled(course, request.user):
+<%static:css group='style-student-notes'/>
+% endif
+
+<script type="text/javascript" src="${static.url('js/jquery.autocomplete.js')}"></script>
+<script type="text/javascript" src="${static.url('js/src/tooltip_manager.js')}"></script>
+
+<link href="${static.url('css/vendor/jquery.autocomplete.css')}" rel="stylesheet" type="text/css">
+  ${HTML(fragment.head_html())}
+</%block>
+
+<%block name="js_extra">
+  <script type="text/javascript" src="${static.url('assets/vendor/magnific/jquery.magnific-popup.min.js')}"></script>
+  <script type="text/javascript" src="${static.url('assets/vendor/star-rating/star-rating.min.js')}"></script>
+  <script type="text/javascript" src="${static.url('common/js/vendor/jquery.scrollTo.js')}"></script>
+  <script type="text/javascript" src="${static.url('js/vendor/flot/jquery.flot.js')}"></script>
+  <script type="text/javascript" src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script type="text/javascript" src="${static.url('js/vendor/jquery.modal.min.js')}"></script>
+
+  <%static:js group='courseware'/>
+  <%include file="/mathjax_include.html" args="disable_fast_preview=True"/>
+
+  % if show_search:
+    <%static:require_module module_name="course_search/js/course_search_factory" class_name="CourseSearchFactory">
+        var courseId = $('.courseware-results').data('courseId');
+        CourseSearchFactory({
+            courseId: courseId,
+            searchHeader: $('.search-bar')
+        });
+    </%static:require_module>
+  % endif
+
+  <%static:require_module module_name="js/courseware/courseware_factory" class_name="CoursewareFactory">
+    CoursewareFactory();
+  </%static:require_module>
+
+  % if staff_access:
+  	<%include file="xqa_interface.html"/>
+  % endif
+
+  <script type="text/javascript">
+    var $$course_id = "${course.id | n, js_escaped_string}",
+        $$username = "${user.username}",
+        $$user_email = "${user.email}",
+        $$instructor = {
+          name: "${instructor_name}",
+          mbox: "mailto:${instructor_email}"
+        };
+        $$xapi_context_extension = {
+          course_id:    $$course_id,
+          course_name:  "${course.display_name_with_default | n, js_escaped_string}",
+          chapter:      "${chapter.display_name_with_default}",
+          sequential:   "${section.display_name_with_default}",
+          vertical:     "${sequence_title}"
+        };
+
+    function loadNotes(){
+      $.ajax({
+          url: "/timed/notes/list/",
+          type: "GET",
+          data: {
+            course_id: $$course_id,
+            video_id: $(".xblock-student_view-video").data("usage-id"),
+          },
+          success: function(res) {
+            var row = '';
+            $("table.tbl-notes-list tbody").html("");
+            $.each( res.notes, function( id, noteObj ) {
+              var row = '<tr data-id="'+id+'"><td class="time"><strong>'+noteObj.taken_at+'</strong></td>';
+              row += '<td class="note">'+noteObj.note+'</td>';
+              row += '<td><a data-id="'+id+'" class="lnk-edit-note">${_("Edit")}</a></td>';
+              row += '<td><a data-id="'+id+'" class="lnk-delete-note">${_("Delete")}</a></td></tr>';
+              $("table.tbl-notes-list tbody").append(row);
+            });
+          },
+      });
+    }
+    function initStars(initialRating){
+      try {
+        // Unload
+        $('.star').starRating('unload');
+      } catch(err) {console.log('Skip unloading');}
+      // Init rating
+
+      var rateURL = "/video/feedback/rate/";
+      $(".star").starRating({
+          initialRating: initialRating,
+          starSize: 20,
+          useFullStars: true,
+          disableAfterRate: false,
+          starShape: 'rounded',
+          activeColor: '#Ff9933',
+          hoverColor: '#Ff9933',
+          ratedColor: '#Ff9933',
+          useGradient: false,
+          callback: function(currentRating, $el){
+              jQuery.ajax({
+                  type: "POST",
+                  url: rateURL,
+                  data: {
+                    stars: currentRating,
+                    course_id: $$course_id,
+                    video_id: $(".xblock-student_view-video").data("usage-id"),
+                  },
+                  success: function (res) {
+                      $(".avg-rating").text(res.avg_rating);
+                      $(".num-reviews").text(res.num_reviews);
+                  },
+              });
+          }
+      });
+
+    }
+
+    function loadFeedback() {
+        var video_id = $(".xblock-student_view-video").data("usage-id");
+        if (video_id) {
+            jQuery.ajax({
+                type: "POST",
+                url: "/video/feedback/fetch/",
+                data: {
+                    course_id: $$course_id,
+                    video_id: video_id,
+                },
+                success: function (res) {
+                    $(".avg-rating").text(res.avg_rating);
+                    $(".num-reviews").text(res.num_reviews);
+                    $(".total-likes").text(res.likes);
+                    if (res.user_like) {
+                       $(".btn-like").addClass("text-success");
+                    } else {
+                       $(".btn-like").removeClass("text-success");
+                    }
+                    initStars(res.user_rating);
+                  },
+              });
+        }
+    }
+
+    $(document).ready(function() {
+
+      $(".course-preview-link").leanModal();
+
+      $(document).on("click", ".notes-tablink", function(){
+        loadNotes();
+      });
+
+      loadFeedback();
+      $("#sequence-list .nav-item").click(function(){
+        loadFeedback();
+        $(".course-preview-link").leanModal();
+      });
+
+      var likeURL = "/video/feedback/like/";
+      $(document).on("click", ".btn-like", function(event){
+          $(event.target).toggleClass('text-success');
+          var like = $(event.target).hasClass('text-success') ? 1 : 0;
+          jQuery.ajax({
+              type: "POST",
+              url: likeURL,
+              data: {
+                like: like,
+                course_id: $$course_id,
+                video_id: $(".xblock-student_view-video").data("usage-id"),
+              },
+              success: function (res) {
+                 $(event.target).siblings().find(".total-likes").text(res.likes);
+              },
+          });
+      });
+
+      $(document).on("click", '#btn-add-note', function(){
+        $(this).magnificPopup({
+          items: {
+            src: '#popup-add-note',
+            type: 'inline'
+          },
+          callbacks: {
+            open: function() {
+              var videoTime = $(".vcr .vidtime").text();
+              if(!videoTime){
+                videoTime = "0:00 / 0:00";
+              }
+              currentTime = videoTime.split("/")[0].trim();
+              $("#input-time").val(currentTime);
+              $("#input-note").val("");
+            },
+          },
+        }).magnificPopup('open');
+      });
+
+      $(document).on("click", '.lnk-edit-note', function(){
+        var noteID = $(this).data("id");
+        var noteText = $(this).closest('td').siblings(".note").text();
+        var noteTime = $(this).closest('td').siblings(".time").find('strong').text();
+        $(this).magnificPopup({
+          items: {
+            src: '#popup-edit-note',
+            type: 'inline'
+          },
+          callbacks: {
+            open: function() {
+              $("#edit-input-time").val(noteTime);
+              $("#edit-input-note").val(noteText);
+              $("#edit-input-id").val(noteID);
+            },
+          },
+        }).magnificPopup('open');
+      });
+
+      $(document).on("click", ".lnk-delete-note", function(e){
+        e.preventDefault();
+        var noteId = $(this).data("id");
+        $.ajax({
+          url: "/timed/notes/delete/",
+          type: "POST",
+          data: {
+            id: noteId,
+          },
+          success: function(res) {
+            if(res.success) {
+              $("table.tbl-notes-list tr[data-id='"+noteId+"']").remove();
+            }
+          },
+        });
+      });
+
+      $(document).on("click", "#btn-note-save", function(e){
+        e.preventDefault();
+        var noteId = $("#edit-input-id").val();
+        var time = $("#edit-input-time").val();
+        var note = $("#edit-input-note").val();
+        if(time && note) {
+          $.ajax({
+            url: "/timed/notes/save/",
+            type: "POST",
+            data: {
+              id: noteId,
+              taken_at: time,
+              note: note,
+            },
+            success: function(res) {
+              if(res.success) {
+                $("table.tbl-notes-list tr[data-id='"+noteId+"']").remove();
+                var row = '<tr id="'+noteId+'"><td class="time"><strong>'+time+'</strong></td>';
+                row += '<td class="note">'+note+'</td>';
+                row += '<td><a data-id="'+noteId+'" class="lnk-edit-note">Edit</a></td>';
+                row += '<td><a data-id="'+noteId+'" class="lnk-delete-note">Delete</a></td></tr>';
+                $("table.tbl-notes-list tbody").append(row);
+                $.magnificPopup.close();
+              }
+            },
+          });
+        }
+      });
+
+      $(document).on("click", "#btn-note-submit", function(e){
+        e.preventDefault();
+        var time = $("#input-time").val();
+        var note = $("#input-note").val();
+        if(time && note) {
+          $.ajax({
+            url: "/timed/notes/add/",
+            type: "POST",
+            data: {
+              course_id: $$course_id,
+              video_id: $(".xblock-student_view-video").data("usage-id"),
+              taken_at: time,
+              note: note,
+            },
+            success: function(res) {
+              if(res.success) {
+                var row = '<tr data-id="'+res.id+'"><td class="time"><strong>'+time+'</strong></td>';
+                row += '<td class="note">'+note+'</td>';
+                row += '<td><a data-id="'+res.id+'" class="lnk-edit-note">Edit</a></td>';
+                row += '<td><a data-id="'+res.id+'" class="lnk-delete-note">Delete</a></td></tr>';
+                $("table.tbl-notes-list tbody").append(row);
+                $.magnificPopup.close();
+              }
+            },
+          });
+        }
+      });
+    });
+  </script>
+
+  % if not request.user.is_authenticated:
+      <script type="text/javascript">
+        // Disable discussions
+        $('.xblock-student_view-discussion button.discussion-show').attr('disabled', true);
+
+        // Insert message informing user discussions are only available to logged in users.
+        $('.discussion-module')
+      </script>
+  % endif
+
+${HTML(fragment.foot_html())}
+
+</%block>
+
+<div class="message-banner" aria-live="polite"></div>
+
+% if default_tab:
+  <%include file="/courseware/course_navigation.html" />
+% else:
+  <%include file="/courseware/course_navigation.html" args="active_page='courseware'" />
+% endif
+
+<div class="container"
+  % if getattr(course, 'language'):
+    lang="${course.language}"
+  % endif
+  >
+  <div class="course-wrapper" role="presentation">
+
+% if disable_accordion is UNDEFINED or not disable_accordion:
+    <div class="course-index">
+
+      <div class="wrapper-course-modes">
+
+          <div class="courseware-bookmarks-button">
+              <a class="bookmarks-list-button" href="${reverse('openedx.course_bookmarks.home', args=[course.id])}">
+                  ${_('Bookmarks')}
+              </a>
+          </div>
+
+          % if show_search:
+            <div id="courseware-search-bar" class="search-bar courseware-search-bar" role="search" aria-label="Course">
+              <form class="search-form">
+                <label for="course-search-input" class="sr">${_('Course Search')}</label>
+                <div class="search-field-wrapper">
+                  <input id="course-search-input" type="text" class="search-field"/>
+                  <button type="submit" class="search-button">${_('Search')}</button>
+                  <button type="button" class="cancel-button" title="${_('Clear search')}">
+                    <span class="icon fa fa-remove" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          % endif
+
+      </div>
+
+      <div class="accordion">
+        <nav class="course-navigation" aria-label="${_('Course')}">
+          % if accordion.strip():
+            ${HTML(accordion)}
+          % else:
+            <div class="chapter">${_("No content has been added to this course")}</div>
+          % endif
+        </nav>
+      </div>
+
+    </div>
+% endif
+    <section class="course-content" id="course-content">
+        % if not course.is_timed_exam:
+        <header class="page-header has-secondary">
+            <div class="page-header-main">
+                <nav aria-label="${_('Course')}" class="sr-is-focusable" tabindex="-1">
+                    <div class="has-breadcrumbs">
+                        <div class="breadcrumbs">
+                            % if COURSE_OUTLINE_PAGE_FLAG.is_enabled(course.id):
+                                <span class="nav-item nav-item-course">
+                                    <a href="${course_url}">${course_home_page_title(course)}</a>
+                                </span>
+                                <span class="icon fa fa-angle-right" aria-hidden="true"></span>
+                            % endif
+                            % if chapter:
+                                <span class="nav-item nav-item-chapter" data-course-position="${course.position}" data-chapter-position="${chapter.position}">
+                                    <a href="${course_url}#${six.text_type(chapter.location)}">${chapter.display_name_with_default}</a>
+                                </span>
+                                <span class="icon fa fa-angle-right" aria-hidden="true"></span>
+                            % endif
+                            % if section:
+                                <span class="nav-item nav-item-section">
+                                    <a href="${course_url}#${six.text_type(section.location)}">${section.display_name_with_default}</a>
+                                </span>
+                                <span class="icon fa fa-angle-right" aria-hidden="true"></span>
+                            % endif
+                            <span class="nav-item nav-item-sequence">${sequence_title}</span>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        % endif
+
+        <main id="main" tabindex="-1" aria-label="Content">
+            % if getattr(course, 'entrance_exam_enabled') and \
+               getattr(course, 'entrance_exam_minimum_score_pct') and \
+               entrance_exam_current_score is not UNDEFINED:
+                % if not entrance_exam_passed:
+                <p class="sequential-status-message">
+                    ${_('To access course materials, you must score {required_score}% or higher on this \
+                    exam. Your current score is {current_score}%.').format(
+                        required_score=int(round(course.entrance_exam_minimum_score_pct * 100)),
+                        current_score=int(round(entrance_exam_current_score * 100))
+                    )}
+                </p>
+                <script type="text/javascript">
+                $(document).ajaxSuccess(function(event, xhr, settings) {
+                    if (settings.url.indexOf("xmodule_handler/problem_check") > -1) {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.entrance_exam_passed){
+                            location.reload();
+                        }
+                    }
+                });
+                </script>
+                % else:
+                  <p class="sequential-status-message">
+                    ${_('Your score is {current_score}%. You have passed the entrance exam.').format(
+                        current_score=int(round(entrance_exam_current_score * 100))
+                    )}
+                </p>
+                % endif
+            % endif
+
+            <script type="text/javascript">
+              //Disable cut copy paste
+              $('body').bind('cut copy paste', function (e) {
+                e.preventDefault();
+              });
+
+              //Disable mouse right click
+              $("body").on("contextmenu",function(e){
+                  return false;
+              });
+            </script>
+
+              ${HTML(fragment.body_html())}
+        </main>
+    </section>
+
+    <section class="courseware-results-wrapper">
+      <div id="loading-message" aria-live="polite" aria-relevant="all"></div>
+      <div id="error-message" aria-live="polite"></div>
+      <div class="courseware-results search-results" data-course-id="${course.id}" data-lang-code="${language_preference}"></div>
+    </section>
+
+    <div id="webcam-modal" class="jqueryModal">
+        <div style="margin-bottom: 10px; line-height: 30px; font-size: 15px;">
+            1. ${_("Go to chrome settings and search the 'Site Settings' and click on it.")} <br/>
+            2. ${_("Click the camera under permission section and delete the Ta3leem.iq from block.")} <br/>
+            3. ${_("Come back to exam and click the 'Continue' button.")} <br/>
+            4. ${_("You will again get prompted to allow the camera, simply allow it.")} <br/>
+        </div>
+        <a href="#" class="btn-brand btn-base webcam-allowed-btn" rel="modal:close" style="float: right; background-color: green; margin-left: 10px;">${_("Continue")}</a>
+    </div>
+
+
+  </div>
+  ${HTML(course_sock_fragment.body_html())}
+</div>
+<div class="container-footer">
+  % if settings.FEATURES.get("LICENSING", False):
+    <div class="course-license">
+    % if getattr(course, "license", None):
+      <%include file="../license.html" args="license=course.license" />
+    % else:
+      ## Default course license: All Rights Reserved, if none is explicitly set.
+      <%include file="../license.html" args="license='all-rights-reserved'" />
+    % endif
+    </div>
+  % endif
+</div>
+% if course.show_calculator or is_edxnotes_enabled(course, request.user):
+    <nav class="nav-utilities ${"has-utility-calculator" if course.show_calculator else ""}" aria-label="${_('Course Utilities')}">
+      ## Utility: Notes
+      % if is_edxnotes_enabled(course, request.user):
+        <%include file="/edxnotes/toggle_notes.html" args="course=course"/>
+      % endif
+
+      ## Utility: Calc
+      % if course.show_calculator:
+        <%include file="/calculator/toggle_calculator.html" />
+      % endif
+    </nav>
+% endif

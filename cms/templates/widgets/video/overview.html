@@ -1,0 +1,100 @@
+<%page args="tabName"/>
+
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+%>
+
+<div class="wrapper-comp-editor" id="editor-tab" data-base-asset-url="${base_asset_url}">
+    <section class="html-editor editor">
+      <div class="row">
+        <textarea class="tiny-mce name="data">${overview | h}</textarea>
+      </div>
+    </section>
+</div>
+
+<script type='text/javascript'>
+require(["domReady!", "jquery"], function(doc, $) {
+  ## get storage
+  var storage = TabsEditingDescriptor.getStorage();
+
+  TabsEditingDescriptor.Model.addModelUpdate(
+      '${html_id}',
+      '${tabName}',
+      function () {
+          // Advanced, Save
+          metadataEditor = storage.MetadataEditor;
+
+          if (metadataEditor) {
+              console.log(metadataEditor.collection);
+          }
+      }
+  );
+
+  TabsEditingDescriptor.Model.addOnSwitch(
+      '${html_id}',
+      '${tabName}',
+      function () {
+          // Basic
+          metadataEditor = storage.MetadataEditor;
+
+          if (metadataEditor) {
+              console.log(metadataEditor.collection);
+          }
+      }
+  );
+
+  ## Init tinyMCE editor
+  var el = $("#editor-tab .tiny-mce");
+  var baseUrl = $("#editor-tab").data('base-asset-url');
+  var html_editor = $(".tiny-mce", this.element).tinymce({
+    script_url: baseUrl + "js/vendor/tinymce/js/tinymce/tinymce.full.min.js",
+    theme: "modern",
+    skin: 'studio-tmce4',
+    schema: "html5",
+    entity_encoding: "raw",
+    formats: {
+      // tinyMCE does block level for code by default
+      code: {
+        inline: 'code'
+      }
+    },
+
+    /*
+    Disable visual aid on borderless table.
+     */
+    visual: false,
+    plugins: "textcolor, link, image, codemirror",
+    codemirror: {
+      path: baseUrl + "js/vendor"
+    },
+    image_advtab: true,
+
+    /*
+    We may want to add "styleselect" when we collect all styles used throughout the LMS
+     */
+    toolbar: "formatselect | fontselect | bold italic underline forecolor wrapAsCode | " +
+      "alignleft aligncenter alignright alignjustify | " +
+      "bullist numlist outdent indent blockquote | link unlink " +
+      'image',
+    width: '100%',
+    height: '400px',
+    menubar: false,
+    statusbar: false,
+
+    /*
+    Necessary to avoid stripping of style tags.
+     */
+    valid_children: "+body[style]",
+
+    /*
+    Allow any elements to be used, e.g. link, script, math
+     */
+    valid_elements: "*[*]",
+    extended_valid_elements: "*[*]",
+    invalid_elements: "",
+    browser_spellcheck: true
+  });
+
+});
+</script>

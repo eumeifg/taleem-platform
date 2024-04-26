@@ -1,0 +1,83 @@
+.taleem-theme {
+    .verification-process {
+        .pay-and-verify {
+            .requirements-container {
+                .list-reqs {
+                    .req {
+                        .title {
+                            background: $primary;
+                            color: #ffffff;
+                            border-bottom: $primary;
+                        }
+
+                        .placeholder-art {
+                            background: $primary;
+
+                            .fa-stack-1x {
+                                background: inherit;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .nav-wizard {
+                ol {
+                    li {
+                        a {
+                            background: $primary;
+                            box-shadow: $input-box-shadow;
+
+                            &:hover {
+                                border-color: #f6d346;
+                                color: #f6d346;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .carousel {
+            .requirements {
+                .requirement {
+                    border-top: 5px solid $primary;
+                }
+            }
+
+            #wrapper-review {
+                .review-task-photos {
+                    .wrapper-photos {
+                        .help-tips {
+                            button.title {
+                                color: #ffffff !important;
+
+                                &:hover,
+                                &:focus {
+                                    background: none;
+                                    border: 1px solid $link-hover-color;
+                                    box-shadow: none;
+                                    color: $link-hover-color !important;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .action-primary {
+            background: $primary;
+            border: 0 !important;
+            color: $white !important;
+            box-shadow: none !important;
+
+            &:hover,
+            &:focus {
+                color: $link-hover-color !important;
+                background: none;
+                border: 1px solid $link-hover-color !important;
+            }
+        }
+    }
+}

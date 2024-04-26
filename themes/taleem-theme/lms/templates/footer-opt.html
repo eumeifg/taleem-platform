@@ -1,0 +1,99 @@
+## mako
+<%page expression_filter="h"/>
+<%!
+  from django.conf import settings
+  from django.urls import reverse
+  from django.utils.translation import ugettext as _
+  from branding.api import get_footer
+  from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
+  SOCIAL_MEDIA_FOOTER_URLS = {
+    'Facebook': '#',
+    'Twitter': '#',
+    'Linkedin': '#',
+    'Youtube': '#',
+    'Instagram': '#'
+  }
+  SOCIAL_MEDIA_FOOTER_URLS_SETTINGS = getattr(settings, 'SOCIAL_MEDIA_FOOTER_URLS', {})
+  SOCIAL_MEDIA_FOOTER_URLS.update(SOCIAL_MEDIA_FOOTER_URLS_SETTINGS)
+%>
+<% footer = get_footer(is_secure=is_secure) %>
+<% icp_license_info = getattr(settings, 'ICP_LICENSE_INFO', {})%>
+<%namespace name='static' file='static_content.html'/>
+
+  <div class="container-fluid footer-top">
+    <div class="row my-3">
+      <div class="col-md-6 footer-logo-block">
+        <!-- <img class="image-logo" src="${static.url('images/footer-logo.png')}" alt="Footer Logo"> -->
+        <object data="${static.url('images/footer-logo.png')}" height="90"> </object>
+      </div>
+      <div class="col-md-6 footer-qr-block">
+        <!-- <img class="image-qr" src="${static.url('images/qr-code.png')}" alt="QR Code"> -->
+        <object data="${static.url('images/qr-code.png')}" height="90"> </object>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid wrapper-footer">
+    <footer>
+      <div class="row">
+        <div class="col-md-6">
+          <nav class="footer-share-nav site-nav navbar-expand-sm">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="#"><span class="lab la-2x la-google-play"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="itms-services://?action=download-manifest&url=${'{}{}'.format(settings.LMS_ROOT_URL, reverse('taleem:download_app'))}"><span class="lab la-2x la-apple"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/honor">${_("Honor Code")}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/privacy">${_("Privacy Policy")}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${reverse('certificates:verify')}">${_("Verify Certificate")}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/help">${_("Help")}</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div class="col-md-6">
+          <nav class="footer-nav navbar-expand-sm">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="#">${_("Follow Us")}</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${SOCIAL_MEDIA_FOOTER_URLS['Twitter']}"><span class="lab la-2x la-twitter"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${SOCIAL_MEDIA_FOOTER_URLS['Linkedin']}"><span class="lab la-2x la-linkedin-in"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${SOCIAL_MEDIA_FOOTER_URLS['Youtube']}"><span class="lab la-2x la-youtube"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${SOCIAL_MEDIA_FOOTER_URLS['Instagram']}"><span class="lab la-2x la-instagram"></span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="${SOCIAL_MEDIA_FOOTER_URLS['Facebook']}"><span class="lab la-2x la-facebook-f"></span></a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </div>
+% if include_dependencies:
+  <%static:js group='base_vendor'/>
+  <%static:css group='style-vendor'/>
+  <%include file="widgets/segment-io.html" />
+  <%include file="widgets/segment-io-footer.html" />
+% endif
+% if footer_css_urls:
+  % for url in footer_css_urls:
+    <link rel="stylesheet" type="text/css" href="${url}"></link>
+  % endfor
+% endif

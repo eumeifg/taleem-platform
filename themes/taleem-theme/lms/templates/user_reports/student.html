@@ -1,0 +1,438 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+%>
+
+<div id="student-report" class="student-report" style="display: none;">
+    <!-- Courses Stats Row -->
+    <div class="row mb-2">
+        <!-- Enrolled Courses -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-courses" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Enrolled Courses")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="enrolled_courses_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-school la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Wishlist Courses -->
+        <div class="col mb-2">
+            <a href="/dashboard#wishlist" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Wishlist Courses")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="wishlist_courses_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="lar la-heart la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Finished Courses -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-courses" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Finished Courses")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="finished_courses_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-graduation-cap la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Certificates -->
+        <div class="col mb-2">
+            <a href="#" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Certificates")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="certificates_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-certificate la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Assignments Stats Row -->
+    <div class="row mb-2">
+        <!-- Submitted Assignments -->
+        <div class="col mb-2">
+            <a href="#assignments-details" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Submitted Assignments")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="submitted_assignments_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-tasks la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Pending Assignments -->
+        <div class="col mb-2">
+            <a href="#assignments-details" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Pending Assignments")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="pending_assignments_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-hourglass-start la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Missed Assignments -->
+        <div class="col mb-2">
+            <a href="#assignments-details" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Missed Assignments")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="missed_assignments_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-hourglass-end la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Timed Exams Stats Row -->
+    <div class="row mb-2">
+        <!-- Submitted Timed Exams -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Submitted Timed Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="submitted_exams_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-clipboard-check la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Pending Timed Exams -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Pending Timed Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="pending_exams_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-stopwatch la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Missed Timed Exams -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Missed Timed Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="missed_exams_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-calendar-times la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Timed Exams Stats Row -->
+    <div class="row mb-2">
+        <!-- Timed Exams Average Grade -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Timed Exams Average Grade")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="exams_average_grade">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-pen-alt la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Passed Timed Exams Ratio -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Passed Ratio")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="passed_exams_ratio">00 %</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-percent la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Passed Timed Exams -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Passed Timed Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="passed_exams_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-check-circle la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Failed Time Exams -->
+        <div class="col mb-2">
+            <a href="/dashboard#my-exams" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Failed Time Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="failed_exams_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-times-circle la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Assignments Details -->
+    <div class="row mt-2">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-purple text-white">
+                    <a name="assignments-details">${_("Assignments Details")}</a>
+                </div>
+                <div class="card-body">
+                    <div class="accordion courses-assignments-details" id="assignments-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%include file="student-tpl.html"/>
+
+<script type="text/javascript">
+    var submittedAssignments = 0;
+    var pendingAssignments = 0;
+    var missedAssignments = 0;
+
+    function reportsAddCourseAssignmentsItem(index, assignment) {
+        let list = $('#student-report .courses-assignments-details');
+        let template = $.trim($('#assignments-template').html());
+        
+        // update exam data
+        let clone = template.replace(/{{assignment_index}}/ig, 'assignment-' + index);
+        clone = clone.replace(/{{assignment_name}}/ig, assignment.course_display_name);
+        clone = clone.replace(/{{submitted_assign_num}}/ig, assignment.course_submitted_assignments.length);
+        clone = clone.replace(/{{pending_assign_num}}/ig, assignment.course_pending_assignments.length);
+        clone = clone.replace(/{{missed_assign_num}}/ig, assignment.course_missed_assignments.length);
+
+        clone = $(clone);
+
+        if(assignment.course_submitted_assignments.length) {
+            assignment.course_submitted_assignments.forEach((assign) => { 
+                clone.find('.submitted-assigns-list').append(
+                    $('<tr>').append($('<td>').text(assign.name))
+                        .append($('<td>').append($('<a>').attr('href', assign.url).attr('target', '_blank').append('<i class="las la-lg la-external-link-alt"></i>')))
+                );
+            });
+        } else {
+            clone.find('.submitted-assigns-table>table').hide();
+            clone.find('.submitted-assigns-table>i').show();
+        }
+
+        if(assignment.course_pending_assignments.length) {
+            assignment.course_pending_assignments.forEach((assign) => { 
+                clone.find('.pending-assigns-list').append(
+                    $('<tr>').append($('<td>').text(assign.name))
+                        .append($('<td>').append($('<a>').attr('href', assign.url).attr('target', '_blank').append('<i class="las la-lg la-external-link-alt"></i>')))
+                );
+            });
+        } else {
+            clone.find('.pending-assigns-table>table').hide();
+            clone.find('.pending-assigns-table>i').show();
+        }
+
+        if(assignment.course_missed_assignments.length) {
+            assignment.course_missed_assignments.forEach((assign) => { 
+                clone.find('.missed-assigns-list').append(
+                    $('<tr>').append($('<td>').text(assign.name))
+                        .append($('<td>').append($('<a>').attr('href', assign.url).attr('target', '_blank').append('<i class="las la-lg la-external-link-alt"></i>')))
+                );
+            });
+        } else {
+            clone.find('.missed-assigns-table>table').hide();
+            clone.find('.missed-assigns-table>i').show();
+        }
+
+        submittedAssignments += assignment.course_submitted_assignments.length;
+        pendingAssignments += assignment.course_pending_assignments.length;
+        missedAssignments += assignment.course_missed_assignments.length;
+
+        // add exam to the list
+        list.append(clone);
+    }
+    
+    function reportsLoadStudentReport(reportData) {
+        // update stats counts
+        if(reportData.hasOwnProperty('enroll_course_count')) {
+            $('#student-report .enrolled_courses_count').html(reportData.enroll_course_count);
+        }
+        if(reportData.hasOwnProperty('course_wish_list_count')) {
+            $('#student-report .wishlist_courses_count').html(reportData.course_wish_list_count);
+        }
+        if(reportData.hasOwnProperty('finished_course_count')) {
+            $('#student-report .finished_courses_count').html(reportData.finished_course_count);
+        }
+        if(reportData.hasOwnProperty('certificate_count_report')) {
+            $('#student-report .certificates_count').html(reportData.certificate_count_report);
+        }
+
+        if(reportData.hasOwnProperty('submitted_timed_exam_count')) {
+            $('#student-report .submitted_exams_count').html(reportData.submitted_timed_exam_count);
+        }
+        if(reportData.hasOwnProperty('pending_timed_exam_count')) {
+            $('#student-report .pending_exams_count').html(reportData.pending_timed_exam_count);
+        }
+        if(reportData.hasOwnProperty('missed_timed_exam_count')) {
+            $('#student-report .missed_exams_count').html(reportData.missed_timed_exam_count);
+        }
+
+        if(reportData.hasOwnProperty('timed_exam_average_grade')) {
+            $('#student-report .exams_average_grade').html(reportData.timed_exam_average_grade);
+        }
+        if(reportData.hasOwnProperty('passed_timed_exams_count') && reportData.hasOwnProperty('failed_timed_exams_count')) {
+            let ratio = 0;
+            if((reportData.passed_timed_exams_count + reportData.failed_timed_exams_count) != 0) {
+                ratio = (reportData.passed_timed_exams_count/(reportData.passed_timed_exams_count + reportData.failed_timed_exams_count)) * 100;
+            }
+            ratio = Math.round((ratio + Number.EPSILON) * 100) / 100;
+            $('#student-report .passed_exams_ratio').html(ratio + ' %');
+        }
+        if(reportData.hasOwnProperty('passed_timed_exams_count')) {
+            $('#student-report .passed_exams_count').html(reportData.passed_timed_exams_count);
+        }
+        if(reportData.hasOwnProperty('failed_timed_exams_count')) {
+            $('#student-report .failed_exams_count').html(reportData.failed_timed_exams_count);
+        }
+        // remove old assignments report
+        $('#student-report .courses-assignments-details').empty();
+        submittedAssignments = 0;
+        pendingAssignments = 0;
+        missedAssignments = 0;
+
+        // add assignments report
+        let assignments = reportData.assignment_report;
+		assignments.forEach((assignment, index) => reportsAddCourseAssignmentsItem(index, assignment));
+        $('#student-report .submitted_assignments_count').html(submittedAssignments);
+        $('#student-report .pending_assignments_count').html(pendingAssignments);
+        $('#student-report .missed_assignments_count').html(missedAssignments);
+
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#reports #student-report').slideDown('slow');
+    }
+</script>

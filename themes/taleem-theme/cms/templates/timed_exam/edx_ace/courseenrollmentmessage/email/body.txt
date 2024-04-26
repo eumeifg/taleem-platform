@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}You have been enrolled in a course, please visit Ta3leem Site to start your course.{% endblocktrans %}
+
+{{ dashboard_url }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

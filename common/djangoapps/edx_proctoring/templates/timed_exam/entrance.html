@@ -1,0 +1,96 @@
+{% load i18n %}
+<div class="sequence timed-exam entrance" data-exam-id="{{exam_id}}">
+  <h3>
+    {% blocktrans %}
+    {{ exam_name }} is a Timed Exam ({{total_time}})
+    {% endblocktrans %}
+  </h3>
+  <p>
+    {% trans "This exam has a time limit associated with it." %}
+    <strong>
+      {% trans "To pass this exam, you must complete the problems in the time allowed." %}
+    </strong>
+    {% trans "After you select " %}
+    <strong>
+      {% trans "I am ready to start this timed exam," %}
+    </strong>
+    {% trans "you will have "%} {{total_time|lower}} {% trans " to complete and submit the exam." %}
+  </p>
+
+  <h4>{% trans "Before starting the exam, please confirm the following:" %}</h4>
+  <ol>
+      <li>{% trans "Sitting directly towards the computer and the camera" %}</li>
+      <li>{% trans "Make sure that the lighting in the room is suitable for your image to appear clearly" %}</li>
+      <li>{% trans "Avoid turning or bending over during the exam (this may be considered a cheating attempt)" %}</li>
+      <li>{% trans "It is forbidden to cover the face or eyes in any way during the exam (unless this happens accidentally)" %}</li>
+      <li>{% trans "Avoid leaving the room during the exam (this may be considered an attempt to cheat)" %}</li>
+      <li>{% trans "It is not allowed for another person to be in the room with you or near you during the exam (this may be considered an attempt to cheat)" %}</li>
+      <li>{% trans "It is not allowed to read questions aloud or move the lips while reading the questions (this may be considered an attempt to cheat)" %}</li>
+      <li>{% trans "When the connection or power is cut off, you can reconnect and continue the examination from the question that was answered before the disconnection" %}</li>
+      <li>{% trans "It is not allowed to eat or drink during the exam" %}</li>
+      <li>{% trans "It is not allowed to move to any other program or website during the exam (this may be considered an attempt to cheat)." %}</li>
+      <li>{% trans "Be warned, system will capture photos as a part of proctoring process" %}</li>
+      <li>{% trans "All your movements will be recorded and sent to the teacher with the answers, Non-compliance may expose your score to withholding or any other action the teacher deems appropriate" %}</li>
+  </ol>
+
+  <button class="gated-sequence start-timed-exam action-primary" data-ajax-url="{{enter_exam_endpoint}}" data-exam-id="{{exam_id}}">
+    <a>
+      {% blocktrans %}
+        I am ready to start this timed exam.
+      {% endblocktrans %}
+      <span class="icon fa fa-arrow-circle-right" aria-hidden="true"></span>
+    </a>
+  </button>
+</div>
+{% if not hide_extra_time_footer %}
+  {% include 'timed_exam/footer.html' %}
+{% endif %}
+
+<script type="text/javascript">
+
+  var inProcess = false;
+
+  var disableClickEvent = function () {
+    inProcess = true;
+    $('body').css('cursor', 'wait');
+    $('.start-timed-exam').css('cursor', 'wait');
+  };
+
+  var enableClickEvent = function () {
+    inProcess = false;
+    $('body').css('cursor', 'auto');
+    $('.start-timed-exam').css('cursor', 'auto');
+  };
+
+  $('.start-timed-exam').click(function () {
+      if (!inProcess) {
+        disableClickEvent();
+        var action_url = $(this).data('ajax-url');
+        var exam_id = $(this).data('exam-id');
+
+        $.post(
+          action_url,
+          {
+            "exam_id": exam_id,
+            "start_clock": true
+          },
+          function (data) {
+            // reload the page, because we've unlocked it
+            location.reload();
+          }
+        ).fail(function(){
+          enableClickEvent();
+          var msg = gettext(
+            "There has been a problem starting your exam.\n\n" +
+            "Possible reasons are that your account has not been fully activated,\n" +
+            "you are experiencing a network connection problem, or there has been\n" +
+            "a service disruption. Please check these potential problems and try again."
+          );
+          alert(msg);
+        });
+      } else {
+        return false;
+      }
+    }
+  );
+</script>

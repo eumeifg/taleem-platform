@@ -1,0 +1,44 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load django_markup %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="80%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <div class="image-block col-md-6">
+            <img src="{{ site_url }}static/taleem-theme/images/email/account_activation_banner.png" alt="" style="margin-left: auto; margin-right: auto; display: block; width: 50%;">
+        </div>
+    </tr>
+{% if route_enabled %}
+    <tr>
+        <td>
+            <p style="color: rgba(0,0,0,.75);">
+                {% filter force_escape %}
+                    {% blocktrans %}This is a routed Account Activation email for {{ routed_user }} ({{ routed_user_email }}): {{ routed_profile_name }}{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+        </td>
+    </tr>
+{% endif %}
+    <tr>
+        <td style="text-align: center;">
+            <h3 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {% trans "Welcome to Ta3leem Platform" as header_msg %}{{ header_msg | force_escape }}
+            </h3>
+            <p style="color: #ffffff; text-align: center; font-weight: 200;">
+                {% filter force_escape %}
+                    {% blocktrans %}You are almost there! Use the link below to activate your account to access the Ta3leem courses. Note that you will not be able to log back into your account until you have activated it.{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+
+            {% filter force_escape %}
+                {% blocktrans asvar course_cta_text %}Activate Account{% endblocktrans %}
+            {% endfilter %}
+            {% include "ace_common/edx_ace/common/return_to_course_cta.html" with course_cta_text=course_cta_text course_cta_url=confirm_activation_link %}
+        </td>
+    </tr>
+</table>
+{% endblock %}

@@ -1,0 +1,107 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from django.utils.translation import ugettext as _
+%>
+
+<div id="teacher-report" class="teacher-report" style="display: none;">
+    <!-- Stats Row -->
+    <div class="row mb-2">
+        <!-- Number of Exams -->
+        <div class="col mb-2">
+            <a href="#exams-details" class="card border-left-purple h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-s font-weight-bold text-purple text-uppercase text-left mb-1">
+                                ${_("Number of Exams")}
+                            </div>
+                            <div class="h4 mb-0 font-weight-bold text-yellow text-left">
+                                <span class="timed_exam_count">00</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-clipboard-list la-4x text-yellow opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!-- Exams Details -->
+    <div class="row mt-2">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-purple text-white">
+                    <a name="exams-details">${_("Exams Details")}</a>
+                </div>
+                <div class="card-body">
+                    <div class="accordion timed-exam-details" id="exams-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%include file="teacher-tpl.html"/>
+
+<script type="text/javascript">
+    function reportsAddExamItem(index, exam) {
+        let list = $('#teacher-report .timed-exam-details');
+        let template = $.trim($('#exam-template').html());
+        
+        // update exam data
+        let clone = template.replace(/{{exam_key}}/ig, exam.timed_exam_key);
+        clone = clone.replace(/{{exam_index}}/ig, 'exam-' + index);
+        clone = clone.replace(/{{exam_name}}/ig, exam.timed_exam_name);
+        clone = clone.replace(/{{exam_avg_grade}}/ig, exam.average_percentage || '-');
+        clone = clone.replace(/{{exam_absent_num}}/ig, exam.absent_students.length);
+
+        clone = $(clone);
+
+        if(exam.top_students.length) {
+            exam.top_students.forEach((stu) => { 
+                clone.find('.top-students-list').append(
+                    $('<tr>').attr('data-toggle', 'tooltip').attr('title', stu.email)
+                        .append($('<td>').text(stu.username))
+                        .append($('<td>').text(stu.name))
+                        .append($('<td>').text(stu.grade_percentage))
+                );
+            });
+        } else {
+            clone.find('.top-students-table>table').hide();
+            clone.find('.top-students-table>i').show();
+        }
+
+        if(exam.absent_students.length) {
+            exam.absent_students.forEach((stu) => { 
+                clone.find('.absent-students-list').append(
+                    $('<tr>').attr('data-toggle', 'tooltip').attr('title', stu.email)
+                        .append($('<td>').text(stu.username))
+                        .append($('<td>').text(stu.name))
+                );
+            });
+        } else {
+            clone.find('.absent-students-table>table').hide();
+            clone.find('.absent-students-table>i').show();
+        }
+
+        // add exam to the list
+        list.append(clone);
+    }
+    
+    function reportsLoadTeacherReport(reportData) {
+        // update timed exam count
+        if(reportData.hasOwnProperty('timed_exam_count')) {
+            $('#teacher-report .timed_exam_count').html(reportData.timed_exam_count);
+        }
+        // remove old exams report
+        $('#teacher-report .timed-exam-details').empty();
+        // add exams report
+        let exams = reportData.timed_exam_reports;
+		exams.forEach((exam, index) => reportsAddExamItem(index, exam));
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#reports #teacher-report').slideDown('slow');
+    }
+</script>

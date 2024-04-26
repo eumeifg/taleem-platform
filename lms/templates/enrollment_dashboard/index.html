@@ -1,0 +1,13 @@
+<!--<%page expression_filter="h"/>-->
+<!--<%inherit file="../main.html" />-->
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="body">
+    <div id="root" class="container">
+    </div>
+    <%static:webpack entry="EnrollmentDashboard">
+        new EnrollmentDashboard({});
+    </%static:webpack>
+</%block>
+

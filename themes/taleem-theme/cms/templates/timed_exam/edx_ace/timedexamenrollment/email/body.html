@@ -1,0 +1,31 @@
+{% extends 'ace_common/edx_ace/common/base_body.html' %}
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<table width="80%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <div class="image-block col-md-6">
+            <img src="{{ site_url}}static/taleem-theme/images/email/timed_exam_banner.png" alt="" style="margin-left: auto; margin-right: auto; display: block; width: 50%;">
+        </div>
+    </tr>
+    <tr>
+        <td style="text-align: center;">
+            <h3 style="color: #ffffff; margin-left: auto; margin-right: auto; display: block; text-align: center; padding-top: 30px;">
+                {% trans "You have a New Exam" as tmsg %}{{ tmsg | force_escape }}
+            </h3>
+            <p style="color: #ffffff; text-align: center; font-weight: 200;">
+                {% filter force_escape %}
+                {% blocktrans %}You have been enrolled in a timed exam, please visit Ta3leem Site to view and attempt your timed exam.{% endblocktrans %}
+                {% endfilter %}
+                <br />
+            </p>
+            {% filter force_escape %}
+                {% blocktrans asvar course_cta_text %}Sign in{% endblocktrans %}
+            {% endfilter %}
+            {% include "ace_common/edx_ace/common/return_to_course_cta.html" with course_cta_text=course_cta_text course_cta_url=dashboard_url %}
+
+        </td>
+    </tr>
+</table>
+{% endblock %}

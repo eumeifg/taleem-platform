@@ -1,0 +1,41 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+<style>
+</style>
+</%block>
+
+<%block name="pagetitle">${_("Offline Exam Expired")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1" class="bootstrap-iso">
+  <div class="container">
+      <div class="row">
+          <div class="col-md-12">
+              <div class="error-template">
+                  <p><span class="las la la-calendar-times"></span></p>
+                  <h1>
+                      Oops!! You are late !!</h1>
+                  <h2>Exam expired</h2>
+                  <div class="error-details">
+                      Sorry, time limit for this exam is over!
+                  </div>
+                  <div class="error-actions">
+                      <a href="/" class="btn btn-primary btn-lg"><span class="las la la-home"></span>
+                          Take Me Home </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</main>
+
+<%block name="js_extra">
+</%block>

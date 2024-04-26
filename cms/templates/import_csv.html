@@ -1,0 +1,240 @@
+<%page expression_filter="h"/>
+<%inherit file="base.html" />
+
+<%namespace name='static' file='static_content.html'/>
+<%!
+  from django.utils.translation import get_language_bidi
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import (
+      dump_js_escaped_json, js_escaped_string
+  )
+  from openedx.core.djangolib.markup import HTML, Text
+%>
+
+<%block name="header_extras">
+  <style>
+    % if get_language_bidi():
+    .view-import .wrapper-status .list-progress .status-detail {
+      margin-left: 0 !important;
+      margin-right: 60px !important;
+      float: right !important;
+    }
+    .view-import .wrapper-status .list-progress .status-visual {float: right !important;}
+    .view-import .wrapper-status .list-progress .status-visual .icon {left: unset !important; right: 20px !important;}
+    % endif
+  </style>
+</%block>
+
+<%block name="title">
+${_("Question Bank Import")}
+</%block>
+
+<%block name="bodyclass">is-signedin course tools view-import</%block>
+
+<%block name="content">
+<div class="wrapper-mast wrapper">
+  <header class="mast has-subtitle">
+    <h1 class="page-header">
+      <small class="subtitle">${_("Tools")}</small>
+      <span class="sr">&gt; </span>
+        ${_("Question Bank Import")}
+    </h1>
+  </header>
+</div>
+
+<div class="wrapper-content wrapper">
+  <section class="content">
+    <article class="content-primary" role="main">
+      <div class="introduction">
+          <p>${Text(_("Be sure you want to import a question bank before continuing. New questions will be added to this question bank. {em_start}You cannot undo a question bank import{em_end}. Before you proceed, we recommend that you export the current question bank, so that you have a backup copy of it.")).format(em_start=HTML('<strong>'), em_end=HTML("</strong>"))}</p>
+
+          <p>${_("The questions that you import must be in a .csv file. This .csv file must contain questions in specific format.")}</p>
+
+          <p>${_("The import process has five stages. During the first two stages, you must stay on this page. You can leave this page after the Unpacking stage has completed. We recommend, however, that you don't make important changes to your question bank until the import operation has completed.")}</p>
+      </div>
+
+      <form id="fileupload" method="post" enctype="multipart/form-data" class="import-form">
+
+        <h2 class="title">
+          ${_("Select a .csv File to import questions")}
+        </h2>
+
+        <p class="error-block"></p>
+
+        <a href="#" class="action action-choose-file choose-file-button">
+          <span class="icon fa fa-upload" aria-hidden="true"></span>
+          <span class="copy">${_("Choose a File to Import")}</span>
+        </a>
+
+        <div class="wrapper wrapper-file-name file-name-block">
+            <h3 class="title">
+              <span class="label">${_("File Chosen:")}</span>
+              <span class="file-name"></span>
+            </h3>
+
+          <input type="file" name="csv-data" class="file-input" />
+
+          <input type="submit"
+           value="${_('Import questions from the selected file')}"
+           class="submit-button" id="replace-courselike-button" />
+        </div>
+
+        <div class="wrapper wrapper-status is-hidden">
+          <h3 class="title">
+            ${_("Question Bank Import Status")}
+          </h3>
+
+          <ol class="status-progress list-progress">
+            <li class="item-progresspoint item-progresspoint-upload is-complete">
+              <span class="deco status-visual">
+                <span class="icon fa fa-cog" aria-hidden="true"></span>
+                <span class="icon fa fa-warning" aria-hidden="true"></span>
+              </span>
+
+              <div class="status-detail">
+                <h3 class="title">${_("Uploading")}</h3>
+                <div class="progress-bar">
+                  <div class="progress-fill"></div>
+                </div>
+                <p class="copy">${_("Transferring your file to our servers")}</p>
+              </div>
+            </li>
+
+            <li class="item-progresspoint item-progresspoint-unpack is-started">
+              <span class="deco status-visual">
+                <span class="icon fa fa-cog" aria-hidden="true"></span>
+                <span class="icon fa fa-warning" aria-hidden="true"></span>
+              </span>
+
+              <div class="status-detail">
+                <h3 class="title">${_("Unpacking")}</h3>
+                <p class="copy">${_("Expanding and preparing folder/file structure (You can now leave this page safely, but avoid making drastic changes to content until this import is complete)")}</p>
+              </div>
+            </li>
+
+
+            <li class="item-progresspoint item-progresspoint-verify is-not-started">
+              <span class="deco status-visual">
+                <span class="icon fa fa-cog" aria-hidden="true"></span>
+                <span class="icon fa fa-warning" aria-hidden="true"></span>
+              </span>
+
+              <div class="status-detail">
+                <h3 class="title">${_("Verifying")}</h3>
+                <p class="copy">${_("Reviewing semantics, syntax, and required data")}</p>
+              </div>
+            </li>
+
+            <li class="item-progresspoint item-progresspoint-import is-not-started">
+              <span class="deco status-visual">
+                <span class="icon fa fa-cog" aria-hidden="true"></span>
+                <span class="icon fa fa-warning" aria-hidden="true"></span>
+              </span>
+
+              <div class="status-detail">
+                <h3 class="title">
+                  ${_("Updating Question Bank")}
+                </h3>
+                <p class="copy">
+                  ${_("Integrating your imported content into this library. This process might take longer with larger libraries.")}
+                </p>
+              </div>
+            </li>
+            <li class="item-progresspoint item-progresspoint-success has-actions is-not-started">
+              <span class="deco status-visual">
+                <span class="icon fa fa-square-o" aria-hidden="true"></span>
+              </span>
+
+              <div class="status-detail">
+                <h3 class="title">
+                  ${_("Success")}
+                  <span class="item-progresspoint-success-date"></span>
+                </h3>
+                <p class="copy">
+                  ${_("Your imported content has now been integrated into this question bank")}
+                </p>
+
+                <ul class="list-actions">
+                  <li class="item-action">
+                    <a href="${successful_import_redirect_url}" id="view-updated-button" class="action action-primary">
+                      ${_("View Updated Question Bank")}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </form>
+    </article>
+
+    <aside class="content-supplementary" role="complimentary">
+      <div class="bit">
+          <h3 class="title-3">${_("Why import a question bank?")}</h3>
+          <p>${_("You might want to add new questions to an existing question bank or want to add questions to an newly created question bank.")}</p>
+      </div>
+
+      <div class="bit">
+          <h3 class="title-3">${_("Supported question types")}</h3>
+          <ul>
+              <li>${_("Multiple Choice")}</li>
+          </ul>
+      </div>
+
+      <div class="bit external-help">
+          <a id="download-csv" href="" download="sample-questions.csv" class="button external-help-button">
+              <i class="fa fa-download"></i> ${_("Download a sample CSV")}
+          </a>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<%static:webpack entry="Import">
+  Import('${import_status_url | n, js_escaped_string}', ${True | n, dump_js_escaped_json});
+</%static:webpack>
+</%block>
+
+<%block name="jsextra">
+<script>
+  const rows = [
+    [
+      "Display Name", "Difficulty Level", "Learning Outcome",
+      "Chapter", "Topics", "Question Text", "Description",
+      "Choice 1", "Choice 2", "Choice 3"
+    ],
+    [
+      "Question 1", "easy", "learning_outcome_1",
+      "1", '"topic 1, topic 2"', '"Add the question text, or prompt, here. This text is required."',
+      "You can add an optional tip or note related to the prompt like this.",
+      "an incorrect answer:false", "the correct answer:true", "an incorrect answer:false"
+    ],
+    [
+      "Question 2", "moderate", "learning_outcome_2",
+      "2", '"topic a, topic b"', '"Add the question text, or prompt, here. This text is required."',
+      "You can add an optional tip or note related to the prompt like this.",
+      "an incorrect answer:false", "the correct answer:true", "an incorrect answer:false"
+    ],
+    [
+      "Question 3", "hard", "learning_outcome_3",
+      "3", '"topic 1, topic 2"', '"Add the question text, or prompt, here. This text is required."',
+      "You can add an optional tip or note related to the prompt like this.",
+      "an incorrect answer:false", "the correct answer:true", "an incorrect answer:false"
+    ]
+  ];
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+
+  rows.forEach(function(rowArray) {
+    let row = rowArray.join(",");
+    csvContent += row + "\r\n";
+  });
+
+  var encodedUri = encodeURI(csvContent);
+
+  $(document).ready(function() {
+    let downloadLink = document.getElementById("download-csv");
+    downloadLink.setAttribute("href", encodedUri);
+  });
+</script>
+</%block>

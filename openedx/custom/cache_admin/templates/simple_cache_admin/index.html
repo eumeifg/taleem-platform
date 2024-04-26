@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />
+
+<h1>Ta3leem Cache</h1>
+
+<div class="simple_cache" id="content-main">
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <input type="submit" value="Ok" />
+  </form>
+
+  <br class="clear" />
+  <code><strong>{{ value }}</strong></code>
+</div>
+
+<br class="clear" />
+
+<script type="text/javascript">
+    var action_elem = document.getElementById("id_action");
+    var key_elem = document.getElementById("id_key");
+    var timeout_elem = document.getElementById("id_timeout");
+    var value_elem = document.getElementById("id_value");
+
+    var toggleFields = function () {
+        key_elem.parentNode.style.display = "none";
+        value_elem.parentNode.style.display = "none";
+        timeout_elem.parentNode.style.display = "none";
+
+        if (action_elem.value === "GET") {
+            key_elem.parentNode.style.display = "block";
+        } else if (action_elem.value === "UPDATE") {
+            key_elem.parentNode.style.display = "block";
+            value_elem.parentNode.style.display = "block";
+            timeout_elem.parentNode.style.display = "block";
+        } else if (action_elem.value === "DELETE") {
+            key_elem.parentNode.style.display = "block";
+        }
+    }
+
+    toggleFields();
+
+    action_elem.onchange = function() {
+        toggleFields();
+    };
+
+</script>
+{% endblock %}

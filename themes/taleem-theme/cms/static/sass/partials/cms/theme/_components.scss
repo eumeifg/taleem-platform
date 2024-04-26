@@ -1,0 +1,41 @@
+.wrapper-mast .mast.has-navigation .nav-actions{
+    top: auto;
+}
+
+.add-xblock-component .new-component .new-component-type .add-xblock-component-button,
+.wrapper-mast .mast.has-actions .nav-actions .button.new-button,
+.wrapper-mast .mast.has-actions .nav-actions .button.button-new,
+.notice-create.has-actions .list-actions .action-primary,
+.view-uploads .no-asset-content .new-button,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library,
+.view-team .content .notice-create.has-actions .list-actions .action-primary,
+.view-settings .group-settings.assignment-types .actions .new-button,
+.view-settings .group-settings.course-learning-info .actions .new-button,
+.view-settings .group-settings.instructor-types .actions .new-button,
+.wrapper-xblock .xblock-message.no-container-content.xblock-message.no-container-content .button,
+.wrapper-xblock .xblock-message.no-container-content.xblock-message.no-container-content .action {
+    background: $primary;
+    border-color: $primary;
+    color: #ffffff;
+
+    &:hover{
+        background: $link-hover-color;
+        color: #ffffff;
+        border-color: $link-hover-color;
+    }
+}
+
+.add-xblock-component {
+    .new-component {
+        h5{
+            color: $primary;
+        }
+    }
+}
+
+.chapters-input{
+    display: inline-block;
+}

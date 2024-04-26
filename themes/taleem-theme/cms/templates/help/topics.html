@@ -1,0 +1,70 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.markup import HTML
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../base.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/css/bootstrap-iso.min.css')}"/>
+</%block>
+
+<%block name="title">${_("Help")}</%block>
+
+<%block name="content">
+<div class="bootstrap-iso">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between m-4">
+            <h1 class="h3 mb-0 text-gray-800">${_("Help")}</h1>
+            % if user.is_superuser:
+                <a href="/admin/help/" class="d-none d-sm-inline-block btn btn-lg btn-primary shadow-sm">
+                    <i class="fa fa-tasks fa-sm text-white-50"></i> ${_("Manage Topics")}
+                </a>
+            % endif
+        </div>
+
+    <!-- Topcis Row -->
+    <div class="row">
+
+        % if get_language_bidi():
+            <!-- Topics in Arabic -->
+            % for topic in help_topics:
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">${topic.title_arabic}</div>
+                    <div class="card-body">
+                        <p>${HTML(topic.description_arabic)}</p>
+                    </div>
+                </div>
+            </div>
+            % endfor
+        % else:
+            <!-- Topics in English -->
+            % for topic in help_topics:
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">${topic.title_english}</div>
+                    <div class="card-body">
+                        <p>${HTML(topic.description_english)}</p>
+                    </div>
+                </div>
+            </div>
+            % endfor
+        % endif
+
+    </div>
+
+</div>
+</%block>
+
+<%block name="jsextra">
+
+</%block>

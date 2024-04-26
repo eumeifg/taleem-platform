@@ -1,0 +1,78 @@
+.ackcontent {
+    padding-top: 1vh;
+    display: flex;
+    justify-content: center;
+}
+
+.ackmain {
+    padding-right: 1vw;
+    padding-top: 2vh;
+    height: 50vh;
+    width: 45vw;
+    border: solid 1px black;
+}
+
+.headContent{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    text-align: center;
+    align-content: space-between;
+    align-items: center;
+    width: 40vw;
+    height: 6vh;
+    padding-left: 3vw;
+    padding-right: 2vw;
+}
+
+.valueBox {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+    box-shadow:         inset 0 0 15px #6a7f93;
+}
+
+.ackTitle {
+    margin-top: 2vh;
+    text-align: center;
+    font-weight: 600;
+}
+
+.ackBody {
+    margin-top: 5vh;
+    margin-left: 2vw;
+    font-weight: 400;
+    text-align: right;
+}
+
+.ackSign {
+    margin-top: 5vh;
+    text-align: right;
+}
+
+
+.ackbuttonLine {
+    padding: 5px;
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    margin-top: 5vh;
+}
+
+.ackloginButton {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    margin-right: 1vw;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+    cursor:pointer;
+}
+
+.ackloginButtonTag {
+    padding-top: 2px;
+    text-decoration: none;
+}

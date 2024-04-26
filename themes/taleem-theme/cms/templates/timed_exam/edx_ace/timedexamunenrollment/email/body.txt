@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Hi user, your teacher has un-enrolled you from the timed exam. Please sign in into your Ta3leem account to view your timed exams that you enrolled in.{% endblocktrans %}
+
+{{ dashboard_url }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

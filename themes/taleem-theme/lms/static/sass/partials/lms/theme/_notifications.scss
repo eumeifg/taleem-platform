@@ -1,0 +1,129 @@
+.taleem-theme {
+    // Notification bell and drawer
+    .notify {
+        .toggle-notify-dropdown {
+            color: #ffffff;
+            border-bottom: none;
+            font-weight: 500;
+            font-size: 22px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-family: initial;
+            outline: 0;
+            padding: 15px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+        }
+        .toggle-notify-dropdown .fa-bell {
+            color: #fff;
+            font-size: 20px;
+        }
+        .toggle-notify-dropdown .bubble {
+            display: inline-block;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background-color: #ed0b4c;
+            color: #ffffff;
+            font-weight: 600;
+            position: absolute;
+            @include right(-3px);
+            top: -4px;
+            font-size: 12px;
+            text-align: center;
+            line-height: 21px;
+        }
+        .dropdown-notify-menu {
+            position: absolute;
+            color: #333;
+            z-index: 10;
+            top: 90px;
+            background: #fff;
+            padding: 0;
+            max-width: 320px;
+            @include right(100px);
+            border: none;
+            border-radius: 6px;
+            max-height: initial;
+            overflow: hidden;
+
+            .notifications-list {
+                padding: 20px;
+                max-height: 300px;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
+            .notifications-link {
+                padding: 10px 20px;
+                border-top: solid 1px #e5e5e5;
+                text-align: center;
+
+                a {
+                    color: #858796 !important;
+                }
+            }
+        }
+        .notification-item {
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #000;
+            position: relative;
+
+            .read-icon {
+                color: #f74225;
+                font-size: 13px;
+                opacity: 0;
+                align-self: flex-start;
+                position: absolute;
+                bottom: 10px;
+                @include right(10px);
+                padding: 5px;
+                &:hover {
+                    color: #fff;
+                    background-color: #f74225;
+                }
+            }
+
+            .notification-date {
+                font-size: 11px;
+                display: block;
+                text-align: left;
+            }
+        }
+        .notification-item:not(last-child) {
+            border-bottom: 1px solid #e7e7e7;
+        }
+        .notification-item:hover {
+            color: initial;
+            background-color: #f9f9f9;
+        }
+        .notification-item:hover .read-icon {
+            opacity: 1;
+        }
+        .text-red {
+            color: #f74225 !important;
+        }
+        .font-weight-bold {
+            font-weight: bold !important;
+        }
+        .pl-3 {
+            @include padding-left(1rem !important);
+        }
+        .ml-1 {
+            @include margin-left(0.25rem !important);
+        }
+        .d-block {
+            display: block;
+        }
+        .d-none,
+        .hidden {
+            display: none;
+        }
+        .timestamp {
+            margin: 0;
+        }
+    }
+}

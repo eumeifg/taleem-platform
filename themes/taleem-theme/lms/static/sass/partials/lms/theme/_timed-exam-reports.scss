@@ -1,0 +1,34 @@
+.content-wrapper.main-container{
+  .score-dist-list {
+    tbody {
+      tr {
+        td {
+          &:nth-child(1) {
+            span{
+              font-size: 16px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+.rtl.taleem-theme {
+  .content-wrapper.main-container{
+    .score-dist-list {
+      tbody {
+        tr {
+          td {
+            &:nth-child(1) {
+              span{
+                font-size: 16px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

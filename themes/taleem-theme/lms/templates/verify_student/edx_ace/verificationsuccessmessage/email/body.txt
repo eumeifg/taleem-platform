@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Hello {{full_name}}, {% endblocktrans %}
+
+{% trans "Congratulations! Your ID verification process was successful." %}
+{% trans "Your verification is effective for one year." %}
+
+{% trans "Thank you," %}
+{% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+{% endautoescape %}

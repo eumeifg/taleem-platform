@@ -1,0 +1,178 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    import pytz
+    from datetime import datetime
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.markup import HTML
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+    from openedx.custom.utils import utc_datetime_to_local_datetime
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <link rel="stylesheet" href="${static.url('assets/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css')}">
+    <script src="${static.url('assets/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js')}"></script>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    .form {border: 1px solid lightgray; padding: 20px;}
+    .form .fieldset {margin-bottom: 20px;}
+    .form #id_name {width: 50%;}
+    .form #id_course {width: 50%;}
+    .form #id_folder {margin-right: 10px;width: 50%;}
+    .form input {font-style: normal;}
+    .form label {display: block; font-style: normal;}
+    .form select {min-width: 100px; height: 30px;}
+    .form .errorlist {padding-left: 0; margin: 10px 0 0 0;}
+    .form .errorlist li {list-style-type: none; color: red;}
+    .non-field-errors .form-error {color: red; margin-bottom: 10px;}
+    .mce-tinymce button:hover {background-color: transparent !important;}
+
+    </style>
+</%block>
+
+<%block name="pagetitle">
+    % if action == 'create':
+        ${_("Create Live Class")}
+    % else:
+        ${_("Edit Live Class")}
+    % endif
+</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">
+                % if action == 'create':
+                    ${_("Create Live Class")}
+                % else:
+                    ${_("Edit Live Class")}
+                % endif
+            </h1>
+            <div>
+                <a href="${reverse('live_classes_management')}"
+                   class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <i class="las la-lg la-chevron-left la-sm text-white-50"></i> ${_("Live Classes")}
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Live Class Details")}</h6>
+                    </div>
+                    <div class="card-body">
+                        % if form.non_field_errors():
+                          <div class="non-field-errors">
+                            % for err in form.non_field_errors():
+                              <p class="form-error">${err}</p>
+                            % endfor
+                          </div>
+                        % endif
+
+                        <form method="post" class="form" enctype="multipart/form-data" id="classForm" action="${reverse('create_meeting')}">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}" />
+
+                            ${form.as_div()}
+
+                            <a id="submit" class="btn btn-primary" href="javascript::void(0);">${_("Submit")}</a>
+                            % if request.user.is_superuser:
+                                <div id="editClassDiv" hidden>
+                                    <a id="updateClass" class="btn btn-primary" href="javascript::void(0);">${_("Update Class")}</a>
+                                </div>
+                            % endif
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="${settings.TINYMCE_JS_URL}"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <!-- Page level custom js -->
+    <script>
+    $(function () {
+        // Init TinyMCE
+        tinymce.init({
+            selector: "textarea",
+            height : "280",
+            menubar: false,
+            plugins: "link image code textcolor",
+            toolbar: 'undo redo | styleselect | forecolor | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | link image | code'
+        });
+
+        // Bind click of submit button
+        $("#submit").click(function(){
+             var datetimeField = document.getElementById('id_scheduled_on');
+             datetimeField.value = datetimeField.value.replace(' ','T');
+            $("#classForm").submit();
+        });
+
+        $(document).ready(function() {
+            var datetimeField = document.getElementById('id_scheduled_on');
+            if (datetimeField.defaultValue){
+                datetimeField.defaultValue= datetimeField.defaultValue.replace(' ', 'T');
+            }
+            var windowURL = window.location.href;
+            if (windowURL.includes("edit")){
+                % if live_class:
+                    document.getElementById("classForm").action = "${reverse('edit_meeting', args=[text_type(live_class.id)])}";
+                % endif
+                % if request.user.is_superuser:
+                    document.getElementById('editClassDiv').removeAttribute('hidden');
+                    document.getElementById('submit').style.display = "none";
+                % endif
+            }
+
+            $("#updateClass").click(function(){
+                var datetimeField = document.getElementById('id_scheduled_on');
+                datetimeField.value = datetimeField.value.replace(' ','T');
+                $("#classForm").submit();
+            });
+
+            $('#id_scheduled_on').datetimepicker(
+                {
+                    format: 'YYYY-MM-DD H:mm'
+                }
+            );
+        });
+
+    });
+    </script>
+</%block>

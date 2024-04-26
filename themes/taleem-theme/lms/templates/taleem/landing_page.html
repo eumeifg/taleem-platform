@@ -1,0 +1,77 @@
+<%namespace name='static' file='../static_content.html'/>
+
+<%!
+  from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+%>
+
+<%
+  tb_config = configuration_helpers.get_value('TA3LEEM_BROWSER', {})
+  redirect_to = tb_config.get('CONFIG_FILE', 'javascript:void(0);')
+%>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ta3leem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="${static.url('assets/css/landing_page.min.css')}"/>
+    <link rel="icon" type="image/x-icon" href="${static.url('images/favicon.ico')}"/>
+    <style type="text/css">
+      a.action {color: #f6d346; text-decoration: none;}
+      a.action:hover, a.action:active {color: #ffffff;}
+      .btn {min-width: 100px; width: auto;}
+    </style>
+  </head>
+  <body class="rtl">
+    <div class="wrapper">
+      <div class="header">
+        <div class="logo">
+          <img src="${static.url('images/logo.png')}" alt="Ta3leem Logo">
+        </div>
+        <div class="header">
+            <div class="links">
+              <a href="/login" class="btn">تسجيل الدخول للأساتذة</a>
+            </div>
+        </div>
+      </div>
+      <div class="hero">
+        <div class="mock">
+          <img src="${static.url('images/landing-page-compressed.png')}" alt="Ta3leem Mockup">
+        </div>
+        <di class="details">
+          <h1>
+            احصل على تطبيقاتنا
+          </h1>
+          <h3>
+            للوصول إلى المواد الدراسية الكاملة لمراحل التعليم الابتدائي، والثانوي
+          </h3>
+          <div class="mobile">
+            <h5>للأجهزة المحمولة</h5>
+            <div class="links">
+              <a href="https://play.google.com/store/apps/details?id=com.creative.ta3leemapp" class="btn">
+                Android
+              </a>
+              <a href="itms-services://?action=download-manifest&url=https://learner.ta3leem.iq/taleem/download/mobile/app/" class="btn">
+                iOS
+              </a>
+            </div>
+          </div>
+          <div class="desktop">
+            <h5>لأجهزة سطح المكتب</h5>
+            <div class="links">
+              <a href="https://storage.ta3leem.iq/media/tb/Ta3leemBrowserInstaller.exe" class="btn">
+                Windows
+              </a>
+            </div>
+            <div class="links" style="margin-top: 12px;">
+              <a href="${redirect_to}" class="action">ابدأ متصفح تعليم</a>
+            </div>
+          </div>
+        </di>
+      </div>
+    </div>
+  </body>
+</html>

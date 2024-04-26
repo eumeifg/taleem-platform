@@ -1,0 +1,318 @@
+.taleem-theme {
+    .courses-container {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .courses {
+        position: relative;
+        .loading-block {
+            display: none;
+        }
+        &.loading .loading-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #2c1c59;
+            background: rgb(233, 234, 244);
+            background: radial-gradient(
+                circle,
+                rgba(233, 234, 244, 1) 0%,
+                rgba(255, 255, 255, 0) 100%
+            );
+        }
+    }
+
+    .courses-filter {
+        display: block;
+        width: 300px;
+        background: #f3f4f9;
+        border: 2px solid #f3f4f9;
+        border-radius: 15px;
+
+        .filters-title {
+            display: block;
+            color: #2c1c59;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .filter-accordion {
+            background-color: #e9eaf4;
+
+            .filter-card {
+                .filter-header {
+                    padding: 20px;
+                    background-color: #f3f4f9;
+                    border-bottom: 1px solid #e9eaf4;
+                    text-align: left;
+                    cursor: pointer;
+
+                    &.rtl {
+                        text-align: right;
+                    }
+
+                    .filter-title {
+                        font-size: 16px;
+                        margin: 0;
+
+                        .filetr-count {
+                            display: none;
+                            padding: 0.25em 0.6em;
+                            margin: 0 5px;
+                            font-size: 75%;
+                            font-weight: 700;
+                            line-height: 1;
+                            text-align: center;
+                            white-space: nowrap;
+                            vertical-align: baseline;
+                            border-radius: 10rem;
+                            color: #212529;
+                            background-color: #ffc107;
+                            transition: color 0.15s ease-in-out,
+                                background-color 0.15s ease-in-out,
+                                border-color 0.15s ease-in-out,
+                                box-shadow 0.15s ease-in-out;
+
+                            &.show {
+                                display: inline-block;
+                            }
+                        }
+                        &::after {
+                            float: right;
+                            flex-shrink: 0;
+                            width: 15px;
+                            height: 15px;
+                            margin-left: auto;
+                            content: "";
+                            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23212529'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+                            background-repeat: no-repeat;
+                            background-size: 15px;
+                            transition: transform 0.2s ease-in-out;
+
+                            &.rtl {
+                                float: left;
+                                margin-left: initial;
+                                margin-right: auto;
+                            }
+                        }
+                    }
+
+                    &:not(.collapsed) .filter-title::after {
+                        transform: rotate(-180deg);
+                    }
+                }
+
+                .filter-body {
+                    -ms-flex: 1 1 auto;
+                    flex: 1 1 auto;
+                    min-height: 1px;
+                    padding: 20px;
+
+                    .filter-group {
+                        margin-bottom: 10px;
+
+                        .filter-group-title {
+                            font-size: 16px;
+                            font-weight: 700;
+                            text-align: left;
+
+                            &.rtl {
+                                text-align: right;
+                            }
+                        }
+                        .filter-group-body {
+                            padding-left: 10px;
+
+                            &.rtl {
+                                padding-left: initial;
+                                padding-right: 10px;
+                            }
+                        }
+                    }
+
+                    .form-check {
+                        padding-left: 20px;
+                        text-align: left;
+
+                        .form-check-input {
+                            margin-left: -20px;
+                        }
+
+                        &.rtl {
+                            padding-left: initial;
+                            padding-right: 20px;
+                            text-align: right;
+
+                            .form-check-input {
+                                margin-left: initial;
+                                margin-right: -20px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .filter-item {
+            margin: 20px;
+
+            .filter-label {
+                font-size: 16px;
+                text-align: left;
+
+                &.rtl {
+                    text-align: right;
+                }
+            }
+            .filter-input {
+                width: 100%;
+                background-color: #e9eaf4;
+                padding: 5px;
+                border: none;
+                border-radius: 5px;
+            }
+        }
+
+        .filter-btn {
+            display: block;
+            margin: 20px;
+            margin-top: 40px;
+            padding: 5px;
+            color: #f3f4f9;
+            background-color: #281958;
+            border: 1px solid #281958;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            &:hover {
+                background: #5b2662;
+                text-decoration: none;
+            }
+        }
+    }
+
+    .pagination {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 30px 0;
+        .prev,
+        .next,
+        .pages .page {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            color: #2c1c59;
+            background-color: #f3f4f9;
+            border: none;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            &.active {
+                color: #f3f4f9;
+                background-color: #281958;
+                text-decoration: none;
+            }
+            &:hover {
+                color: #f3f4f9;
+                background-color: #5b2662;
+                text-decoration: none;
+            }
+        }
+
+        .pages .hiden-pages {
+            line-height: 40px;
+            margin: 0 10px;
+        }
+
+        &.rtl {
+            .prev,
+            .next {
+                transform: rotate(-180deg);
+            }
+        }
+    }
+}
+
+.rtl.taleem-theme {
+    .courses-filter {
+        .filter-accordion {
+            .filter-card {
+                .filter-header {
+                    text-align: right;
+
+                    .filter-title {
+                        &::after {
+                            float: left;
+                            margin-left: initial;
+                            margin-right: auto;
+                        }
+                    }
+                }
+
+                .filter-body {
+                    .filter-group {
+                        .filter-group-title {
+                            text-align: right;
+                        }
+                        .filter-group-body {
+                            padding-left: initial;
+                            padding-right: 10px;
+                        }
+                    }
+
+                    .form-check {
+                        padding-left: initial;
+                        padding-right: 20px;
+                        text-align: right;
+
+                        .form-check-input {
+                            margin-left: initial;
+                            margin-right: -20px;
+                        }
+                    }
+                }
+            }
+        }
+
+        .filter-item {
+            .filter-label {
+                text-align: right;
+            }
+        }
+    }
+
+    .pagination {
+        .prev,
+        .next {
+            transform: rotate(-180deg);
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    .taleem-theme .courses-container {
+      flex-flow: column nowrap;
+    }
+    .taleem-theme .courses-filter {
+      width: 100%;
+    }
+}

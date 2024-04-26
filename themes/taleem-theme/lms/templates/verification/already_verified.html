@@ -1,0 +1,18 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _
+
+%>
+<%inherit file="../main.html" />
+
+<%block name="pagetitle">${_("ID Verification")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <section class="container about">
+        <h1>
+            <%block name="pageheader">${_("ID Verification")}</%block>
+        </h1>
+        <p>
+            <%block name="pagecontent">${_("You are already verified. There is no need to verify again.")}</%block>
+        </p>
+    </section>
+</main>

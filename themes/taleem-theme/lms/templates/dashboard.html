@@ -1,0 +1,670 @@
+<%page expression_filter="h"/>
+<%inherit file="main.html" />
+<%def name="online_help_token()"><% return "learnerdashboard" %></%def>
+<%namespace name='static' file='static_content.html'/>
+<%!
+import pytz
+import six
+from django_user_agents.utils import get_user_agent
+from datetime import datetime, timedelta
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+from django.template import RequestContext
+from entitlements.models import CourseEntitlement
+from third_party_auth import pipeline
+from util.date_utils import strftime_localized
+from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangolib.js_utils import dump_js_escaped_json, js_escaped_string
+from lms.djangoapps.courseware.access import has_access
+from openedx.core.djangolib.markup import HTML, Text
+
+from student.models import CourseEnrollment
+from student.roles import CourseStaffRole, CourseAccessRole
+from openedx.custom.wishlist.models import Wishlist
+from openedx.custom.taleem.utils import can_create_exam
+%>
+
+<%
+  cert_name_short = settings.CERT_NAME_SHORT
+  cert_name_long = settings.CERT_NAME_LONG
+  is_teacher = CourseAccessRole.objects.filter(
+     user=user, role__in=['staff', 'instructor']
+  ).exists()
+  is_staff = user.is_staff
+  exam_template_name = 'timed_exam/exam.html'
+  if (is_teacher and can_create_exam(user)) or is_staff:
+    exam_template_name = 'timed_exam/exam_teacher.html'
+
+  user_agent = get_user_agent(request)
+  seb_settings = configuration_helpers.get_value('TA3LEEM_BROWSER', {})
+  can_use_normal_browser = user.ta3leem_profile.can_use_normal_browser
+  is_tb = not seb_settings or "Ta3leem/2.0" in user_agent.ua_string or can_use_normal_browser
+  browser_download_link = seb_settings.get('EXE', None)
+  config_download_link = seb_settings.get('CONFIG_FILE', None)
+%>
+
+<%block name="pagetitle">${_("Dashboard")}</%block>
+<%block name="bodyclass">view-dashboard is-authenticated</%block>
+
+<%block name="header_extras">
+<link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/loading-bar/loading-bar.css')}"/>
+<link rel="stylesheet" type="text/css" href="${static.url('assets/vendor/datatables/dataTables.bootstrap4.min.css')}"/>
+<link rel="stylesheet" href="${static.url('assets/vendor/star-rating/star-rating.min.css')}">
+<style type="text/css">
+  .content-wrapper {
+    margin-top: 0 !important;
+  }
+  #my-exams, .my-courses {border-radius: 5px;}
+  .dashboard .nav-tabs a, .dashboard .nav-tabs a:hover {text-decoration:none;}
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image {width: 30%; max-height: unset;}
+  .dashboard .main-container .my-courses .listing-courses .course-item .course-container {padding: 10px;}
+  .dashboard a.user-report-btn {
+    display: block;
+    margin: 0;
+    margin-bottom: 20px;
+    padding: 10px;
+    color: #f3f4f9;
+    background-color: #281958;
+    border: 1px solid #281958;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .dashboard a.user-report-btn:hover {
+    background: #5b2662;
+    color: #f3f4f9;
+    text-decoration: none;
+  }
+</style>
+% for template_name in ["donation"]:
+<script type="text/template" id="${template_name}-tpl">
+  <%static:include path="dashboard/${template_name}.underscore" />
+</script>
+% endfor
+</%block>
+
+<%block name="js_extra">
+  <script src="${static.url('js/commerce/credit.js')}"></script>
+  <!-- Page level plugins -->
+  <script src="${static.url('assets/vendor/datatables/jquery.dataTables.min.js')}"></script>
+  <script src="${static.url('assets/vendor/datatables/dataTables.bootstrap4.min.js')}"></script>
+  <script type="text/javascript" src="${static.url('assets/vendor/star-rating/star-rating.min.js')}"></script>
+
+  <%static:js group='dashboard'/>
+
+  <!-- Page level custom js -->
+  <script src="${static.url('assets/js/dashboard.js')}"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+
+      // Init data table
+      $('#dataTable').DataTable({
+          pageLength: 4,
+          order: [],
+          language: {
+              url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+          },
+      });
+
+      $('#dataTableLiveClass').DataTable({
+          pageLength: 4,
+          order: [],
+          language: {
+              url: (typeof datatablesLangPath !== 'undefined') ? datatablesLangPath : "",
+          },
+      });
+
+      // ************ Wishlist: Remove Favorite
+      $(".remove-wishlist").click(function(e){
+          var course_id = $(this).data('course-key');
+          var $el = $(this);
+          var $ul = $el.closest('.listing-courses');
+          jQuery.ajax({
+              type: "DELETE",
+              url: "/api/wishlist/remove/",
+              data: {'course_key': course_id},
+              success: function (res) {
+                  var $target = $el.closest('.course-container');
+                  $target.remove();
+                  if($(".remove-wishlist").length <= 0) {
+                      $ul.html("${_('You haven\'t added any courses to wishlist yet.')}");
+                  }
+              },
+              error: function (xhr) { // if error occured
+                  alert('Something went wrong!');
+              }
+          });
+      });
+
+      edx.dashboard.legacy.init({
+        dashboard: "${reverse('dashboard') | n, js_escaped_string}",
+        signInUser: "${reverse('signin_user') | n, js_escaped_string}",
+        changeEmailSettings: "${reverse('change_email_settings') | n, js_escaped_string}"
+      });
+
+      function initStars(initialRating, startElementId){
+        var $startElement = $(document.getElementById(startElementId));
+
+        try {
+          // Unload
+          $startElement.starRating('unload');
+        } catch(err) {console.log('Skip unloading');}
+        // Init rating
+
+        $startElement.starRating({
+            initialRating: initialRating,
+            starSize: 20,
+            useFullStars: true,
+            disableAfterRate: false,
+            starShape: 'rounded',
+            activeColor: '#Ff9933',
+            hoverColor: '#Ff9933',
+            ratedColor: '#Ff9933',
+            useGradient: false,
+            callback: function(currentRating, $el){
+                jQuery.ajax({
+                    type: "POST",
+                    url: $el.data('courseratingurl'),
+                    data: {
+                      stars: currentRating,
+                    },
+                    success: function (res) {
+                        $el.parent().parent().find('.avg-rating').text(res.avg);
+                        $el.parent().parent().find('.num-reviews').text(res.count);
+                    },
+                });
+            }
+        });
+      }
+      $( ".course-rating" ).each(function() {
+          initStars($(this).data('userrating'), $(this).attr('id'));
+      });
+
+      // Javascript to enable link to tab
+      var hash = location.hash.replace(/^#/, '');  // ^ means starting, meaning only match the first hash
+      if (hash) {
+        $('.nav-tabs a[href="#nav-' + hash + '"]').tab('show');
+      }
+      // Change hash for page-reload
+      $('.nav-tabs a').on('shown.bs.tab', function (e) {
+        window.location.hash = e.target.hash.replace('nav-', '');
+      })
+    });
+  </script>
+  <%static:webpack entry="UnenrollmentFactory">
+    UnenrollmentFactory({
+      urls: {
+        dashboard: "${reverse('dashboard') | n, js_escaped_string}",
+        signInUser: "${reverse('signin_user') | n, js_escaped_string}",
+        changeEmailSettings: "${reverse('change_email_settings') | n, js_escaped_string}",
+        browseCourses: "${marketing_link('COURSES') | n, js_escaped_string}"
+      },
+      isEdx: false
+    });
+  </%static:webpack>
+  <%static:webpack entry="EntitlementUnenrollmentFactory">
+    ## Wait until the document is fully loaded before initializing the EntitlementUnenrollmentView
+    ## to ensure events are setup correctly.
+    $(document).ready(function() {
+      EntitlementUnenrollmentFactory({
+        dashboardPath: "${reverse('dashboard') | n, js_escaped_string}",
+        signInPath: "${reverse('signin_user') | n, js_escaped_string}",
+        browseCourses: "${marketing_link('COURSES') | n, js_escaped_string}",
+        isEdx: false
+      });
+    });
+  </%static:webpack>
+  % if settings.FEATURES.get('ENABLE_DASHBOARD_SEARCH'):
+    <%static:require_module module_name="course_search/js/dashboard_search_factory" class_name="DashboardSearchFactory">
+        DashboardSearchFactory();
+    </%static:require_module>
+  % endif
+  % if redirect_message:
+    <%static:require_module module_name="js/views/message_banner" class_name="MessageBannerView">
+        var banner = new MessageBannerView({urgency: 'low', type: 'warning'});
+        $('#content').prepend(banner.$el);
+        banner.showMessage(${redirect_message | n, dump_js_escaped_json})
+    </%static:require_module>
+  % endif
+  % if recovery_email_message:
+      <%static:require_module module_name="js/views/message_banner" class_name="MessageBannerView">
+        var banner = new MessageBannerView({urgency: 'low', type: 'warning', hideCloseBtn: false, isRecoveryEmailMsg: true});
+        $('#content').prepend(banner.$el);
+        banner.showMessage(${recovery_email_message | n, dump_js_escaped_json})
+      </%static:require_module>
+  % endif
+  % if recovery_email_activation_message:
+      <%static:require_module module_name="js/views/message_banner" class_name="MessageBannerView">
+        var banner = new MessageBannerView({urgency: 'low', type: 'warning', isRecoveryEmailMsg: true});
+        $('#content').prepend(banner.$el);
+        banner.showMessage(${recovery_email_activation_message | n, dump_js_escaped_json})
+      </%static:require_module>
+  % endif
+</%block>
+
+
+<div class="home-slider">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="content col-md-6">
+          <h1><strong>${_("Interactive e-learning")}</strong><br /><strong>${_("platform")}</strong> ${_("with a")}<br/><span class="creative-text">${_("creative")}</span> <span class="technologies-text">${_("technologies.")}</span></h1>
+        <ul class="list">
+          <li>${_("- Ta3leem  platform introduces the latest innovative technologies in")} <br/> ${_("e-learning.")}</li>
+          <li>${_("- Divide the Courses into small sections that make it easy to find and easy to understand.")}</li>
+        </ul>
+      </div>
+      <div class="image-block col-md-6">
+        <img src="${static.url('images/img01.png')}" alt="">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="dashboard-notifications" tabindex="-1">
+  <div class="loading-block login-screen-loader" style="display:none"><i class="las la-4x la-spin la-sync"></i></div>
+    %if banner_account_activation_message:
+        <div class="dashboard-banner">
+            ${banner_account_activation_message | n, decode.utf8}
+        </div>
+    %endif
+
+    %if enrollment_message:
+        <div class="dashboard-banner">
+            ${enrollment_message | n,  decode.utf8}
+        </div>
+    %endif
+
+    %if enterprise_message:
+        <div class="dashboard-banner">
+            ${ enterprise_message | n, decode.utf8 }
+        </div>
+    %endif
+
+    %if account_activation_messages:
+      <div class="activation-message-container">
+        % for account_activation_message in account_activation_messages:
+          <div class="account-activation ${account_activation_message.tags}" role="alert" aria-label="Account Activation Message" tabindex="-1">
+            <div class="message-copy" >
+              ${ account_activation_message | n, decode.utf8 }
+            </div>
+          </div>
+        % endfor
+      </div>
+    %endif
+
+</div>
+
+% if settings.FEATURES.get('SHOW_RESULT_ANNOUNCEMENT_BANNER', False):
+<%include file="results/announcement.html" />
+% endif
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="dashboard" id="dashboard-main">
+      <div class="main-container">
+        <h1 class="dashboard-title">${_("Dashboard")}</h1>
+        <input type="hidden" value="${user.email}" id="user_email" />
+        <nav>
+          <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-my-courses-tab" data-toggle="tab" href="#nav-my-courses" role="tab" aria-controls="nav-my-courses" aria-selected="true">
+              <i class="las la-2x la-school align-middle"></i>
+              ${_("My Courses")}
+              <!-- <img src="${static.url('images/icons/course.svg')}" style="height: 30px;"> -->
+            </a>
+            <a class="nav-item nav-link" id="nav-my-exams-tab" data-toggle="tab" href="#nav-my-exams" role="tab" aria-controls="nav-my-exams" aria-selected="false">
+              <i class="las la-2x la-clipboard-list align-middle"></i>
+              ${_("My Exams")}
+              <!-- <img src="${static.url('images/icons/exam.svg')}" style="height: 30px;"> -->
+            </a>
+            <a class="nav-item nav-link" id="nav-wishlist-tab" data-toggle="tab" href="#nav-wishlist" role="tab" aria-controls="nav-wishlist" aria-selected="false">
+              <i class="lar la-2x la-heart align-middle"></i>
+              ${_("Wishlist")}
+              <!-- <img src="${static.url('images/icons/wishlist.svg')}" style="height: 30px;"> -->
+            </a>
+            <a class="nav-item nav-link" id="nav-live-class-tab" data-toggle="tab" href="#nav-live-class" role="tab" aria-controls="nav-live-class" aria-selected="false">
+                <i class="las la-2x la-chalkboard-teacher align-middle"></i>
+              ${_("My Live Classes")}
+            </a>
+          </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+          <div class="tab-pane fade show active" id="nav-my-courses" role="tabpanel" aria-labelledby="nav-my-courses-tab">
+            <div class="my-courses p-4 bg-white" id="my-courses-wrapper">
+
+              % if len(course_entitlements + course_enrollments) > 0:
+                <ul class="listing-courses">
+                <%
+                    share_settings = configuration_helpers.get_value(
+                        'SOCIAL_SHARING_SETTINGS',
+                        getattr(settings, 'SOCIAL_SHARING_SETTINGS', {})
+                    )
+                %>
+                % for dashboard_index, enrollment in enumerate(course_entitlements + course_enrollments):
+                  <%
+                    # Check if the course run is an entitlement and if it has an associated session
+                    entitlement = enrollment if isinstance(enrollment, CourseEntitlement) else None
+                    entitlement_session = entitlement.enrollment_course_run if entitlement else None
+                    entitlement_days_until_expiration = entitlement.get_days_until_expiration() if entitlement else None
+                    entitlement_expiration = datetime.now(tz=pytz.UTC) + timedelta(days=entitlement_days_until_expiration) if (entitlement and entitlement_days_until_expiration < settings.ENTITLEMENT_EXPIRED_ALERT_PERIOD) else None
+                    entitlement_expiration_date = strftime_localized(entitlement_expiration, 'SHORT_DATE') if entitlement and entitlement_expiration else None
+                    entitlement_expired_at = strftime_localized(entitlement.expired_at_datetime, 'SHORT_DATE') if entitlement and entitlement.expired_at_datetime else None
+
+                    is_fulfilled_entitlement = True if entitlement and entitlement_session else False
+                    is_unfulfilled_entitlement = True if entitlement and not entitlement_session else False
+
+                    entitlement_available_sessions = []
+                    if entitlement:
+                      # Grab the available, enrollable sessions for a given entitlement and scrape them for relevant attributes
+                      entitlement_available_sessions = [{
+                        'session_id': course['key'],
+                        'enrollment_end': course['enrollment_end'],
+                        'pacing_type': course['pacing_type'],
+                        'advertised_start': CourseOverview.get_from_id(CourseKey.from_string(course['key'])).advertised_start,
+                        'start': CourseOverview.get_from_id(CourseKey.from_string(course['key'])).start,
+                        'end': CourseOverview.get_from_id(CourseKey.from_string(course['key'])).end,
+                        } for course in course_entitlement_available_sessions[str(entitlement.uuid)]]
+                      if is_fulfilled_entitlement:
+                        # If the user has a fulfilled entitlement, pass through the entitlements CourseEnrollment object
+                        enrollment = entitlement_session
+                      else:
+                        # If the user has an unfulfilled entitlement, pass through a bare CourseEnrollment object to populate card with metadata
+                        pseudo_session = unfulfilled_entitlement_pseudo_sessions[str(entitlement.uuid)]
+                        if not pseudo_session:
+                            continue
+                        pseudo_key = pseudo_session['key']
+                        if not isinstance(pseudo_key, CourseKey):
+                          pseudo_key = CourseKey.from_string(pseudo_session['key'])
+                        enrollment = CourseEnrollment(user=user, course=CourseOverview.get_from_id(pseudo_key), mode=pseudo_session['type'])
+                      # We only show email settings for entitlement cards if the entitlement has an associated enrollment
+                      show_email_settings = is_fulfilled_entitlement and (entitlement_session.course_id in show_email_settings_for)
+                    else:
+                      show_email_settings = (enrollment.course_id in show_email_settings_for)
+
+                    session_id = enrollment.course_id
+                    show_courseware_link = show_courseware_links_for.get(session_id, False)
+                    cert_status = cert_statuses.get(session_id)
+                    can_refund_entitlement = entitlement and entitlement.is_entitlement_refundable()
+                    can_unenroll = (not cert_status) or cert_status.get('can_unenroll') if not unfulfilled_entitlement else False
+                    credit_status = credit_statuses.get(session_id)
+                    course_mode_info = all_course_modes.get(session_id)
+                    is_paid_course = True if entitlement else (session_id in enrolled_courses_either_paid)
+                    is_course_blocked = (session_id in block_courses)
+                    course_verification_status = verification_status_by_course.get(session_id, {})
+                    course_requirements = courses_requirements_not_met.get(session_id)
+                    related_programs = inverted_programs.get(six.text_type(entitlement.course_uuid if is_unfulfilled_entitlement else session_id))
+                    show_consent_link = (session_id in consent_required_courses)
+                    course_overview = enrollment.course_overview
+                    resume_button_url = resume_button_urls[dashboard_index]
+                  %>
+                  <%include file='dashboard/_dashboard_course_listing.html' args='course_overview=course_overview, course_card_index=dashboard_index, enrollment=enrollment, is_unfulfilled_entitlement=is_unfulfilled_entitlement, is_fulfilled_entitlement=is_fulfilled_entitlement, entitlement=entitlement, entitlement_session=entitlement_session, entitlement_available_sessions=entitlement_available_sessions, entitlement_expiration_date=entitlement_expiration_date, entitlement_expired_at=entitlement_expired_at, show_courseware_link=show_courseware_link, cert_status=cert_status, can_refund_entitlement=can_refund_entitlement, can_unenroll=can_unenroll, credit_status=credit_status, show_email_settings=show_email_settings, course_mode_info=course_mode_info, is_paid_course=is_paid_course, is_course_blocked=is_course_blocked, verification_status=course_verification_status, course_requirements=course_requirements, dashboard_index=dashboard_index, share_settings=share_settings, user=user, related_programs=related_programs, display_course_modes_on_dashboard=display_course_modes_on_dashboard, show_consent_link=show_consent_link, enterprise_customer_name=enterprise_customer_name, resume_button_url=resume_button_url, course_ratings=course_ratings, is_tb=is_tb' />
+                % endfor
+                % if show_load_all_courses_link:
+                    <br/>
+                     ${len(course_enrollments)} ${_("results successfully populated,")}
+                     <a href="${reverse('dashboard')}?course_limit=None">
+                         ${_("Click to load all enrolled courses")}
+                    </a>
+                %endif
+                </ul>
+              % else:
+                <div class="empty-dashboard-message">
+                  % if display_dashboard_courses:
+                    <p>${_("You are not enrolled in any courses yet.")}</p>
+                    % if empty_dashboard_message:
+                      <p class="custom-message">${empty_dashboard_message | n, decode.utf8}</p>
+                    %endif
+                    % if settings.FEATURES.get('COURSES_ARE_BROWSABLE'):
+                      <a class="btn btn-primary" href="${marketing_link('COURSES')}">
+                        ${_("Explore courses")}
+                      </a>
+                    %endif
+                  % else:
+                  <p>${_("Activate your account!")}</p>
+                  <p class="custom-message">${ activate_account_message | n, decode.utf8 }</p>
+                  % endif
+              </div>
+              % endif
+
+              % if staff_access and len(errored_courses) > 0:
+                <div id="course-errors">
+                  <h2>${_("Course-loading errors")}</h2>
+
+                % for course_dir, errors in errored_courses.items():
+                   <h3>${course_dir}</h3>
+                       <ul>
+                     % for (msg, err) in errors:
+                         <li>${msg}
+                           <ul><li><pre>${err}</pre></li></ul>
+                         </li>
+                     % endfor
+                       </ul>
+                % endfor
+                </div>
+              % endif
+            </div>
+          </div>
+          <div class="tab-pane fade" id="nav-my-exams" role="tabpanel" aria-labelledby="nav-my-exams-tab">
+            <div class="my-exams p-4 bg-white">
+              <div class="table-responsive">
+                <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>${_("Name")}</th>
+                      <th>${_("Duration")}</th>
+                      <th>${_("Starts")}</th>
+                      <th>${_("Deadline")}</th>
+                      <th>${_("Mode of Examination")}</th>
+                      <th>${_("Exam Status")}</th>
+                      % if user.is_staff or is_teacher:
+                        <th>${_("Attempted")}</th>
+                        <th>${_("Reviewed")}</th>
+                      % else:
+                        <th>${_("Attempt Status")}</th>
+                        <th>${_("Score")}</th>
+                      % endif
+                      <th>${_("Actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  % for exam in exam_enrollments:
+                    <%include file="${exam_template_name}" args="exam=exam, is_tb=is_tb, tb_exam_url=config_download_link" />
+                  % endfor
+                  </tbody>
+                </table>
+              </div>
+
+               % if not exam_enrollments:
+                 <p>${_("You don't have a scheduled exams yet.")}</p>
+               % endif
+
+            </div>
+          </div>
+          <div class="tab-pane fade" id="nav-wishlist" role="tabpanel" aria-labelledby="nav-wishlist-tab">
+            <div class="my-courses p-4 bg-white">
+              <ul class="listing-courses">
+              <%
+                  share_settings = configuration_helpers.get_value(
+                      'SOCIAL_SHARING_SETTINGS',
+                      getattr(settings, 'SOCIAL_SHARING_SETTINGS', {})
+                  )
+              %>
+              <% wishlist_courses = Wishlist.get_favorite_courses(user) %>
+              % for course in wishlist_courses:
+                <li class="course-item">
+                  <%include file="wishlist/course.html" args="course=course, share_settings=share_settings" />
+                </li>
+              % endfor
+
+              % if not wishlist_courses:
+                <li>${_("You haven't added any courses to wishlist yet.")}</li>
+              % endif
+
+              </ul>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="nav-live-class" role="tabpanel" aria-labelledby="nav-live-class-tab">
+            <div class="live-class p-4 bg-white">
+              <div class="table-responsive">
+                <table class="table table-bordered text-center" id="dataTableLiveClass" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>${_("Name")}</th>
+                      <th>${_("Start Time")}</th>
+                      <th>${_("Duration")}</th>
+                      <th>${_("Teacher")}</th>
+                      <th>${_("Status")}</th>
+                      <th>${_("Action")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    % for live_class in live_classes:
+                       <%include file="live_class/class.html" args="live_class=live_class" />
+                    % endfor
+                  </tbody>
+                </table>
+              </div>
+
+               % if not live_classes:
+                 <p>${_("You don't have any scheduled live class yet.")}</p>
+               % endif
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="side-container" role="complementary" aria-label="messages">
+        <a href="/reports" class="user-report-btn"><i class="las la-chart-pie mx-1"></i>${_('Reports and Statistics')}</a>
+        %if display_sidebar_account_activation_message:
+          <div class="sidebar-notification">
+            <%include file="${static.get_template_path('registration/account_activation_sidebar_notice.html')}" />
+          </div>
+        % endif
+
+        % if settings.FEATURES.get('ENABLE_DASHBOARD_SEARCH'):
+          <div id="dashboard-search-bar" class="search-bar dashboard-search-bar" role="search" aria-label="Dashboard">
+            <form class="search-form">
+              <label for="dashboard-search-input">${_('Search Your Courses')}</label>
+              <div class="search-field-wrapper">
+                <input id="dashboard-search-input" type="text" class="search-field"/>
+                <button type="submit" class="search-button" title="${_('Search')}">
+                  <span class="icon las la-lg la-search" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="cancel-button" title="${_('Clear search')}">
+                  <span class="icon las la-lg la-trash" aria-hidden="true"></span>
+                </button>
+              </div>
+            </form>
+          </div>
+          <div id="dashboard-search-results" class="search-results dashboard-search-results"></div>
+        % endif
+
+        <%block name="skip_links">
+          % if settings.FEATURES.get('ENABLE_ANNOUNCEMENTS'):
+            <a id="announcements-skip" class="nav-skip sr-only sr-only-focusable" href="#announcements">${_("Skip to list of announcements")}</a>
+          % endif
+        </%block>
+        % if settings.FEATURES.get('ENABLE_ANNOUNCEMENTS'):
+          <%include file='dashboard/_dashboard_announcements.html' />
+        % endif
+
+        % if display_sidebar_on_dashboard:
+          <div class="profile-sidebar" id="profile-sidebar" role="region" aria-label="Account Status Info">
+            <header class="profile">
+              <h2 class="account-status-title sr">${_("Account Status Info")}: </h2>
+            </header>
+            <div class="user-info">
+              <ul>
+
+                <%include file="${static.get_template_path('dashboard/_dashboard_status_verification.html')}" />
+
+                % if not is_tb and browser_download_link and config_download_link:
+                <li class="mt-4 status status-verification">
+                  <span class="title status-title">${_("Ta3leem Browser")}</span>
+                  <p class="status-note">${_("To view courses you need to install the Ta3leem Browser")}</p>
+                  <a href="${browser_download_link}" class="btn btn-primary">
+                    <i class="fa fa-download mr-2"></i> ${_("Download Ta3leem Browser")}
+                  </a>
+                  <p class="status-note mt-2">${_("Once you are ready with our browser, click below link to start viewing the courses.")}</p>
+                  <a href="${config_download_link}">
+                    <i class="fa fa-sign-in mr-2"></i> ${_("Open Ta3leem Browser")}
+                  </a>
+                </li>
+                % endif
+
+              </ul>
+            </div>
+          </div>
+        % endif
+      </div>
+    </div>
+</main>
+
+<div id="email-settings-modal" class="modal" aria-hidden="true">
+  <div class="inner-wrapper" role="dialog" aria-labelledby="email-settings-title">
+    <button class="close-modal">
+      <span class="icon las la-lg la-trash" aria-hidden="true"></span>
+      <span class="sr">
+        ## Translators: this is a control to allow users to exit out of this modal interface (a menu or piece of UI that takes the full focus of the screen)
+        ${_("Close")}
+      </span>
+    </button>
+
+    <header>
+      <h2 id="email-settings-title">
+        ${Text(_("Email Settings for {course_number}")).format(course_number=HTML('<span id="email_settings_course_number"></span>'))}
+        <span class="sr">,
+          ## Translators: this text gives status on if the modal interface (a menu or piece of UI that takes the full focus of the screen) is open or not
+          ${_("window open")}
+        </span>
+      </h2>
+      <hr/>
+    </header>
+
+    <form id="email_settings_form" method="post">
+      <input name="course_id" id="email_settings_course_id" type="hidden" />
+      <label><input type="checkbox" id="receive_emails" name="receive_emails" />${_("Receive course emails")} </label>
+      <div class="submit">
+        <input type="submit" id="submit" value="${_("Save Settings")}" />
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="unenroll-modal" class="modal unenroll-modal" aria-hidden="true">
+  <div class="inner-wrapper" role="dialog" aria-labelledby="unenrollment-modal-title" aria-live="polite">
+    <button class="close-modal">
+      <span class="icon las la-lg la-trash" aria-hidden="true"></span>
+      <span class="sr">
+        ## Translators: this is a control to allow users to exit out of this modal interface (a menu or piece of UI that takes the full focus of the screen)
+        ${_("Close")}
+      </span>
+    </button>
+
+    <header class="unenroll-header">
+      <h2 id="unenrollment-modal-title">
+        <span id='track-info'></span>
+        <span id='refund-info'></span>
+        <span class="sr">,
+          ## Translators: this text gives status on if the modal interface (a menu or piece of UI that takes the full focus of the screen) is open or not
+          ${_("window open")}
+        </span>
+      </h2>
+      <hr/>
+    </header>
+    <div id="unenroll_error" class="modal-form-error"></div>
+    <form id="unenroll_form" method="post" data-remote="true" action="${reverse('change_enrollment')}">
+      <input name="course_id" id="unenroll_course_id" type="hidden" />
+      <input name="enrollment_action" type="hidden" value="unenroll" />
+      <div class="submit">
+        <input class="submit-button" name="submit" type="submit" value="${_("Unenroll")}" />
+      </div>
+    </form>
+  </div>
+</div>
+
+<%include file="dashboard/_dashboard_entitlement_unenrollment_modal.html"/>

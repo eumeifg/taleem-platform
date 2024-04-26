@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans trimmed %}{{ platform_name }} ID Verification Photos Received{% endblocktrans %}
+{% endautoescape %}

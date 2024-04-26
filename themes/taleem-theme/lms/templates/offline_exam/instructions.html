@@ -1,0 +1,134 @@
+<%page expression_filter="h"/>
+<%!
+  import json
+  from django.utils.translation import ugettext as _
+  from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+<style>
+main {
+    padding: 40px;
+}
+.content-wrapper {background-color: #fff;}
+.action-primary {background-image:none;}
+.action-primary:hover,
+.action-primary:focus,
+.action-primary:active {
+  background-image:none !important;
+  text-shadow: none;
+}
+#overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,1);
+  z-index: 2;
+  cursor: pointer;
+}
+#loading{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50px;
+  line-height: 50px;
+  color: white;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+}
+</style>
+</%block>
+
+<%block name="pagetitle">${_("Offline Exam Instructions")}</%block>
+
+<main id="main" tabindex="-1" aria-label="Content" class="bootstrap-iso">
+    <div class="container-fluid">
+        <div class="card h-100 p-4">
+            <div class="card-title">
+                <h3>
+                    ${exam.display_name} is a Offline Exam (${total_time})
+                </h3>
+            </div>
+            <div class="card-body">
+                <p>
+                    ${_("This exam has a time limit associated with it.")}
+                    <strong>
+                    ${_("To pass this exam, you must complete the problems in the time allowed.")}
+                    </strong>
+                    ${_("After you select ")}
+                    <strong>
+                    ${_("I am ready to start this offline exam,")}
+                    </strong>
+                    ${_("you will have ")} ${total_time.lower()} ${_(" to complete and submit the exam.")}
+                </p>
+                <h4>${_("Before starting the exam, please confirm the following:")}</h4>
+                <ol>
+                  <li>${_("Sitting directly towards the computer and the camera")}</li>
+                  <li>${_("Make sure that the lighting in the room is suitable for your image to appear clearly")}</li>
+                  <li>${_("Avoid turning or bending over during the exam (this may be considered a cheating attempt)")}</li>
+                  <li>${_("It is forbidden to cover the face or eyes in any way during the exam (unless this happens accidentally)")}</li>
+                  <li>${_("Avoid leaving the room during the exam (this may be considered an attempt to cheat)")}</li>
+                  <li>${_("It is not allowed for another person to be in the room with you or near you during the exam (this may be considered an attempt to cheat)")}</li>
+                  <li>${_("It is not allowed to read questions aloud or move the lips while reading the questions (this may be considered an attempt to cheat)")}</li>
+                  <li>${_("When the connection or power is cut off, you can reconnect and continue the examination from the question that was answered before the disconnection")}</li>
+                  <li>${_("It is not allowed to eat or drink during the exam")}</li>
+                  <li>${_("It is not allowed to move to any other program or website during the exam (this may be considered an attempt to cheat).")}</li>
+                  <li>${_("Be warned, system will capture photos as a part of proctoring process")}</li>
+                  <li>${_("All your movements will be recorded and sent to the teacher with the answers, Non-compliance may expose your score to withholding or any other action the teacher deems appropriate")}</li>
+                </ol>
+                <button class="action-primary p-2 px-4" id="btnReadyToStart">
+                ${_("I am ready to start this offline exam.")}
+                <span class="icon las la la-arrow-circle-right" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="card-footer">
+                <h4>${_("Can I request additional time to complete my exam?")}</h4>
+                <p>
+                    ${_("\n      If you have disabilities,\n      you might be eligible for an additional time allowance on timed exams.\n      Ask your course team for information about additional time allowances.\n    ")}
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="overlay">
+    <div id="loading">
+        <i class="las la la-spin la-sync"></i>
+    </div>
+</div>
+
+<%block name="js_extra">
+<script>
+var markAttemptAsReady = function() {
+  $("#overlay").show();
+  $.ajax({
+    type: "POST",
+    url: "${attempt_status_endpoint}",
+    data: {'status': 'ready_to_start'},
+    success: function (res) {
+      location.reload();
+    },
+    error: function (xhr) { // if error occured
+      console.error(xhr.statusText + xhr.responseText);
+    },
+    complete: function () {
+      $("#overlay").hide();
+    },
+  });
+}
+
+$(document).ready(function(){
+  $("#btnReadyToStart").click(function(){
+    markAttemptAsReady();
+  });
+});
+</script>
+</%block>

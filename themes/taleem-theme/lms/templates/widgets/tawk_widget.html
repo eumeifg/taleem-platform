@@ -1,0 +1,21 @@
+<%!
+  from django.conf import settings
+  from django.utils.translation import get_language_bidi
+%>
+
+<script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+
+  (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    % if get_language_bidi():
+      s1.src='${settings.TAWK_WIDGET_LINK_AR}';
+    % else:
+      s1.src='${settings.TAWK_WIDGET_LINK_EN}';
+    % endif
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+  })();
+</script>

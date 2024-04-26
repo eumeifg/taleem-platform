@@ -1,0 +1,89 @@
+version: '3.1'
+services: 
+  mongodb:
+    image: mongo:3.4.2
+    command: mongod
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=root
+    - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+    - ./mongo/001_users.js:/docker-entrypoint-initdb.d/001_users.js:ro
+    networks:
+    - external
+  redis:
+    image: redis:4.0.10-alpine
+    networks:
+    - external
+  # elasticsearch:
+  #   image: elasticsearch:1.4
+  #   networks:
+  #   - external
+  memcached:
+    image: memcached:1.4
+    networks:
+    - external
+  mysql:
+    image: mysql:5.6
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    environment: 
+    - MYSQL_ROOT_PASSWORD=root
+    networks:
+    - external
+  lms:
+    image: registry.creativeadvtech.com/ta3leem/openedx:latest
+    #command: gunicorn -c /openedx/edx-platform/lms_gunicorn.py lms.wsgi
+    ports:
+    - 8080:8000
+    volumes:
+    - ./config:/openedx/edx-platform/config
+    - ./data:/openedx/edx-data
+    - ./test_root:/openedx/edx-platform/test_root
+    environment:
+    - PORT=8000
+    - ADDRESS=0.0.0.0
+    - LANG=en_US.UTF-8
+    - SETTINGS=production
+    - SERVICE_VARIANT=lms
+    - EDXAPP_TEST_MONGO_HOST=mongodb
+    - LMS_CFG=/openedx/edx-platform/config/lms.yml
+    - EDX_REST_API_CLIENT_NAME=default_env-default_deployment-studio
+    - STUDIO_CFG=/openedx/edx-platform/config/cms.yml
+    - REVISION_CFG=//openedx/edx-platform/config/revisions.yml
+    - CONFIG_ROOT=/openedx/edx-platform
+    - NO_PREREQ_INSTALL=1
+    - SETUPTOOLS_USE_DISTUTILS=stdlib
+    - SKIP_WS_MIGRATIONS=1
+    networks:
+    - external
+  cms:
+    image: registry.creativeadvtech.com/ta3leem/openedx:latest
+    #registry.creativeadvtech.com/openedx:latest
+    #command: gunicorn -c /openedx/edx-platform/cms_gunicorn.py cms.wsgi
+    ports:
+    - 8090:8000
+    - 8100:8010
+    volumes:
+    - ./config:/openedx/edx-platform/config
+    - ./data:/openedx/edx-data
+    - ./test_root:/openedx/edx-platform/test_root
+    environment:
+    - PORT=8010
+    - ADDRESS=0.0.0.0
+    - LANG=en_US.UTF-8
+    - SETTINGS=production
+    - SERVICE_VARIANT=cms
+    - EDXAPP_TEST_MONGO_HOST=mongodb
+    - LMS_CFG=/openedx/edx-platform/config/lms.yml
+    - CMS_CFG=/openedx/edx-platform/config/cms.auth.json
+    - EDX_REST_API_CLIENT_NAME=default_env-default_deployment-studio
+    - STUDIO_CFG=/openedx/edx-platform/config/cms.yml
+    - REVISION_CFG=/openedx/edx-platform/config/revisions.yml
+    - CONFIG_ROOT=/openedx/edx-platform
+    - NO_PREREQ_INSTALL=1
+    - SETUPTOOLS_USE_DISTUTILS=stdlib
+    - SKIP_WS_MIGRATIONS=1
+    networks:
+    - external
+networks:
+  external:
+    external: true

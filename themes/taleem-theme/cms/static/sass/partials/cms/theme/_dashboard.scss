@@ -1,0 +1,33 @@
+.view-dashboard{
+  #tip-available-easy-questions {
+    color: $green;
+    font-weight: bold;
+  }
+  #tip-available-medium-questions {
+    color: $orange;
+    font-weight: bold;
+  }
+  #tip-available-hard-questions {
+    color: $pink;
+    font-weight: bold;
+  }
+}
+
+#stickyModal{
+  @if $bi-app-direction == rtl {
+    direction: rtl;
+    text-align: right !important;
+    a {
+      float: left !important;
+      margin-right: 10px;
+    }
+  }
+}
+
+.data-table {
+  th {
+    @if  $bi-app-direction == rtl {
+      text-align: right;
+    }
+  }
+}

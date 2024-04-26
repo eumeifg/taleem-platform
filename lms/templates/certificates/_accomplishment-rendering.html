@@ -1,0 +1,71 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<%namespace name='static' file='../static_content.html'/>
+<%
+course_mode_class = course_mode if course_mode else ''
+%>
+
+<main class="accomplishment accomplishment-main">
+
+    <div class="wrapper-accomplishment-rendering">
+        <div class="container-certificate">
+            <img src = "/static/certificates/images/cert.svg" alt="certificate">
+
+
+
+            <div class="centered" style="top: 22%; font-family: 'Bahij TheSansArabic ExtraBold';
+             font-size: 6vw; color: #2B215A; letter-spacing: 1px">Certificate</div>
+
+            <div class="centered" style="top: 28%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 2vw; color: #2B215A; letter-spacing: 4px">Of achievement</div>
+
+            <div class="centered" style="top: 42%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 2vw; color: #2B215A;">This certificate is proudly presented to</div>
+
+            <div class="centered" style="top: 50%; font-family: 'Bahij TheSansArabic ExtraBold';
+             font-size: 5.5vw; color: #2B215A; text-transform: uppercase">${accomplishment_copy_name}</div>
+
+            <div class="centered" style="top: 64%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 1.2vw; color: #2B215A;"> in affirmation to successfully completing the full curriculum and <br> tests of <strong>${accomplishment_copy_course_name}</strong> educational course/training course through the online <br> platform of ta3leem.</div>
+
+            <div class="bottom-right" style="bottom: 12%; right: 16%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 1.8vw; color: #2B215A;">Signature</div>
+
+            <div class="top-right" style="top: 10%; right: 10%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 1.0vw; color: #2B215A;">Certificate No.: ${certificate_id_number}</div>
+
+            <div class="top-left" style="top: 10%; left: 10%; font-family: 'Bahij TheSansArabic Plain';
+             font-size: 1.0vw; color: #2B215A;">Date: ${certificate_date_issued}</div>
+        </div>
+    </div>
+
+    <div class="wrapper-accomplishment-metadata">
+        <div class="accomplishment-metadata">
+            <h2 class="accomplishment-metadata-title hd-6">${accomplishment_copy_more_about}</h2>
+
+            <div class="wrapper-metadata">
+                <dl class="metadata accomplishment-recipient">
+                    <dt class="label sr-only">${_("Awarded to:")}</dt>
+                    <dd class="value copy copy-meta">
+                        <span class="recipient-img">
+                            <img class="src" src="/static/certificates/images/demo-user-profile.png" alt="Recipient Image">
+                        </span>
+                        <div class="recipient-details">
+                            <h3 class="recipient-name">${accomplishment_copy_name}</h3>
+                            <p class="recipient-username">${accomplishment_copy_username} @ ${platform_name}</p>
+                        </div>
+                    </dd>
+                </dl>
+                <dl class="metadata accomplishment-id">
+                    <dt class="label copy copy-meta">${certificate_id_number_title}:</dt>
+                    <dd class="value copy copy-base">${certificate_id_number}</dd>
+                </dl>
+                <dl class="metadata accomplishment-date">
+                    <dt class="label copy copy-meta">${certificate_date_issued_title}</dt>
+                    <dd class="value copy copy-base">${certificate_date_issued}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+</main>

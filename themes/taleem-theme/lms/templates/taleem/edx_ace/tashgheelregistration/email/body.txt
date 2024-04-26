@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}
+
+Hi {{ username }}, You have been registered in our system. Please change your password for security purpose. Here is your temporary password
+
+{% endblocktrans %}
+
+{{ password }}
+
+{% blocktrans %}The {{ platform_name }} Team{% endblocktrans %}
+{% endautoescape %}

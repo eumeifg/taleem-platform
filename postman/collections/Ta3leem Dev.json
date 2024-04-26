@@ -1,0 +1,1969 @@
+{
+	"info": {
+		"_postman_id": "7f0bddd0-5d17-420d-b8e7-ca011edce203",
+		"name": "Ta3leem Dev",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "16154361-7f0bddd0-5d17-420d-b8e7-ca011edce203"
+	},
+	"item": [
+		{
+			"name": "account",
+			"item": [
+				{
+					"name": "Bearer Access Token",
+					"id": "328a5052-3a8c-4b07-9a0d-fcad63544fd4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "token_type",
+									"value": "bearer",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "skQSsdRVkpbxQEj7kZhUqY0j2fnDZ2vJpe2CVtpS",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "8MOqTRf10TvbTxqMnEnhZqBnrbHu9574JbUd7ucB6lIAqEI7maZ8EG3Emb5O2bI5BRvepSGhaIDfeeOj4clADhSSV8gvqEJzJVXIM9YS5vUdn7zLnmFBzXMq5btjn4qZ",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "usernamehere",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "passwordhere",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/oauth2/access_token/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"oauth2",
+								"access_token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Account",
+					"id": "65b17a52-6cf7-4adc-a535-711d816658d0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJmYW1pbHlfbmFtZSI6ICIiLCAiaWF0IjogMTYzMDkyMTQ5NiwgImdpdmVuX25hbWUiOiAiIiwgInN1cGVydXNlciI6IHRydWUsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJuYW1lIjogIm5hcmVzaCIsICJzdWIiOiAiODRiZTc4YWViN2Q0NTg0OTBjYTQ0MzQyYjY4ODViYTQiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJleHAiOiAxNjMwOTU3NDk2LCAidmVyc2lvbiI6ICIxLjIuMCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInNjb3BlcyI6IFsicmVhZCIsICJwcm9maWxlIiwgIndyaXRlIiwgImVtYWlsIl0sICJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIn0.5zf6nERQIql5qgI8SuHtDJ9LLOmlP6-sFJYrBYvoh00",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"calendar_receive_reminder_notifications\": \"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/accounts/naresh",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"user",
+								"v1",
+								"accounts",
+								"naresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password Reset",
+					"id": "fb54a781-f785-4f56-bc55-89bc7598e786",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJpYXQiOiAxNjMxNTk2NTMzLCAiZ2l2ZW5fbmFtZSI6ICJOYXJlc2giLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAic3ViIjogIjg0YmU3OGFlYjdkNDU4NDkwY2E0NDM0MmI2ODg1YmE0IiwgImVtYWlsIjogIm5hcmVzaC5tYWNreUBnbWFpbC5jb20iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAicHJlZmVycmVkX3VzZXJuYW1lIjogIm5hcmVzaCIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgInN1cGVydXNlciI6IHRydWUsICJleHAiOiAxNjMxNjMyNTMzLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiZmFtaWx5X25hbWUiOiAiTWFjayIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJzY29wZXMiOiBbInByb2ZpbGUiLCAid3JpdGUiLCAicmVhZCIsICJlbWFpbCJdLCAibmFtZSI6ICJuYXJlc2giLCAiYWRtaW5pc3RyYXRvciI6IHRydWV9.xBReO4HcpW307nzkv8lRQKDioRHaAkC6OWis_97YNXQ",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"naresh.macky@gmail.com\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/password_reset/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"password_reset",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change profile visibility",
+					"id": "312ae289-cca8-4805-9357-f72d270d5d02",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgIm5hbWUiOiAiTmFyZXNoIE1ha3dhbmEiLCAiZXhwIjogMTYzMzQ1MjkyOSwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAiZmlsdGVycyI6IFsidXNlcjptZSJdLCAic3ViIjogIjg0YmU3OGFlYjdkNDU4NDkwY2E0NDM0MmI2ODg1YmE0IiwgImlhdCI6IDE2MzM0MTY5MjksICJmYW1pbHlfbmFtZSI6ICJNYWNrIiwgInZlcnNpb24iOiAiMS4yLjAiLCAiZ2l2ZW5fbmFtZSI6ICJOYXJlc2giLCAic2NvcGVzIjogWyJwcm9maWxlIiwgImVtYWlsIiwgInJlYWQiLCAid3JpdGUiXSwgInN1cGVydXNlciI6IHRydWUsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIn0.dMNDuBxYV0UtzP-Aoz8g3ENi3wu28YwYkKi5Bz1hFHQ",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"account_privacy\": \"private\"}",
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/preferences/naresh",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"user",
+								"v1",
+								"preferences",
+								"naresh"
+							]
+						},
+						"description": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/preferences/naresh"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account info",
+					"id": "4f536319-30cb-49b0-ac59-bba8f7dc0593",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "dRvmKtObbPw7YCOHYRPsMNlPUPNow9",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgIm5hbWUiOiAiTmFyZXNoIE1ha3dhbmEiLCAiZXhwIjogMTYzMzQ1MjkyOSwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAiZmlsdGVycyI6IFsidXNlcjptZSJdLCAic3ViIjogIjg0YmU3OGFlYjdkNDU4NDkwY2E0NDM0MmI2ODg1YmE0IiwgImlhdCI6IDE2MzM0MTY5MjksICJmYW1pbHlfbmFtZSI6ICJNYWNrIiwgInZlcnNpb24iOiAiMS4yLjAiLCAiZ2l2ZW5fbmFtZSI6ICJOYXJlc2giLCAic2NvcGVzIjogWyJwcm9maWxlIiwgImVtYWlsIiwgInJlYWQiLCAid3JpdGUiXSwgInN1cGVydXNlciI6IHRydWUsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIn0.dMNDuBxYV0UtzP-Aoz8g3ENi3wu28YwYkKi5Bz1hFHQ",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/accounts/demo",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"user",
+								"v1",
+								"accounts",
+								"demo"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Language",
+					"id": "ff137ce4-5f04-4728-862f-cf35ad6ed4b4",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJzdXBlcnVzZXIiOiB0cnVlLCAiZ2l2ZW5fbmFtZSI6ICJOYXJlc2giLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJmYW1pbHlfbmFtZSI6ICJNYWNrIiwgInN1YiI6ICI4NGJlNzhhZWI3ZDQ1ODQ5MGNhNDQzNDJiNjg4NWJhNCIsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJzY29wZXMiOiBbImVtYWlsIiwgInByb2ZpbGUiLCAid3JpdGUiLCAicmVhZCJdLCAiaWF0IjogMTYzMzk2MTE2MCwgImV4cCI6IDE2MzM5OTcxNjAsICJuYW1lIjogIk5hcmVzaCBNYWt3YW5hIiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImF1ZCI6ICJTRVQtTUUtUExFQVNFIiwgImVtYWlsIjogIm5hcmVzaC5tYWNreUBnbWFpbC5jb20iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAidmVyc2lvbiI6ICIxLjIuMCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIn0.3teeiRalk8Sz_4zIefDqkigTqq56rPKdWjGNfWPzjas",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"pref-lang\": \"ar\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/preferences/naresh",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"user",
+								"v1",
+								"preferences",
+								"naresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registration",
+					"id": "fcad6aff-b9ec-4410-9a85-cbc47b9516e2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "joker@ta3leem.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Joker#9610",
+									"type": "text"
+								},
+								{
+									"key": "is_request_from_mobile_app",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/user/v1/account/registration/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"user",
+								"v1",
+								"account",
+								"registration",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "85bf44c0-3e4e-4a30-bf96-0d396882b810"
+		},
+		{
+			"name": "ebooks",
+			"item": [
+				{
+					"name": "ebook update",
+					"id": "04ad6f5c-f500-408b-957a-1be8efab3056",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJleHAiOiAxNjMyMTcwNDk2LCAiZmFtaWx5X25hbWUiOiAiTWFjayIsICJzdWIiOiAiODRiZTc4YWViN2Q0NTg0OTBjYTQ0MzQyYjY4ODViYTQiLCAicHJlZmVycmVkX3VzZXJuYW1lIjogIm5hcmVzaCIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJzdXBlcnVzZXIiOiB0cnVlLCAidmVyc2lvbiI6ICIxLjIuMCIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJhZG1pbmlzdHJhdG9yIjogdHJ1ZSwgImlhdCI6IDE2MzIxMzQ0OTYsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJuYW1lIjogIm5hcmVzaCIsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIiwgImdpdmVuX25hbWUiOiAiTmFyZXNoIiwgInNjb3BlcyI6IFsid3JpdGUiLCAicmVhZCIsICJwcm9maWxlIiwgImVtYWlsIl0sICJlbWFpbF92ZXJpZmllZCI6IHRydWV9.yjlFN8JhriU8jHvJuaPxSyYY4o472hFJx2adTQ9AHVU",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "pdf",
+									"type": "file",
+									"src": "/C:/Users/91997/Downloads/Project proposal.pdf",
+									"disabled": true
+								},
+								{
+									"key": "title",
+									"value": "API Test",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "cover",
+									"type": "file",
+									"src": "/C:/Users/91997/OneDrive/Pictures/video_cover.png",
+									"disabled": true
+								},
+								{
+									"key": "pages",
+									"value": "33",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "published",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/ebooks/update/07fc92a6-3a82-4ee3-b1ac-2a6c1a7eb677/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"ebooks",
+								"update",
+								"07fc92a6-3a82-4ee3-b1ac-2a6c1a7eb677",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "3a3db356-89bb-46b6-9975-e645cb6623f8"
+		},
+		{
+			"name": "wishlist",
+			"item": [
+				{
+					"name": "Wishlist",
+					"id": "46782f5d-1335-4aad-a12a-f04b85cd24e3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "VNjBgvcIyVD0At19wWbSP0Gd5e1IyD",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJwcmVmZXJyZWRfdXNlcm5hbWUiOiAia2FwaWxhcm9yYTg4MTBAZ21haWwuY29tIiwgImFkbWluaXN0cmF0b3IiOiBmYWxzZSwgInN1YiI6ICIyMzkyZjMzZTc5NGNhYTY1ZTA1MWM3ZTRhNTdmZDg3NyIsICJmYW1pbHlfbmFtZSI6ICIiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAidmVyc2lvbiI6ICIxLjIuMCIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZ2l2ZW5fbmFtZSI6ICIiLCAiZW1haWwiOiAia2FwaWxhcm9yYTg4MTBAZ21haWwuY29tIiwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZSwgImlhdCI6IDE2MzY0NjIyNTMsICJuYW1lIjogImthcGlsIiwgInN1cGVydXNlciI6IGZhbHNlLCAiZXhwIjogMTYzNjQ5ODI1M30.-ruhDuolgCsN82PGgXNAL-YKNkHmvMI4u94CvUuor0s",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer guJ2LG0ngREBuPGC6Or2zoeGcCGG1O",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/wishlist/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"wishlist",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add course to wishlist",
+					"id": "3ab89d3d-913b-4add-ba47-1d0e273abd80",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIiwgImdpdmVuX25hbWUiOiAiTmFyZXNoIiwgImZhbWlseV9uYW1lIjogIk1hY2siLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZXhwIjogMTYzNDIzNDk2NywgImlhdCI6IDE2MzQxOTg5NjcsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgInN1cGVydXNlciI6IHRydWUsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJzY29wZXMiOiBbInJlYWQiLCAid3JpdGUiLCAicHJvZmlsZSIsICJlbWFpbCJdLCAiZmlsdGVycyI6IFsidXNlcjptZSJdLCAibmFtZSI6ICJOYXJlc2ggTWFrd2FuYSIsICJzdWIiOiAiODRiZTc4YWViN2Q0NTg0OTBjYTQ0MzQyYjY4ODViYTQiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZX0.NkXXTOf2AXzj7H9LEHLp2ehJT0KEVKBsEkH78kRazsc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_key\": \"course-v1:Ta3leem+EL-2+T-2020\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/wishlist/add/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"wishlist",
+								"add",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove course from wishlist",
+					"id": "bfabef60-baae-49d6-b5cc-c09d3e5bce6d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIiwgImdpdmVuX25hbWUiOiAiTmFyZXNoIiwgImZhbWlseV9uYW1lIjogIk1hY2siLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZXhwIjogMTYzNDIzNDk2NywgImlhdCI6IDE2MzQxOTg5NjcsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgInN1cGVydXNlciI6IHRydWUsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJzY29wZXMiOiBbInJlYWQiLCAid3JpdGUiLCAicHJvZmlsZSIsICJlbWFpbCJdLCAiZmlsdGVycyI6IFsidXNlcjptZSJdLCAibmFtZSI6ICJOYXJlc2ggTWFrd2FuYSIsICJzdWIiOiAiODRiZTc4YWViN2Q0NTg0OTBjYTQ0MzQyYjY4ODViYTQiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZX0.NkXXTOf2AXzj7H9LEHLp2ehJT0KEVKBsEkH78kRazsc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_key\": \"course-v1:Ta3leem+EL-2+T-2020\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/wishlist/remove/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"wishlist",
+								"remove",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "013a2e79-bf26-48e9-9250-eab118bde54c"
+		},
+		{
+			"name": "certificates",
+			"item": [
+				{
+					"name": "Certificates",
+					"id": "80500fba-7748-41a1-8919-927599b68da4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJhZG1pbmlzdHJhdG9yIjogZmFsc2UsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImVtYWlsIjogImpvc2lwLmdydWJlc2ExMEBnbWFpbC5jb20iLCAiZmFtaWx5X25hbWUiOiAiIiwgImdpdmVuX25hbWUiOiAiIiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImlhdCI6IDE2MzM1MTE0NjUsICJzY29wZXMiOiBbImVtYWlsIiwgIndyaXRlIiwgInByb2ZpbGUiLCAicmVhZCJdLCAiZXhwIjogMTYzMzU0NzQ2NSwgIm5hbWUiOiAiSm9zaXAgR3J1YmVzYSIsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJzdWIiOiAiNTZkMjUzMzVjNDVhODY5YzkyYWE5OWMyNmExNmNhMTUiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAicHJlZmVycmVkX3VzZXJuYW1lIjogImpncnViZXNhQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAic3VwZXJ1c2VyIjogZmFsc2UsICJhdWQiOiAiU0VULU1FLVBMRUFTRSJ9.yuazxAdMDfkR9OeNG2eClnNViEEyVFLwSQdjDky1Cao",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/certificates/v0/certificates/jgrubesa@creativeadvtech.com",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"certificates",
+								"v0",
+								"certificates",
+								"jgrubesa@creativeadvtech.com"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "31a67684-a0ab-4fc4-b155-06f400a794ec"
+		},
+		{
+			"name": "course enrollment",
+			"item": [
+				{
+					"name": "Un-enrollment",
+					"id": "8d0bed69-c701-4934-b2d1-045c7028bcad",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJhZG1pbmlzdHJhdG9yIjogZmFsc2UsICJnaXZlbl9uYW1lIjogIk5hcmVzaCIsICJmYW1pbHlfbmFtZSI6ICJNYWNrIiwgInNjb3BlcyI6IFsid3JpdGUiLCAicmVhZCIsICJwcm9maWxlIiwgImVtYWlsIl0sICJlbWFpbCI6ICJuYXJlc2gubWFja3lAZ21haWwuY29tIiwgImlhdCI6IDE2MzM2ODI3NjAsICJuYW1lIjogIk5hcmVzaCBNYWt3YW5hIiwgImV4cCI6IDE2MzM3MTg3NjAsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAibmFyZXNoIiwgInN1YiI6ICI4NGJlNzhhZWI3ZDQ1ODQ5MGNhNDQzNDJiNjg4NWJhNCIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJ2ZXJzaW9uIjogIjEuMi4wIiwgInN1cGVydXNlciI6IGZhbHNlLCAiZW1haWxfdmVyaWZpZWQiOiB0cnVlfQ.rNDd_lI-zEajbpBqKmX1SCHvM1iLSRQ5Kl8R-gIOKes",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_id\": \"course-v1:taleem+test_11+1122\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/enrollment/v1/unenroll/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"enrollment",
+								"v1",
+								"unenroll",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enrollment",
+					"id": "9b9c3280-922a-4363-af86-657027c79b5c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJnaXZlbl9uYW1lIjogIk5hcmVzaCIsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJlbWFpbCI6ICJkZW1vQHRhM2xlZW0uY29tIiwgIm5hbWUiOiAiRGVtbyBUYWxlZW0iLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiaWF0IjogMTY0NDkyNjM5MSwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgInByZWZlcnJlZF91c2VybmFtZSI6ICJkZW1vIiwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAiZmFtaWx5X25hbWUiOiAiTWFrd2FuYSIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJzdWIiOiAiMzVlZjM3ZGUzMWVjYTEzZjk3ZjZlNTBlYzM2YWU1YjkiLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAic2NvcGVzIjogWyJ3cml0ZSIsICJyZWFkIiwgInByb2ZpbGUiLCAiZW1haWwiXSwgImV4cCI6IDE2NDQ5NjIzOTEsICJ2ZXJzaW9uIjogIjEuMi4wIiwgInN1cGVydXNlciI6IHRydWV9.G1hN5vtO0OH1er-HGW-0jFdOl8CYL55kISyPww66u24",
+								"type": "text"
+							},
+							{
+								"key": "X-EDX-API-KEY",
+								"value": "M9q4E2hd1b29g0gsxeFBSqV",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user\":\"hchammas@creativeadvtech.com\",\r\n    \"mode\":\"timed\",\r\n    \"course_details\": {\r\n        \"course_id\":\"course-v1:Ta3leem:College1:CS+7a404d7bd86a42d+2022T1\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/enrollment/v1/enrollment",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"enrollment",
+								"v1",
+								"enrollment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exam Enrollment",
+					"id": "abfff70c-f96b-4bdb-927f-fb71bb166a1b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJnaXZlbl9uYW1lIjogIk5hcmVzaCIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJuYW1lIjogIkRlbW8gVGFsZWVtIiwgImZhbWlseV9uYW1lIjogIk1ha3dhbmEiLCAiZW1haWxfdmVyaWZpZWQiOiB0cnVlLCAiZW1haWwiOiAiZGVtb0B0YTNsZWVtLmNvbSIsICJzY29wZXMiOiBbInJlYWQiLCAid3JpdGUiLCAiZW1haWwiLCAicHJvZmlsZSJdLCAiaWF0IjogMTY0MjQwNTYxOSwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAic3VwZXJ1c2VyIjogdHJ1ZSwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZSwgInByZWZlcnJlZF91c2VybmFtZSI6ICJkZW1vIiwgImV4cCI6IDE2NDI0NDE2MTksICJ2ZXJzaW9uIjogIjEuMi4wIiwgInN1YiI6ICIzNWVmMzdkZTMxZWNhMTNmOTdmNmU1MGVjMzZhZTViOSIsICJhdWQiOiAiU0VULU1FLVBMRUFTRSJ9.geknNdYfYBulTL7UHpgMo38p9RvRJGZSIzNcUKUExvE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_details\": {\r\n        \"course_id\": \"course-v1:Ta3leem:College1:CS+cc98f200f57b43f+2022T1\"\r\n    },\r\n    \"mode\": \"timed\",\r\n    \"user\": \"naresh\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://cms-ta3leem.dev.env.creativeadvtech.com/api/enrollment/v1/enrollment",
+							"protocol": "https",
+							"host": [
+								"cms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"enrollment",
+								"v1",
+								"enrollment"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "bc3a5787-addf-449c-9905-5d8ddab59fe8"
+		},
+		{
+			"name": "XBlock",
+			"item": [
+				{
+					"name": "Render XBlock",
+					"id": "bb49e227-0355-4d1a-b78f-9f3d73ca9473",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJzdXBlcnVzZXIiOiB0cnVlLCAiZmFtaWx5X25hbWUiOiAiTWFjayIsICJzY29wZXMiOiBbInByb2ZpbGUiLCAicmVhZCIsICJ3cml0ZSIsICJlbWFpbCJdLCAidmVyc2lvbiI6ICIxLjIuMCIsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJuYW1lIjogIk5hcmVzaCBNYWt3YW5hIiwgImVtYWlsIjogIm5hcmVzaC5tYWNreUBnbWFpbC5jb20iLCAiaWF0IjogMTYzNTMzODUyMSwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAiZmlsdGVycyI6IFsidXNlcjptZSJdLCAic3ViIjogIjg0YmU3OGFlYjdkNDU4NDkwY2E0NDM0MmI2ODg1YmE0IiwgInByZWZlcnJlZF91c2VybmFtZSI6ICJuYXJlc2giLCAiZ2l2ZW5fbmFtZSI6ICJOYXJlc2giLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZXhwIjogMTYzNTM3NDUyMSwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZX0.cgeyVrBxwvPI6pHvebS4GiBxpkbc0qzQfTw3VdgJ6N0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/xblock/block-v1:ta3leem+d1008+2020_T2+type@problem+block@2dbbe9e7b8b24082a8eb1330e5b30054?view=student_view",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"xblock",
+								"block-v1:ta3leem+d1008+2020_T2+type@problem+block@2dbbe9e7b8b24082a8eb1330e5b30054"
+							],
+							"query": [
+								{
+									"key": "view",
+									"value": "student_view",
+									"type": "text"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "load m3u8",
+					"id": "6babce81-cad4-4eaa-818d-ff88b4669ff7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjogIjEuMi4wIiwgInByZWZlcnJlZF91c2VybmFtZSI6ICJ2YWRpbSIsICJzdWIiOiAiNDdkYTAzNzdmYWI1YmE2OTllZDRjZTBkY2RkNGI5NTEiLCAiaWF0IjogMTYzNjQ1NDExMiwgImV4cCI6IDE2MzY0OTAxMTIsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJmYW1pbHlfbmFtZSI6ICJHcnViZXNhIiwgImF1ZCI6ICJTRVQtTUUtUExFQVNFIiwgImVtYWlsIjogInZrYXNzaW5AY3JlYXRpdmVhZHZ0ZWNoLmNvbSIsICJnaXZlbl9uYW1lIjogIkpvc2lwIiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgInNjb3BlcyI6IFsicHJvZmlsZSIsICJyZWFkIiwgIndyaXRlIiwgImVtYWlsIl0sICJhZG1pbmlzdHJhdG9yIjogdHJ1ZSwgInN1cGVydXNlciI6IHRydWUsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJuYW1lIjogIlZhZGltIEthIn0.RyXprmRUIYt_4QGcjtIX3923CYhOubnuy2a18hSZew0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/videos/playlist/course-v1:ta3leem+d1008+2020_T2/405623e5-68ff-4ef8-ac55-6c7c47fd35df/720p.m3u8",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"videos",
+								"playlist",
+								"course-v1:ta3leem+d1008+2020_T2",
+								"405623e5-68ff-4ef8-ac55-6c7c47fd35df",
+								"720p.m3u8"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "c2f63611-c8da-4dc1-887d-8823e0b94191"
+		},
+		{
+			"name": "discussion",
+			"item": [
+				{
+					"name": "Get Threads",
+					"id": "d96518f1-6ddb-4c57-b3f3-54a8fb9d473b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiAiYTkxYzc2YmNkMWRjMzc3ZDkzM2RmMWY3MDlmZTRlMzYiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAic2NvcGVzIjogWyJwcm9maWxlIiwgIndyaXRlIiwgImVtYWlsIiwgInJlYWQiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgImVtYWlsIjogInB1c2hwYUByYWouY29tIiwgInByZWZlcnJlZF91c2VybmFtZSI6ICJwdXNocGFAcmFqLmNvbSIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJleHAiOiAxNjQzOTA2MzY4LCAidmVyc2lvbiI6ICIxLjIuMCIsICJuYW1lIjogIlB1c2hwYXJhaiIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJhZG1pbmlzdHJhdG9yIjogZmFsc2UsICJpYXQiOiAxNjQzODcwMzY4LCAiZ2l2ZW5fbmFtZSI6ICJQdXNocGEiLCAic3VwZXJ1c2VyIjogZmFsc2UsICJmYW1pbHlfbmFtZSI6ICJSYWoifQ.E3VlkNO79uq0BzNoEGnImq4wAimrMTDFRtgEcn0Fnrs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_id\": \"course-v1:Ta3leem+EL-2+T-2020\",\r\n    \"requested_fields\": [\"profile_image\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/?course_id=course-v1%3ATa3leem%2BEL-2%2BT-2020",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								""
+							],
+							"query": [
+								{
+									"key": "course_id",
+									"value": "course-v1%3ATa3leem%2BEL-2%2BT-2020"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vote",
+					"id": "36ab31ae-f036-4fc2-8ec7-8c8ce797de52",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkwOTc5MCwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk0NTc5MH0.EJ7pBUfomI7a-iNY418AZHatERADuZQ0sKeec0zYzLY",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"voted\": true\r\n}"
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/6181161a421aa97aca47acd7/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								"6181161a421aa97aca47acd7",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pin a thread",
+					"id": "b1803afc-1800-4c20-b19c-7eba63d493e3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJmYW1pbHlfbmFtZSI6ICJHcnViZXNhIiwgImV4cCI6IDE2MzYzOTExNjUsICJnaXZlbl9uYW1lIjogIkpvc2lwIiwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgInZlcnNpb24iOiAiMS4yLjAiLCAiZW1haWxfdmVyaWZpZWQiOiB0cnVlLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZW1haWwiOiAidmthc3NpbkBjcmVhdGl2ZWFkdnRlY2guY29tIiwgImlhdCI6IDE2MzYzNTUxNjUsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAic2NvcGVzIjogWyJ3cml0ZSIsICJlbWFpbCIsICJyZWFkIiwgInByb2ZpbGUiXSwgIm5hbWUiOiAiVmFkaW0gS2EiLCAic3VwZXJ1c2VyIjogdHJ1ZSwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAic3ViIjogIjQ3ZGEwMzc3ZmFiNWJhNjk5ZWQ0Y2UwZGNkZDRiOTUxIiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXX0.jlSh8vT9bl4x7wkeF5KojLGJINrC3tuhm1OcGZJcEho",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json; charset=utf-8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pinned\": true\r\n}"
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/6181161a421aa97aca47acd7/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								"6181161a421aa97aca47acd7",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "flag abuse",
+					"id": "826e6e32-a0b4-4a91-955d-7b07ccebaa9c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkwOTc5MCwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk0NTc5MH0.EJ7pBUfomI7a-iNY418AZHatERADuZQ0sKeec0zYzLY",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"abuse_flagged\": true\r\n}"
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/6181161a421aa97aca47acd7/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								"6181161a421aa97aca47acd7",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Course Topics",
+					"id": "92e2cb6a-2d3b-41f4-b76e-06abb49c254a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkwOTc5MCwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk0NTc5MH0.EJ7pBUfomI7a-iNY418AZHatERADuZQ0sKeec0zYzLY",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/course_topics/course-v1:ta3leem+d1008+2020_T2/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"course_topics",
+								"course-v1:ta3leem+d1008+2020_T2",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Post",
+					"id": "60b305cc-c160-4f01-b620-ad07d530a1bc",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiAiYTkxYzc2YmNkMWRjMzc3ZDkzM2RmMWY3MDlmZTRlMzYiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAic2NvcGVzIjogWyJwcm9maWxlIiwgIndyaXRlIiwgImVtYWlsIiwgInJlYWQiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgImVtYWlsIjogInB1c2hwYUByYWouY29tIiwgInByZWZlcnJlZF91c2VybmFtZSI6ICJwdXNocGFAcmFqLmNvbSIsICJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJleHAiOiAxNjQzOTA2MzY4LCAidmVyc2lvbiI6ICIxLjIuMCIsICJuYW1lIjogIlB1c2hwYXJhaiIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJhZG1pbmlzdHJhdG9yIjogZmFsc2UsICJpYXQiOiAxNjQzODcwMzY4LCAiZ2l2ZW5fbmFtZSI6ICJQdXNocGEiLCAic3VwZXJ1c2VyIjogZmFsc2UsICJmYW1pbHlfbmFtZSI6ICJSYWoifQ.E3VlkNO79uq0BzNoEGnImq4wAimrMTDFRtgEcn0Fnrs",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_id\": \"course-v1:Ta3leem+EL-2+T-2020\",\r\n    \"type\": \"private\",\r\n    \"topic_id\": \"course\",\r\n    \"title\": \"Mai zukega nai from pushpa\",\r\n    \"raw_body\": \"Body text\"\r\n}"
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"id": "5d0f9cdb-1e7b-496b-a4c1-2e7b96699bdb",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkwOTc5MCwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk0NTc5MH0.EJ7pBUfomI7a-iNY418AZHatERADuZQ0sKeec0zYzLY",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/618225f6421aa97aca47acdb",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								"618225f6421aa97aca47acdb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Post Copy",
+					"id": "295164a6-cb68-41e7-9bf0-d1074a433bbd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkwOTc5MCwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk0NTc5MH0.EJ7pBUfomI7a-iNY418AZHatERADuZQ0sKeec0zYzLY",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"topic_id\": \"course\",\r\n    \"type\": \"discussion\",\r\n    \"title\": \"Title text to test\",\r\n    \"raw_body\": \"Body text to test\"\r\n}"
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/threads/618225f6421aa97aca47acdb",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"threads",
+								"618225f6421aa97aca47acdb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add comment",
+					"id": "3edb83a2-b1b8-489d-ae49-1931d1f836be",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkyNTM5MSwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk2MTM5MX0.449Of6PAiBW6b5AG-D3VEQP5EBscpk7sfNSL8qw-gl0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"thread_id\": \"61823c04421aa97acd47acd7\",\r\n    \"raw_body\": \"Reply with body text to test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/comments/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"comments",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get comments",
+					"id": "17706d49-fe7d-4ddb-b3ef-1a9dc04b48d2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJmYW1pbHlfbmFtZSI6ICJHcnViZXNhIiwgImV4cCI6IDE2MzYzOTExNjUsICJnaXZlbl9uYW1lIjogIkpvc2lwIiwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgInZlcnNpb24iOiAiMS4yLjAiLCAiZW1haWxfdmVyaWZpZWQiOiB0cnVlLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAiZW1haWwiOiAidmthc3NpbkBjcmVhdGl2ZWFkdnRlY2guY29tIiwgImlhdCI6IDE2MzYzNTUxNjUsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAic2NvcGVzIjogWyJ3cml0ZSIsICJlbWFpbCIsICJyZWFkIiwgInByb2ZpbGUiXSwgIm5hbWUiOiAiVmFkaW0gS2EiLCAic3VwZXJ1c2VyIjogdHJ1ZSwgImFkbWluaXN0cmF0b3IiOiB0cnVlLCAic3ViIjogIjQ3ZGEwMzc3ZmFiNWJhNjk5ZWQ0Y2UwZGNkZDRiOTUxIiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXX0.jlSh8vT9bl4x7wkeF5KojLGJINrC3tuhm1OcGZJcEho",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/comments/?thread_id=60e2bdfd421aa9344499f31d",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"comments",
+								""
+							],
+							"query": [
+								{
+									"key": "thread_id",
+									"value": "60e2bdfd421aa9344499f31d"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit comment",
+					"id": "8f3ef995-2925-4197-b780-07b029bb467e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkyNTM5MSwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk2MTM5MX0.449Of6PAiBW6b5AG-D3VEQP5EBscpk7sfNSL8qw-gl0",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"raw_body\": \"Edited text via API\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/comments/61823df9421aa97aca47acdd",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"comments",
+								"61823df9421aa97aca47acdd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete comment",
+					"id": "361474cf-7d0a-473c-9c7a-cb0e26b3b0a2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ICJ2a2Fzc2luQGNyZWF0aXZlYWR2dGVjaC5jb20iLCAiZ2l2ZW5fbmFtZSI6ICJKb3NpcCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAidmFkaW0iLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTYzNTkyNTM5MSwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInN1YiI6ICI0N2RhMDM3N2ZhYjViYTY5OWVkNGNlMGRjZGQ0Yjk1MSIsICJ2ZXJzaW9uIjogIjEuMi4wIiwgImZhbWlseV9uYW1lIjogIkdydWJlc2EiLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAibmFtZSI6ICJWYWRpbSBLYSIsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiYWRtaW5pc3RyYXRvciI6IHRydWUsICJzdXBlcnVzZXIiOiB0cnVlLCAiZXhwIjogMTYzNTk2MTM5MX0.449Of6PAiBW6b5AG-D3VEQP5EBscpk7sfNSL8qw-gl0",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/merge-patch+json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/discussion/v1/comments/61823df9421aa97aca47acdd",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"discussion",
+								"v1",
+								"comments",
+								"61823df9421aa97aca47acdd"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "21abdb53-9723-4206-be67-050f84b3ad9c"
+		},
+		{
+			"name": "live courses",
+			"item": [
+				{
+					"name": "enrollment",
+					"id": "cf5f2b41-2fc3-4577-9f4e-47ebeee7dfe7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOiAxNjM2NjI4MDAwLCAiZXhwIjogMTYzNjY2NDAwMCwgImlzcyI6ICJodHRwOi8vMTI3LjAuMC4xOjgwMDAvb2F1dGgyIiwgImVtYWlsIjogImthcGlsYXJvcmE4ODEwQGdtYWlsLmNvbSIsICJlbWFpbF92ZXJpZmllZCI6IHRydWUsICJpc19yZXN0cmljdGVkIjogZmFsc2UsICJzdWIiOiAiMjM5MmYzM2U3OTRjYWE2NWUwNTFjN2U0YTU3ZmQ4NzciLCAibmFtZSI6ICJrYXBpbCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAia2FwaWxhcm9yYTg4MTBAZ21haWwuY29tIiwgImF1ZCI6ICJTRVQtTUUtUExFQVNFIiwgImFkbWluaXN0cmF0b3IiOiBmYWxzZSwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgInZlcnNpb24iOiAiMS4yLjAiLCAiZ2l2ZW5fbmFtZSI6ICIiLCAic3VwZXJ1c2VyIjogZmFsc2UsICJzY29wZXMiOiBbInJlYWQiLCAiZW1haWwiLCAid3JpdGUiLCAicHJvZmlsZSJdLCAiZmFtaWx5X25hbWUiOiAiIn0.PkEik9_217OMePltpYWaBLkSNh1G_FcgQyBBofu1FaM",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"course_id\": \"723834c0-f9d9-4bae-94db-f3ab3068f7cd\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/live-courses/v1/courses/enrollment/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"live-courses",
+								"v1",
+								"courses",
+								"enrollment",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "0f8b3c88-5e9b-499d-ab3e-229abc49e447"
+		},
+		{
+			"name": "Vouchers",
+			"item": [
+				{
+					"name": "Voucher Balance",
+					"id": "b94d1d75-69a2-406b-b1b5-dcd414135cfb",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ciN1MjVOoKoFrwvxULOJ6VQr1CI8dj",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJleHAiOiAxNjQxOTIyNjg2LCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiZW1haWwiOiAia2FwaWxhcm9yYTg4MTBAZ21haWwuY29tIiwgIm5hbWUiOiAia2FwaWwiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiaWF0IjogMTY0MTg4NjY4NiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImFkbWluaXN0cmF0b3IiOiBmYWxzZSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInNjb3BlcyI6IFsiZW1haWwiLCAicmVhZCIsICJwcm9maWxlIiwgIndyaXRlIl0sICJzdWIiOiAiMjM5MmYzM2U3OTRjYWE2NWUwNTFjN2U0YTU3ZmQ4NzciLCAidmVyc2lvbiI6ICIxLjIuMCIsICJnaXZlbl9uYW1lIjogIiIsICJmYW1pbHlfbmFtZSI6ICIiLCAicHJlZmVycmVkX3VzZXJuYW1lIjogImthcGlsYXJvcmE4ODEwQGdtYWlsLmNvbSIsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJzdXBlcnVzZXIiOiBmYWxzZX0.SxiDhaXjgLGrbX1pu-2r8CrvFDFTX1mAIONkQ9rbZYk",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"voucher_code\": \"0C21A3D19FE23E36\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/vouchers/v1/balance/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"vouchers",
+								"v1",
+								"balance",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Voucher Redeem",
+					"id": "c0eeb96b-6afb-43dc-b84b-9f6effff1860",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ciN1MjVOoKoFrwvxULOJ6VQr1CI8dj",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJleHAiOiAxNjQxOTIyNjg2LCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiZW1haWwiOiAia2FwaWxhcm9yYTg4MTBAZ21haWwuY29tIiwgIm5hbWUiOiAia2FwaWwiLCAiaXNzIjogImh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9vYXV0aDIiLCAiaWF0IjogMTY0MTg4NjY4NiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImFkbWluaXN0cmF0b3IiOiBmYWxzZSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgInNjb3BlcyI6IFsiZW1haWwiLCAicmVhZCIsICJwcm9maWxlIiwgIndyaXRlIl0sICJzdWIiOiAiMjM5MmYzM2U3OTRjYWE2NWUwNTFjN2U0YTU3ZmQ4NzciLCAidmVyc2lvbiI6ICIxLjIuMCIsICJnaXZlbl9uYW1lIjogIiIsICJmYW1pbHlfbmFtZSI6ICIiLCAicHJlZmVycmVkX3VzZXJuYW1lIjogImthcGlsYXJvcmE4ODEwQGdtYWlsLmNvbSIsICJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJzdXBlcnVzZXIiOiBmYWxzZX0.SxiDhaXjgLGrbX1pu-2r8CrvFDFTX1mAIONkQ9rbZYk",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"voucher_code\": \"0C21A3D19FE23E36\",\r\n    \"course_id\": \"4dbbb572-eda4-4ce3-ba31-6a6fe0db065b\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/vouchers/v1/redeem/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"vouchers",
+								"v1",
+								"redeem",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "10dc8466-6b3e-4af6-946d-a0770f3ce97f"
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "Delete Course",
+					"id": "117db1a8-8078-44cf-b5e3-c6a8cf2be1af",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "R2BHJ76LkcITpbzGAex0oecbBMSuGg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "https://cms-ta3leem.dev.env.creativeadvtech.com/api/courses/v1/delete/course-v1:taleem+ts66+ts66/",
+							"protocol": "https",
+							"host": [
+								"cms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"courses",
+								"v1",
+								"delete",
+								"course-v1:taleem+ts66+ts66",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My Courses",
+					"id": "37bfc0c5-359b-41f4-b7ff-86be69172983",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "headerPrefix",
+									"value": "JWT",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiAiU0VULU1FLVBMRUFTRSIsICJleHAiOiAxNjM3ODY0NjEyLCAiaWF0IjogMTYzNzgyODYxMiwgImlzcyI6ICJodHRwczovL2xtcy10YWwzZWVtLnRlc3QuZW52LmNyZWF0aXZlYWR2dGVjaC5tbC9vYXV0aDIiLCAicHJlZmVycmVkX3VzZXJuYW1lIjogImRlbW8iLCAic2NvcGVzIjogWyJyZWFkIiwgIndyaXRlIiwgImVtYWlsIiwgInByb2ZpbGUiXSwgInZlcnNpb24iOiAiMS4yLjAiLCAic3ViIjogIjM1ZWYzN2RlMzFlY2ExM2Y5N2Y2ZTUwZWMzNmFlNWI5IiwgImZpbHRlcnMiOiBbInVzZXI6bWUiXSwgImlzX3Jlc3RyaWN0ZWQiOiBmYWxzZSwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgImVtYWlsIjogImRlbW9AdGFsZWVtLmNvbSIsICJuYW1lIjogIkRlbW8gVGFsZWVtIiwgImZhbWlseV9uYW1lIjogIiIsICJnaXZlbl9uYW1lIjogIiIsICJhZG1pbmlzdHJhdG9yIjogdHJ1ZSwgInN1cGVydXNlciI6IHRydWV9.H_6Sm2iXq_Wdxcu2R7RQLw1qFUInLU1QXRuX1Y5HCkw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/mobile/v1/users/hchammas@creativeadvtech.com/course_enrollments/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"mobile",
+								"v1",
+								"users",
+								"hchammas@creativeadvtech.com",
+								"course_enrollments",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "5a0a9f93-76c0-4d89-8029-0655b661373e"
+		},
+		{
+			"name": "notifications",
+			"item": [
+				{
+					"name": "Subscribe",
+					"id": "0aac4e07-7f61-49b3-9cb2-ad9ab094075a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "JWT eyJhbGciOiJIUzI1NiJ9.eyJmaWx0ZXJzIjogWyJ1c2VyOm1lIl0sICJmYW1pbHlfbmFtZSI6ICJDaGFtbWFzIiwgImVtYWlsX3ZlcmlmaWVkIjogdHJ1ZSwgImdpdmVuX25hbWUiOiAiSGluZCIsICJleHAiOiAxNjU5NzA5NTQ3LCAibmFtZSI6ICJIaW5kIENoYW1tYXMiLCAiYWRtaW5pc3RyYXRvciI6IGZhbHNlLCAiaXNfcmVzdHJpY3RlZCI6IGZhbHNlLCAiaWF0IjogMTY1OTY3MzU0NywgInN1YiI6ICIyZmRiMTJmYjcyMGFmMGM4MTliNTA0OTAxODEyZWYxMSIsICJzY29wZXMiOiBbImVtYWlsIiwgIndyaXRlIiwgInJlYWQiLCAicHJvZmlsZSJdLCAiYXVkIjogIlNFVC1NRS1QTEVBU0UiLCAidmVyc2lvbiI6ICIxLjIuMCIsICJwcmVmZXJyZWRfdXNlcm5hbWUiOiAiaGNoYW1tYXNAY3JlYXRpdmVhZHZ0ZWNoLmNvbSIsICJpc3MiOiAiaHR0cDovLzEyNy4wLjAuMTo4MDAwL29hdXRoMiIsICJlbWFpbCI6ICJoY2hhbW1hc0BjcmVhdGl2ZWFkdnRlY2guY29tIiwgInN1cGVydXNlciI6IGZhbHNlfQ.7IVRkoAlQ5kYHzRLpDkk3X4ZA6BwbgatMzh9ZqGD2QE",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": \"web\",\r\n    \"registration_id\": \"newtokentestchalukiahai\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/notifications/v1/subscribe/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"v1",
+								"subscribe",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get preferences",
+					"id": "70014cae-9056-41fa-99b9-c7973f968b94",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ZwU0XWepI4iZLbn64TANYzIgQVR7tr",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/notifications/v1/preferences/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"v1",
+								"preferences",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Announcement",
+					"id": "5ce635f1-9ea4-4d1f-95d1-52027c8d7055",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ep7EL1Pjlik7MTrhU88LtoQL8ZkQYW",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": 11,\r\n    \"message\": \"Test announcement API\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/notifications/v1/notifications/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"v1",
+								"notifications",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Course Announcement",
+					"id": "319caf41-9546-49b5-9277-be1ca29d6439",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ep7EL1Pjlik7MTrhU88LtoQL8ZkQYW",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": 11,\r\n    \"message\": \"Test announcement API\",\r\n    \"course_key\": \"course-v1:jigo+jigo+jigo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/notifications/v1/notifications/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"v1",
+								"notifications",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set preferences",
+					"id": "8da83e5a-af21-4b20-8ef0-a35273a807b6",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ZwU0XWepI4iZLbn64TANYzIgQVR7tr",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"receive_on\": \"bt\",\r\n    \"replied_on_question\": true,\r\n    \"asked_private_question\": true,\r\n    \"asked_question\": true,\r\n    \"added_discussion_comment\": true,\r\n    \"added_discussion_post\": true,\r\n    \"replied_on_private_question\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://lms-ta3leem.dev.env.creativeadvtech.com/api/notifications/v1/preferences/",
+							"protocol": "https",
+							"host": [
+								"lms-ta3leem",
+								"dev",
+								"env",
+								"creativeadvtech",
+								"com"
+							],
+							"path": [
+								"api",
+								"notifications",
+								"v1",
+								"preferences",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "454fefa6-8306-4109-92d6-cd71eccfdffb"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0abbf1f9-0a4f-4957-9b61-97306ad7e031",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "bcb33a51-2369-4ce0-be53-835059349d59",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

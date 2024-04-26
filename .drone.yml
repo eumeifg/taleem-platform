@@ -1,0 +1,99 @@
+---
+kind: secret
+name: aws_secret_access_key
+get:
+  path: drone-cred-secrets
+  name: aws_secret_access_key
+
+---
+kind: secret
+name: aws_access_key_id
+get:
+  path: drone-cred-secrets
+  name: aws_access_key_id
+
+---
+kind: secret
+name: ssh_key
+get:
+  path: drone-ssh-rw-key
+  name: drone-aws-rw-key
+
+---
+kind: secret
+name: argocd-username
+get:
+  path: argocd-credentials
+  name: username
+
+---
+kind: secret
+name: argocd-password
+get:
+  path: argocd-credentials
+  name: password
+  
+---
+kind: pipeline
+name: build
+type: kubernetes
+
+trigger:
+  branch:
+  - staging
+  - master
+  event:
+  - push
+
+resources:
+  requests:
+    cpu: 2000
+    memory: 4096MiB
+    
+steps:
+
+- name: build
+  image: plugins/ecr
+  resources:
+    limits:
+      cpu: 2000
+      memory: 4096MiB
+  settings:
+    access_key:
+      from_secret: aws_access_key_id
+    secret_key:
+      from_secret: aws_secret_access_key
+    registry: 310830963532.dkr.ecr.eu-central-1.amazonaws.com
+    region: eu-central-1
+    repo: ta3leem-openedx
+    dockerfile: Dockerfile.aws
+    tags: ["${DRONE_COMMIT_SHA:0:7}"]
+
+---
+kind: pipeline
+name: deploy_staging
+type: kubernetes
+
+trigger:
+  event:
+  - promote
+  target:
+  - staging
+
+steps:
+- name: update-helm
+  image: 310830963532.dkr.ecr.eu-central-1.amazonaws.com/drone-pipeline-img:25a4090
+  environment:
+    PROJECT: ta3leem
+    ENV: staging
+    SSH_KEY:
+      from_secret: ssh_key
+    ARGOCD_USERNAME:
+      from_secret: argocd-username
+    ARGOCD_PASSWORD:
+      from_secret: argocd-password        
+  commands:
+    - ./.drone.sh
+
+depends_on:
+- build

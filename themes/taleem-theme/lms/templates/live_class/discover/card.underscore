@@ -1,0 +1,48 @@
+<div class="course-list-item col my-3">
+    <article class="course" id="<%- course_id %>" role="region" aria-label="<%-name %>">
+      <div>
+        <header class="course-image">
+          <div class="cover-image">
+            <a class="course-cover" href="#">
+            <% if (poster) { %>
+                <img src="<%- poster %>" style="width:249px;height:111px" alt="<%- name %> <%- name %>" />
+            <% }
+            else { %>
+                <img src="/static/taleem-theme/images/placeholder.png" style="width:249px;height:111px" alt="<%- name %> <%- name %>" />
+                </a>
+            <% } %>
+          </div>
+        </header>
+        <div class="course-info" aria-hidden="true">
+          <h2 class="course-name">
+            <a href="#">
+              <span class="course-title"><%- name %></span>
+            </a>
+          </h2>
+          <% if (has_booked) { %>
+            <span id='<%- course_id %>_live_class_is_enrolled' class='enrolled'><%- gettext("Enrolled") %></span>
+          <% }
+          
+          else if (seats_left > 0) { %> 
+            <a class="live-class-enroll-btn" id='<%- course_id %>_live_class_enroll_url' href="/live/class/book_class/<%- course_id %>">
+            <span class="course-enroll"><%- gettext("Enroll") %></span>
+            </a>
+          <% } 
+
+          else { %>
+            <div id='<%- course_id %>_live_class_no_seats_left' class="no_seat"><%- gettext("No Seats Left") %> </div>
+          <% } %>
+        
+
+        <div class="course-price price" aria-hidden="true"><%- gettext("Price") %>: <% if (price.amount_to_pay > 0) {  %>  <%- price.amount_to_pay %> <%- gettext("IQD") %> <% } else { %> <%- gettext("Free") %> <% } %>  </div>
+        <div class="course-duration" aria-hidden="true"> <%-gettext("Duration") %>: <%- duration %> <%- gettext("Minutes") %></div>
+        <% if (seats_left > 0) { %>
+            <div id='<%- course_id %>_live_class_seats_left' class="course-seats-left" aria-hidden="true"><%- gettext("Seats Left") %>: <%- seats_left %></div>
+        <% } %>
+        <div class="course-date advertised_start" aria-hidden="true"><%- gettext("Start Time") %>: <%- display_time %></div>
+          
+
+        </div>
+      </div>
+    </article>
+  </div>

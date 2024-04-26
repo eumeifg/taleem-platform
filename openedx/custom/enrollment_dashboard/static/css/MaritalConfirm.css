@@ -1,0 +1,86 @@
+.maritalContent {
+    padding-top: 1vh;
+    display: flex;
+     justify-content: center;
+}
+
+.maritalMain {
+    padding-right: 1vw;
+    padding-top: 2vh;
+    height: 40vh;
+    width: 70vw;
+    border: solid 1px black;
+    text-align: center;
+}
+
+.maritalBody {
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    height: 28vh;
+}
+
+.maritalDetails {
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+
+.maritalDetails>div {
+    margin-inline: 10px;
+    margin-block: 2px;
+}
+
+.maritalDate {
+    margin: 2vh;
+}
+
+.maritalDatePicker {
+    text-align: center;
+}
+
+.rawIcon {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+     /* min-width: 4vw; */
+}
+
+.rawFinish {
+    margin-top: 3vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.rawFinish div {
+    margin-top: 1vh;
+}
+
+.btnline {
+    display: flex;
+    justify-content: space-around;
+}
+
+.loginbtnTag {
+    text-align: center;
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: #fffffd;
+    -moz-box-shadow:    inset 0 0 15px #6a7f93;
+    -webkit-box-shadow: inset 0 0 15px #6a7f93;
+     box-shadow:         inset 0 0 15px #6a7f93;
+    cursor:pointer;
+    width: 10vw;
+    margin: auto;
+    margin-top: 4vh;
+    text-decoration: none;
+}
+
+.marData {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}

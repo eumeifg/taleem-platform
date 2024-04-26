@@ -1,0 +1,454 @@
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from six import text_type, string_types
+from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext
+from django.urls import reverse
+from django.conf import settings
+from edxmako.shortcuts import marketing_link
+from openedx.core.djangolib.js_utils import js_escaped_string
+from openedx.core.djangolib.markup import clean_dangerous_html, HTML, Text
+from openedx.core.lib.courses import course_image_url
+from lms.djangoapps.courseware.courses import get_course_about_section
+from qr_code.qrcode.maker import make_qr_code_with_args
+%>
+
+<%inherit file="../main.html" />
+<%block name="header_extras">
+  ## OG (Open Graph) title and description added below to give social media info to display
+  ## (https://developers.facebook.com/docs/opengraph/howtos/maximizing-distribution-media-content#tags)
+  <meta property="og:title" content="${course.display_name_with_default}" />
+  <meta property="og:description" content="${get_course_about_section(request, course, 'short_description')}" />
+  <link rel="stylesheet" href="${static.url('assets/vendor/star-rating/star-rating.min.css')}">
+  <style>
+  .taleem-theme header.global-header {
+    background: #333333 !important;
+    border-color: #333333 !important;
+  }
+  .taleem-theme .course-info {
+    margin: 0 -20px;
+  }
+  .taleem-theme .window-wrap {background: #ffffff;}
+  .taleem-theme .course-info .container {padding-bottom: 60px;padding-top: 60px;}
+  .taleem-theme .course-info .course-sidebar {background: #E9EAF4;border-radius: 5px;padding:10px;}
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper {
+    background: #333333;
+    border: none;
+    box-shadow: none;
+  }
+  .taleem-theme .content-wrapper {padding:0;margin-top:0 !important;}
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .intro>.heading-group h1 {color:#ffffff;}
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .intro .main-cta strong,
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper>div.table {margin-bottom:4rem;padding-top:4rem;}
+  .taleem-theme .course-info header.course-profile,
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .media .hero {border: none;}
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .intro .main-cta strong:hover:not(:disabled),
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .intro .main-cta strong:focus:not(:disabled),
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .media .hero .play-intro {
+    border-radius: 50%;
+    box-shadow: none;
+    width: 40px;
+    height: 40px;
+    margin-top: -30px;
+    margin-right: -30px;
+  }
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .media .hero .play-intro::after {
+    font: normal 1.5em/1.5em "Arabic Sans",sans-serif;
+  }
+  .taleem-theme.ltr .course-info header.course-profile .intro-inner-wrapper .media .hero .play-intro::after{margin-left: -8px;}
+  .taleem-theme.ltr .course-info header.course-profile .intro-inner-wrapper .media .hero .play-intro {margin-left: -30px;}
+  .taleem-theme .modal.video-modal {height: auto;}
+  .taleem-theme .icon.fa-envelope {color: #FF0000;}
+  .taleem-theme .icon.fa-facebook {color: #0000FF;}
+  .taleem-theme .icon.fa-twitter {color: #00C3FF;}
+
+  .taleem-theme .course-info .container {
+    padding-bottom: 0px;
+    padding-top: 10px;
+  }
+  .taleem-theme .course-info .intro-inner-wrapper .container {
+    display: flex;
+    align-items: flex-end;
+  }
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .media {
+    padding: 0 !important;
+    background: #E9EAF4;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border: solid 2px #E9EAF4;
+    border-bottom: 0;
+  }
+  .taleem-theme .course-info .course-sidebar {
+    background: #E9EAF4;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: -15px;
+  }
+  .taleem-theme .course-info header.course-profile .intro-inner-wrapper .intro>.heading-group h1 {
+    color: #ffffff;
+    font-size: 30px;
+  }
+  .taleem-theme .course-info .details .inner-wrapper .course-staff .teacher .teacher-image, .course-info .details .entitlement-unenrollment-modal .entitlement-unenrollment-modal-inner-wrapper .course-staff .teacher .teacher-image, .entitlement-unenrollment-modal .course-info .details .entitlement-unenrollment-modal-inner-wrapper .course-staff .teacher .teacher-image {
+    margin: 0 15px 0 15px;
+  }
+  .course-qr-code img {width: 100%;}
+  .course-info header.course-profile .intro-inner-wrapper .intro .main-cta {float: unset;}
+  </style>
+
+</%block>
+
+<%block name="js_extra">
+  <script type="text/javascript" src="${static.url('assets/vendor/star-rating/star-rating.min.js')}"></script>
+  <script type="text/javascript">
+  var $$course_id = "${course.id | n, js_escaped_string}";
+  var courseRatingURL = "/taleem/course-rating/" + $$course_id;
+  var isUserEnrolled = ${'true' if user.is_authenticated and registered else 'false'};
+  var isUserAuthenticated = ${'true' if user.is_authenticated else 'false'};
+
+  (function() {
+    $(".btn-register").click(function(event) {
+        if (!isUserAuthenticated) {
+            location.href = "${reverse('signin_user')}" + "?next=" + encodeURIComponent(location.href);
+        } else {
+          $("#class_enroll_form").submit();
+        }
+      event.preventDefault();
+    });
+
+    $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
+      if (xhr.status == 200) {
+        if (xhr.responseText == "") {
+          location.href = "${reverse('dashboard') | n, js_escaped_string}";
+        }
+        else {
+          location.href = xhr.responseText;
+        }
+      } else if (xhr.status == 403) {
+        $('#register_error').text(
+            (xhr.responseText ? xhr.responseText : "${_("An error has occurred. Please ensure that you are logged in to enroll.") | n, js_escaped_string}")
+        ).css("display", "block");
+      } else {
+        $('#register_error').text(
+            (xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.") | n, js_escaped_string}")
+        ).css("display", "block");
+      }
+    });
+
+    function initStars(initialRating){
+      try {
+        // Unload
+        $('.star').starRating('unload');
+      } catch(err) {console.log('Skip unloading');}
+      // Init rating
+
+      $(".star").starRating({
+          initialRating: initialRating,
+          starSize: 20,
+          useFullStars: true,
+          disableAfterRate: false,
+          starShape: 'rounded',
+          activeColor: '#Ff9933',
+          hoverColor: '#Ff9933',
+          ratedColor: '#Ff9933',
+          useGradient: false,
+          readOnly: !isUserEnrolled,
+          callback: function(currentRating, $el){
+              jQuery.ajax({
+                  type: "POST",
+                  url: courseRatingURL,
+                  data: {
+                    stars: currentRating,
+                  },
+                  success: function (res) {
+                      $(".avg-rating").text(res.avg);
+                      $(".num-reviews").text(res.count);
+                  },
+              });
+          }
+      });
+    }
+
+    function loadCourseRating() {
+      jQuery.ajax({
+        type: "GET",
+        url: courseRatingURL,
+        success: function (res) {
+          $(".avg-rating").text(res.average);
+          $(".num-reviews").text(res.count);
+          initStars(res.user_rating || res.average);
+        },
+      });
+    }
+
+    $(function() {
+      loadCourseRating();
+    });
+  })(this);
+  </script>
+
+  <script src="${static.url('js/course_info.js')}"></script>
+</%block>
+
+<%block name="pagetitle">${course.display_name_with_default}</%block>
+
+<section class="course-info">
+
+  <%block name="course_about_header">
+  <header class="course-profile">
+    <div class="intro-inner-wrapper">
+      <div class="container">
+      <section class="intro">
+        <div class="heading-group text-left">
+          <h1>${course.display_name_with_default}</h1>
+        </div>
+
+        <div class="main-cta">
+        % if user.is_authenticated and registered and show_courseware_link:
+          <a class="btn btn-warning btn-lg mr-2" href="${course_target}">${_("View Course")}</a>
+        % elif is_course_full:
+          <span class="register disabled">
+            ${_("Course is full")}
+          </span>
+        % elif invitation_only and not can_enroll:
+          <span class="register disabled">${_("Enrollment in this course is by invitation only")}</span>
+        ## Shib courses need the enrollment button to be displayed even when can_enroll is False,
+        ## because AnonymousUsers cause can_enroll for shib courses to be False, but we need them to be able to click
+        ## so that they can register and become a real user that can enroll.
+        % elif not is_shib_course and not can_enroll:
+          <span class="register disabled">${_("Enrollment is Closed")}</span>
+        % else:
+          <%
+            if ecommerce_checkout:
+              reg_href = ecommerce_checkout_link
+            else:
+              reg_href="#"
+            if single_paid_mode:
+              href_class = "add-to-cart"
+            else:
+              href_class = "btn-register"
+          %>
+
+          % if allow_anonymous and show_courseware_link:
+          <a href="${course_target}" class="btn btn-warning btn-lg mr-2">
+            ${_("Try it out")}
+          </a>
+          % endif
+
+          % if is_user_allowed_to_access_the_course or not registration_price:
+            <a href="${reg_href}" class="${href_class} btn btn-warning btn-lg">${_("Enroll Now")}</a>
+            <div id="register_error"></div>
+          % else:
+            <a href="${vouchers_page_url}" class="voucher-checkout btn btn-warning btn-lg">${_("Buy This Course for {course_price}").format(course_price=course_price)}</a>
+          % endif
+        % endif
+        </div>
+
+        % if not is_tb:
+          <div class="mt-4 alert alert-warning pattern-library-shim" role="alert">
+            <p>${_("To view this course you need to install the Ta3leem Browser")}</p>
+            <a href="${browser_download_link}" class="btn btn-primary">
+              <i class="fa fa-download mr-2"></i> ${_("Download Ta3leem Browser")}
+            </a>
+          </div>
+        % endif
+
+      </section>
+      % if get_course_about_section(request, course, "video"):
+      <a href="#video-modal" class="media" rel="leanModal">
+        <div class="hero">
+          <img src="${course_image_urls['large']}" alt="" />
+          <div class="play-intro"></div>
+        </div>
+      </a>
+      %else:
+      <div class="media">
+        <div class="hero">
+          <img src="${course_image_urls['large']}" alt="" />
+        </div>
+      </div>
+      % endif
+    </div>
+      </div>
+  </header>
+  </%block>
+
+  <div class="container">
+
+    <%block name="course_about_details">
+    <div class="details text-left">
+      % if staff_access and studio_url is not None:
+        <div class="wrap-instructor-info studio-view">
+          <a class="instructor-info-action" href="${studio_url}">${_("View About Page in studio")}</a>
+        </div>
+      % endif
+
+      <div class="inner-wrapper">
+        ${clean_dangerous_html(get_course_about_section(request, course, "overview"))}
+      </div>
+    </div>
+    </%block>
+
+    <div class="course-sidebar">
+      <div class="course-summary">
+
+        <%include file="course_about_sidebar_header.html" />
+
+        <%block name="course_about_important_dates">
+        <ol class="important-dates">
+          <li class="important-dates-item"><span class="icon las la-lg la-info-circle" aria-hidden="true"></span><p class="important-dates-item-title">${_("Course Number")}</p><span class="important-dates-item-text course-number">${course.display_number_with_default}</span></li>
+          % if not course.start_date_is_still_default:
+              <%
+                  course_start_date = course.advertised_start or course.start
+              %>
+            <li class="important-dates-item">
+              <span class="icon las la-lg la-calendar" aria-hidden="true"></span>
+              <p class="important-dates-item-title">${_("Classes Start")}</p>
+              % if isinstance(course_start_date, string_types):
+                  <span class="important-dates-item-text start-date">${course_start_date}</span>
+              % else:
+                  <%
+                     course_date_string = course_start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+                  %>
+                  <span class="important-dates-item-text start-date localized_datetime" data-format="shortDate" data-datetime="${course_date_string}" data-language="${LANGUAGE_CODE}"></span>
+              % endif
+            </li>
+          % endif
+            ## We plan to ditch end_date (which is not stored in course metadata),
+            ## but for backwards compatibility, show about/end_date blob if it exists.
+            % if course.end:
+                <%
+                    course_end_date = course.end
+                %>
+
+            <li class="important-dates-item">
+                <span class="icon las la-lg la-calendar" aria-hidden="true"></span>
+                <p class="important-dates-item-title">${_("Classes End")}</p>
+                  % if isinstance(course_end_date, string_types):
+                      <span class="important-dates-item-text final-date">${course_end_date}</span>
+                  % else:
+                    <%
+                        course_date_string = course_end_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+                    %>
+                    <span class="important-dates-item-text final-date localized_datetime" data-format="shortDate" data-datetime="${course_date_string}" data-language="${LANGUAGE_CODE}"></span>
+                  % endif
+            </li>
+            % endif
+
+          % if get_course_about_section(request, course, "effort"):
+            <li class="important-dates-item"><span class="icon las la-lg la-pencil-alt" aria-hidden="true"></span><p class="important-dates-item-title">${_("Estimated Effort")}</p><span class="important-dates-item-text effort">${get_course_about_section(request, course, "effort")}</span></li>
+          % endif
+
+          ##<li class="important-dates-item"><span class="icon las la-lg la-clock" aria-hidden="true"></span><p class="important-dates-item-title">${_('Course Length')}</p><span class="important-dates-item-text course-length">${_('{number} weeks').format(number=15)}</span></li>
+
+          %if course_price and (is_cosmetic_price_enabled):
+            <li class="important-dates-item">
+              <span class="icon las la-lg la-coins" aria-hidden="true"></span>
+              <p class="important-dates-item-title">${_("Price")}</p>
+                %if is_user_allowed_to_access_the_course and registration_price:
+                    <span style="margin:0 0 0 1em" class="important-dates-item-text">${_('Free')}</span>
+                %endif
+              <span class="important-dates-item-text" style="${'text-decoration: line-through;' if is_user_allowed_to_access_the_course and registration_price else ''}">${course_price}</span>
+            </li>
+          %endif
+
+          % if pre_requisite_courses:
+          <% prc_target = reverse('about_course', args=[text_type(pre_requisite_courses[0]['key'])]) %>
+          <li class="prerequisite-course important-dates-item">
+            <span class="icon las la-lg la-list-ul" aria-hidden="true"></span>
+            <p class="important-dates-item-title">${_("Prerequisites")}</p>
+            ## Multiple pre-requisite courses are not supported on frontend that's why we are pulling first element
+            <span class="important-dates-item-text pre-requisite"><a href="${prc_target}">${pre_requisite_courses[0]['display']}</a></span>
+            <p class="tip">
+            ${Text(_("You must successfully complete {link_start}{prc_display}{link_end} before you begin this course.")).format(
+              link_start=HTML('<a href="{}">').format(prc_target),
+              link_end=HTML('</a>'),
+              prc_display=pre_requisite_courses[0]['display'],
+            )}
+            </p>
+          </li>
+          % endif
+
+          % if get_course_about_section(request, course, "prerequisites"):
+            <li class="important-dates-item"><span class="icon las la-lg la-book" aria-hidden="true"></span><p class="important-dates-item-title">${_("Requirements")}</p><span class="important-dates-item-text prerequisites">${get_course_about_section(request, course, "prerequisites")}</span></li>
+          % endif
+
+          <li class="important-course-rating-item">
+            <span class="icon las la-lg la-award" aria-hidden="true"></span>
+            <p class="important-dates-item-title">${_("Course Rating")}</p>
+              <span class="important-dates-item-text">
+                  <span class='course_rating star'></span>
+              </span>
+              <div style="float: right;">(${_("Avg")} <span class="avg-rating"></span> ${_("stars")}, <span class="num-reviews"></span> ${_("Reviews")})</div>
+           </li>
+        </ol>
+        </%block>
+    </div>
+
+    <div class="course-qr-code px-4">
+        <%
+            course_about_url = "{lms_url}{course_about}".format(lms_url=settings.LMS_ROOT_URL, course_about=reverse('about_course', args=[str(course.id)]))
+            course_qr_code = make_qr_code_with_args(course_about_url, qr_code_args={"size": "4", "image_format":"png", "light_color": None})
+        %>
+        ${ course_qr_code }
+    </div>
+
+      <%block name="course_about_reviews_tool">
+      ## Course reviews tool
+      % if reviews_fragment_view:
+       ${HTML(reviews_fragment_view.body_html())}
+      % endif
+      </%block>
+
+      ## For now, ocw links are the only thing that goes in additional resources
+      % if get_course_about_section(request, course, "ocw_links"):
+      <div class="additional-resources">
+        <header>
+          <h1>${_("Additional Resources")}</h1>
+      </div>
+
+        <div>
+          ## "MITOpenCourseware" should *not* be translated
+          <h2 class="opencourseware">MITOpenCourseware</h2>
+             ${get_course_about_section(request, course, "ocw_links")}
+        </div>
+    </div>
+      %endif
+
+    % if sidebar_html_enabled:
+      % if get_course_about_section(request, course, "about_sidebar_html"):
+        <section class="about-sidebar-html">
+          ${get_course_about_section(request, course, "about_sidebar_html")}
+        </section>
+      % endif
+    %endif
+  </div>
+
+  </div>
+</div>
+
+## Need to put this hidden form on the page so that the registration button works.
+## Since it's no harm to display a hidden form, we display it with the most permissive conditional
+## which is when the student is not registered.
+%if active_reg_button or is_shib_course:
+  <div style="display: none;">
+    % if is_user_allowed_to_access_the_course or not registration_price:
+      <form id="class_enroll_form" method="post" data-remote="true" action="${reverse('change_enrollment')}">
+        <fieldset class="enroll_fieldset">
+          <legend class="sr">${pgettext("self","Enroll")}</legend>
+          <input name="course_id" type="hidden" value="${course.id}">
+          <input name="enrollment_action" type="hidden" value="enroll">
+        </fieldset>
+        <div class="submit">
+          <input name="submit" type="submit" value="${pgettext('self','enroll')}">
+        </div>
+      </form>
+    %endif
+  </div>
+%endif
+
+<%include file="../video_modal.html" />
+
+<%static:require_module_async module_name="js/dateutil_factory" class_name="DateUtilFactory">
+    DateUtilFactory.transform(iterationKey=".localized_datetime");
+</%static:require_module_async>

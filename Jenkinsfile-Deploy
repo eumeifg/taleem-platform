@@ -1,0 +1,62 @@
+pipeline {
+    agent {
+        kubernetes {
+            cloud 'eks-ta3leem-staging'
+            inheritFrom 'jenkins-ta3leem-staging'
+            yamlFile 'pipeline/pipelinePod.yaml'
+        }
+    }
+    environment {
+        SERVICE_ID = "b:YXJpOmNsb3VkOmdyYXBoOjpzZXJ2aWNlL2M0OGE4ZWMyLTU3MTYtMTFlYi05NGMzLTBhYmUzZjRhNjYwMS80NTg3NjYwNi1kYzc0LTExZWMtYTkzMi0wYWJlM2Y0YTY2MDE="
+    }
+    options {
+        ansiColor('xterm')
+    }
+    stages {
+        stage('Setting deployment') {
+            steps {
+                script {
+                    currentBuild.description = "Deploying image: ${params.IMAGETAG}\n Deploying to the ${params.ENVIRONMENT} environment"
+                }
+            }
+        }
+        stage('Deploy to staging') {
+            when {
+                expression { params.ENVIRONMENT == 'staging' }
+                beforeInput true
+                beforeAgent true
+                beforeOptions true
+            }
+            steps {
+                deployment('https://bitbucket.org/creativeadvtech/ta3-helm-charts.git', params.ENVIRONMENT, 'ta3leem', params.IMAGETAG.trim())
+            }
+        }
+        stage('Deploy to production') {
+            when {
+                expression { params.ENVIRONMENT == 'production' }
+                beforeOptions true
+                beforeInput true
+                beforeAgent true
+            }
+            steps {
+                jiraSendDeploymentInfo (
+                    environmentId: 'eu-central-1',
+                    environmentName: 'production',
+                    environmentType: 'production',
+                    serviceIds: [
+                        "${env.SERVICE_ID}"
+                    ],
+                    state: 'in_progress'
+                )
+                deployment('https://bitbucket.org/creativeadvtech/ta3-helm-charts.git', params.ENVIRONMENT, 'ta3leem', params.IMAGETAG.trim())
+            }
+            post {
+                always {
+                    script {
+                        deploymentNotifier('production')
+                    }
+                }
+            }
+        }
+    }
+}

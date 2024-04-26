@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Hello {{full_name}}, {% endblocktrans %}
+
+{% trans "Thanks for submitting your photos!"%}
+{% trans "We've received your information and the ID verification process has begun." %}
+{% trans "Check for an email from us in the next few days to confirm whether your verification was successful." %}
+{% trans "You can also check the status of the verification process on your dashboard." %}
+
+{% trans "Thank you," %}
+{% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+{% endautoescape %}

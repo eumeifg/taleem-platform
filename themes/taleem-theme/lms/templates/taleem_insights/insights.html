@@ -1,0 +1,273 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    from six import text_type
+    from django.urls import reverse
+    from django.utils import timezone
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Insights")}</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Report Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h2 mb-0 text-gray-800">${_("Ta3leem Insights")}</h1>
+        </div>
+
+    <!-- Stats Row -->
+    <div class="row">
+        <!-- Learners -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase text-left mb-1">
+                                ${_("Learners")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${num_learners}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-user la-4x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Self paced courses -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase text-left mb-1">
+                                ${_("Courses")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${num_courses}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-chalkboard la-4x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase text-left mb-1">
+                                ${_("Lessons")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${num_lessons}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-chalkboard-teacher la-4x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase text-left mb-1">
+                                ${_("Videos")}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-left">
+                                ${num_videos}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="las la-lg la-video la-4x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Courses Charts Row -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    ${_("Course Lessons")}
+                </div>
+                <div class="card-body">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <figure class="highcharts-figure mt-4">
+                                <div id="lessons-chart" style="height: ${len(course_names) * 30}px"></div>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+
+    <!-- Page level custom js -->
+    <script>
+    $(document).ready(function() {
+        // Highcharts theme
+        Highcharts.theme = {
+            colors: ["#f45b5b", "#8085e9", "#8d4654", "#7798BF", "#aaeeee",
+                "#ff0066", "#eeaaee", "#55BF3B", "#DF5353", "#7798BF", "#aaeeee"],
+            chart: {
+                backgroundColor: '#ffffff',
+            },
+            title: {
+                style: {
+                    color: 'black',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            },
+            subtitle: {
+                style: {
+                    color: 'black'
+                }
+            },
+            tooltip: {
+                borderWidth: 0
+            },
+            legend: {
+                itemStyle: {
+                    fontWeight: 'bold',
+                    fontSize: '13px'
+                }
+            },
+            xAxis: {
+                labels: {
+                    style: {
+                        color: '#6e6e70'
+                    }
+                },
+                % if get_language_bidi():
+                opposite: true
+                % endif
+            },
+            yAxis: {
+                labels: {
+                    style: {
+                        color: '#6e6e70'
+                    }
+                },
+                % if get_language_bidi():
+                reversed: true
+                % endif
+            },
+            plotOptions: {
+                map: {
+                    shadow: false
+                },
+                column: {
+                    maxPointWidth: 50
+                }
+            },
+
+            // Highstock specific
+            rangeSelector: {
+                buttonTheme: {
+                    fill: 'white',
+                    stroke: '#C0C0C8',
+                    'stroke-width': 1,
+                    states: {
+                        select: {
+                            fill: '#D0D0D8'
+                        }
+                    }
+                }
+            },
+            scrollbar: {
+                trackBorderColor: '#C0C0C8'
+            },
+
+            // General
+            background2: '#E0E0E8'
+
+        };
+
+        // Apply the theme
+        Highcharts.setOptions(Highcharts.theme);
+
+
+        /**
+            Course Lessons
+        */
+        Highcharts.chart('lessons-chart', {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: "${_('Number of lessons in each course')}"
+            },
+            credits: false,
+            xAxis: {
+                title: {
+                    text: null
+                },
+                categories: JSON.parse('${course_names| n, dump_js_escaped_json}')
+            },
+            yAxis: [{
+                min: 0,
+                title: {
+                    text: "${_('Lessons')}"
+                }
+            }, {
+                linkedTo: 0,
+                opposite: true,
+                title: {
+                    text: "${_('Lessons')}"
+                }
+            }],
+            colors: ["#f6d346"],
+            plotOptions: {
+                bar: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{          
+                pointWidth: 20,
+                name: "${_('Lessons')}",
+                data: JSON.parse("${course_lessons| n, dump_js_escaped_json}")
+
+            }]
+        });
+
+    });
+    </script>
+</%block>

@@ -1,0 +1,356 @@
+<%page expression_filter="h"/>
+<%namespace name='static' file='../../static_content.html'/>
+<%inherit file="../../main.html" />
+
+<%!
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+%>
+
+<%
+  filter_icons = {
+    "provider": "la-landmark",
+    "subject": "la-book",
+    "stage": "la-stream",
+    "language": "la-language",
+  }
+%>
+
+<%block name="header_extras">
+  <script type="text/template" id="exam-card-tpl">
+    <%static:include path="timed_exam/discover/card.underscore" />
+  </script>
+  <link rel="stylesheet" href="${static.url('assets/css/autoComplete.min.css')}">
+  <link rel="stylesheet" href="${static.url('css/filters.css')}">
+  <style>
+    .courses-container .courses .course .course-info .course-title {
+      margin-bottom: 5px;
+    }
+    .highlighted-courses .courses, .find-courses .courses {
+      padding: 20px 0 15px;
+    }
+    #suggestion-msg {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeeba;
+      margin-bottom: 20px;
+      display: none;
+    }
+    #suggestion-msg .suggestion-cat{
+      font-weight: 700;
+    }
+    /******* AutoComplete *******/
+    .autoComplete_wrapper {display: block;}
+    .autoComplete_wrapper > input:focus {
+      border: 0;
+      box-shadow: none;
+    }
+    .autoComplete_wrapper > input:focus-visible {
+      outline: #281958 auto 1px;
+    }
+    .autoComplete_wrapper > ul {
+      overflow: hidden auto;
+      margin-top: 1px;
+      border-radius: 5px;
+      right: -20px;
+      left: -20px;
+      max-height: 300px;
+    }
+    .autoComplete_wrapper > ul > li mark {
+      background-color: transparent;
+      color: #A445B0;
+      font-weight: bold;
+    }
+  </style>
+</%block>
+
+<main id="main" aria-label="Content" tabindex="-1">
+  <section class="find-courses">
+    <section class="courses-container highlighted-courses">
+      % if filters_data:
+      <section class="courses-filter mt-3">
+
+        <h1 class="filters-title"><i class="las la-lg la-filter mx-1"></i> ${_('Filter Exams')}</h1>
+
+        <div id="search-filter" class="filter-item">
+          <input id="filters-auto-complete" class="filter-input" type="text"
+            name="search" placeholder="${_('Search for an exam')}">
+        </div>
+
+        <div id="filter-accordion" class="filter-accordion">
+          % for filter_key, filter_items in filters_data.items():
+          <div class="filter-card" data-filter="${filter_key}">
+            <div class="filter-header collapsed" id="${filter_key}-filter-h"
+              data-toggle="collapse" data-target="#${filter_key}-filter"
+              aria-expanded="false" aria-controls="${filter_key}-filter">
+              <h3 class="filter-title">
+                <i class="las la-lg ${filter_icons[filter_key.lower()] if filter_key.lower() in filter_icons.keys() else 'la-filter'} mx-1"></i>
+                % if LANGUAGE_CODE == "ar" and filter_items["category_name_in_arabic"]:
+                  ${filter_items["category_name_in_arabic"]}
+                % else:
+                  ${filter_items["category_name"]}
+                % endif
+                <span id="${filter_key}-counter" class="filetr-count">0</span>
+              </h3>
+            </div>
+
+            <div id="${filter_key}-filter" class="collapse"
+              aria-labelledby="${filter_key}-filter-h" data-parent="#filter-accordion">
+              <div class="filter-body">
+                %for filter_item in filter_items["category_filters"]:
+                <div class="form-check">
+                  <input class="form-check-input filter-input" type="checkbox" name="${filter_key}[]" value="${filter_item['id']}" id="${filter_key}-${filter_item['id']}">
+                  <label class="form-check-label" for="${filter_key}-${filter_item['id']}">
+                    % if LANGUAGE_CODE == "ar" and filter_item["value_in_arabic"]:
+                      ${filter_item["value_in_arabic"]}
+                    % else:
+                      ${filter_item["value"]}
+                    % endif
+                  </label>
+                </div>
+                %endfor
+              </div>
+            </div>
+
+          </div>
+          %endfor
+        </div>
+
+        <div id="sort-filter" class="filter-item">
+          <h3 class="filter-label"><i class="las la-lg la-sort mx-1"></i> ${_('Sort')}</h3>
+          <select class="filter-input" name="sort">
+              <option value="" selected></option>
+              <option value="start_date">${_('By Start Date')}</option>
+              <option value="due_date">${_('By Due Date')}</option>
+              <option value="atoz">${_('Alphabetically A-Z')}</option>
+              <option value="ztoa">${_('Alphabetically Z-A')}</option>
+          </select>
+        </div>
+        <a class="filter-btn" id="filter-btn"><i class="las la-sync mx-1"></i>${_('Filter')}</a>
+      </section>
+      % endif
+
+      <section class="courses container-fluid" id="courses-wrapper">
+        <div id="suggestion-msg" class="alert alert-warning" role="alert">
+          ${_("We couldn't find any exams for the selected filters.")}
+          <span class="suggestion-cat"></span>
+        </div>
+        <div class="courses-listing row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 justify-content-center">
+        </div>
+        <div class="pagination">
+          <span id="filter-prev" class="prev"><i class="las la-angle-left"></i></span>
+          <div id="filter-pages" class="pages">
+              <span class="page active" data-page="1">1</span>
+          </div>
+          <span id="filter-next" class="next"><i class="las la-angle-right"></i></span>
+        </div>
+        <div class="loading-block"><i class="las la-4x la-spin la-sync"></i></div>
+      </section>
+    </section>
+  </section>
+</main>
+
+<%block name="js_extra">
+  <!-- Page level custom js -->
+  <script type="text/javascript" src="${static.url('assets/js/autoComplete.min.js')}"></script>
+  <script type="text/javascript">
+    Object.defineProperty(Array.prototype, 'flat', {
+        value: function(depth = 1) {
+          return this.reduce(function (flat, toFlatten) {
+            return flat.concat((Array.isArray(toFlatten) && (depth>1)) ? toFlatten.flat(depth-1) : toFlatten);
+          }, []);
+        }
+    });
+    const flatten = (obj) => Object.values(obj).flat();
+    var filterAutoCompleteId = "filters-auto-complete";
+    var filterAutoCompletePlaceholder = "${_('Search for an exam')}";
+    var filterAutoCompleteLoading = "${_('Loading')}";
+    var autoCompleteURL = "${reverse('auto_complete_exam_search')}";
+    var searchURL = "${reverse('search_exams')}";
+    var examImage = "${static.url('images/placeholder.png')}";
+    var currentPage = 1;
+    var totalPages = 1;
+
+    var renderPagination = function () {
+      let pagination = $("#filter-pages");
+
+      // remove all pages
+      pagination.empty();
+      for (let page = 1; page <= totalPages; page++) {
+        let $p = $("<span>", {"class": "page", "data-page": page});
+        $p.text(page);
+        if(page == currentPage) $p.addClass("active");
+        pagination.append($p);
+      }
+    }
+
+    var postFilter = function (filtersSelected) {
+      // update filters UI
+      for (var key in filtersSelected) {
+        if (filtersSelected.hasOwnProperty(key)) {
+          let values = filtersSelected[key];
+          if (values.length > 0) {
+            $("#" + key + "-counter").text(values.length);
+            $("#" + key + "-counter").addClass("show");
+          } else {
+            $("#" + key + "-counter").text(0);
+            $("#" + key + "-counter").removeClass("show");
+          }
+        }
+      }
+      // scroll top
+      $('html, body').animate({
+        scrollTop: $(".courses-container").offset().top
+      }, 500);
+    }
+
+    var getExams = function (page=1, updatePagination=true) {
+      let filters = [];
+      $("#suggestion-msg").hide();
+      $("#courses-wrapper").addClass('loading');
+      $(".courses-filter .filter-card").each(function(index) {
+        let name = $(this).data("filter");
+        let values = $("#" + name + "-filter input:checkbox:checked").map(function() {
+          return $(this).val();
+        }).get();
+        filters[name] = values;
+      });
+
+      // get search
+      let search = $("#search-filter input").val() || "";
+
+      // get sort
+      let sort = $("#sort-filter select").val() || "atoz";
+
+      // hit backend
+      let query = {filters:flatten(filters).join(), search:search, sort:sort, page:page};
+      $("#courses-wrapper .courses-listing").html('');
+      $.get( searchURL, query, function( data ) {
+        if (data.count == 0) $("#suggestion-msg").show();
+        $.each(data.results, function( index, exam ) {
+          exam.image = examImage;
+          var html = _.template($('#exam-card-tpl').html())(exam);
+          $("#courses-wrapper .courses-listing").append(html);
+        });
+        // update page counts
+        currentPage = data.current_page;
+        totalPages = data.num_pages;
+        // render pagination
+        if (updatePagination) renderPagination();
+        $("#courses-wrapper").removeClass('loading');
+        postFilter(filters);
+      });
+    }
+
+    $(document).ready(function () {
+      // The autoComplete.js Engine instance creator
+      const autoCompleteJS = new autoComplete({
+        selector: "#" + filterAutoCompleteId,
+        placeHolder: filterAutoCompletePlaceholder,
+        data: {
+          src: async (query) => {
+            try {
+              // Loading placeholder text
+              document.getElementById(filterAutoCompleteId).setAttribute("placeholder", filterAutoCompleteLoading);
+              // Fetch Data from external Source
+              const source = await fetch(autoCompleteURL + "?search=" + query);
+              // Data is array of `Objects` | `Strings`
+              const data = await source.json();
+              // Post Loading placeholder text
+              document.getElementById(filterAutoCompleteId).setAttribute("placeholder", autoCompleteJS.placeHolder);
+              // Returns Fetched data
+              return data.results;
+            } catch (error) {
+              return error;
+            }
+          },
+          keys: ["name"]
+        },
+        threshold: 3,
+        debounce: 300,
+        resultsList: {
+          noResults: true,
+          maxResults: 15,
+          tabSelect: true
+        },
+        resultItem: {
+          highlight: true
+        }
+      });
+      autoCompleteJS.input.addEventListener("selection", function (event) {
+        const feedback = event.detail;
+        autoCompleteJS.input.blur();
+        // Prepare User's Selected Value
+        const selection = feedback.selection.value[feedback.selection.key];
+        // Replace Input value with the selected value
+        autoCompleteJS.input.value = selection;
+        getExams();
+      });
+
+      // load all exams on page load
+      getExams();
+
+      // filter button click
+      $("#filter-btn").on("click", function() {
+        getExams();
+      });
+
+      // filter on change
+      $(".filter-input:not(#filters-auto-complete)").on("change", function() {
+        getExams();
+      });
+
+      // filter on Enter key
+      $(document).keypress(function(event) {
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == '13') {
+          getExams();
+        }
+      });
+
+      // Pagination
+      $("#filter-prev").on("click", function() {
+        if (currentPage > 1) {
+          getExams(--currentPage, false);
+        }
+      });
+
+      $("#filter-next").on("click", function() {
+        if (currentPage < totalPages) {
+          getExams(++currentPage, false);
+        }
+      });
+
+      $("#filter-pages .page").on("click", function() {
+        let page = parseInt($(this).data("page"));
+        getExams(page, false);
+      });
+
+      // Enroll and Start exam
+      $(document).on("click", ".btn-attempt-exam", function() {
+        var btn = $(this);
+        btn.addClass('disabled');
+        var examID = btn.data('exam-id');
+        var examURL = btn.data('exam-url');
+        $.post({
+            url: "/api/enrollment/v1/enrollment",
+            data: JSON.stringify({
+                mode: "timed",
+                course_details: {
+                    course_id: examID
+                }
+            }),
+            contentType: "application/json",
+            complete: function() {
+                btn.removeClass("disabled");
+            },
+            success: function(response) {
+                window.location.href = '/';
+            }
+        });
+
+      });
+
+    });
+  </script>
+</%block>

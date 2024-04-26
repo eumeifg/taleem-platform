@@ -1,0 +1,34 @@
+## mako
+<%page expression_filter="h"/>
+
+<%!
+from django.utils.translation import ugettext as _
+from openedx.custom.taleem.models import UserType
+%>
+
+<%
+can_set_notification_preferences = any((
+    user.is_superuser,
+    user.is_staff,
+    user.ta3leem_profile.user_type == UserType.teacher.name,
+))
+%>
+
+<div class="nav-item hidden-mobile nav-item-dropdown notify" tabindex="-1">
+    <div class="toggle-notify-dropdown" role="button" aria-label="Notifications" aria-expanded="false" tabindex="0" aria-controls="notify-menu">
+        <i class="las la-lg la-bell"></i>
+        <span class="bubble hidden notification-count"></span>
+    </div>
+    <div class="dropdown-notify-menu hidden" aria-label="Notifications" role="menu" id="notify-menu" tabindex="-1">
+        <div class="notifications-list">
+            <span id="no-notification">${_("You are done. No more notifications!")}</span>
+        </div>
+        <div class="notifications-link">
+            <a class="font-weight-bold d-block" href="/notifications/list/"><i class="las la-lg mx-1 la-list"></i> ${_("View all notifications")}</a>
+            % if can_set_notification_preferences:
+            <a class="font-weight-bold d-block" href="/notifications/preferences/"><i class="las la-lg mx-1 la-cog"></i> ${_("Preferences")}</a>
+            % endif
+        </div>
+    </div>
+</div>
+

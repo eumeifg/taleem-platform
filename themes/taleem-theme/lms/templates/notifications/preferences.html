@@ -1,0 +1,100 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    import pytz
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.markup import HTML
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    .form {border: 1px solid lightgray; padding: 20px;}
+    .form .fieldset {margin-bottom: 20px;}
+    .form input {font-style: normal;}
+    .form label {font-style: normal;}
+    .form select {min-width: 100px; height: 30px;}
+    .form .errorlist {padding-left: 0; margin: 10px 0 0 0;}
+    .form .errorlist li {list-style-type: none; color: red;}
+    .non-field-errors .form-error {color: red; margin-bottom: 10px;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Preferences")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">${_("Notification Preferences")}</h1>
+        </div>
+
+        <!-- Form Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">${_("Preferences")}</h6>
+                    </div>
+                    <div class="card-body">
+                        % if form.non_field_errors():
+                          <div class="non-field-errors">
+                            % for err in form.non_field_errors():
+                              <p class="form-error">${err}</p>
+                            % endfor
+                          </div>
+                        % endif
+
+                        <form method="post" class="form" id="preferencesForm" action=".">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}" />
+
+                            ${form.as_div()}
+
+                            <a id="submit" class="btn btn-primary" href="javascript::void(0);">${_("Submit")}</a>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <!-- Page level custom js -->
+    <script>
+    $(function () {
+        // Bind click of submit button
+        $("#submit").click(function(){
+            $("#preferencesForm").submit();
+        });
+    });
+    </script>
+</%block>

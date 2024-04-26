@@ -1,0 +1,185 @@
+<%page expression_filter="h"/>
+<%!
+    import json
+    import pytz
+    from six import text_type
+    from django.urls import reverse
+    from django.utils.translation import ugettext as _
+    from django.utils.translation import get_language_bidi
+    from openedx.core.djangolib.markup import HTML
+    from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+    from openedx.custom.live_class.models import LiveClass
+    from datetime import datetime
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+    <script src="https://kit.fontawesome.com/16acf9db36.js" crossorigin="anonymous"></script>
+    <style>
+    .window-wrap {background-color: #f8f9fc;}
+    div.dt-buttons {float: inherit;}
+    .swal-button {background-color: #7cd1f9 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button:not([disabled]):hover {    background-color: #78cbf2 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel {background-color: #efefef !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--cancel:not([disabled]):hover {background-color: #e8e8e8 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger {background-color: #e64942 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    .swal-button--danger:not([disabled]):hover {background-color: #df4740 !important; background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:active:not(:disabled), input[type="submit"]:focus:not(:disabled),
+    input[type="button"]:active:not(:disabled), input[type="button"]:focus:not(:disabled),
+    button:active:not(:disabled), button:focus:not(:disabled), .button:active:not(:disabled),
+    .button:focus:not(:disabled) {box-shadow: none;}
+    .btn, button, .btn:hover, .btn:focus, button:hover,
+    button:focus {background-image: none; box-shadow: none; text-shadow: none;}
+    input[type="submit"]:hover:not(:disabled), input[type="button"]:hover:not(:disabled),
+    button:hover:not(:disabled), .button:hover:not(:disabled) {background-image: none; box-shadow: none; text-shadow: none;}
+    .btn-secondary:focus, .btn-secondary:hover {background-color: #717384 !important;}
+    .dt-buttons .btn-secondary {color: #3a3b45;background-color: #f8f9fc;border-color: #f8f9fc;}
+    .dt-buttons .btn-secondary:hover, .dt-buttons .btn-secondary:focus {color: #3a3b45; background-color: #dde2f1 !important; border-color: #d4daed;}
+    .text-red {color: #FF0000;}
+    .text-green {color: #00FF00;}
+    .form {border: 1px solid lightgray; padding: 20px;}
+    .form .fieldset {margin-bottom: 20px;}
+    .form #id_name {width: 50%;}
+    .form #id_course {width: 50%;}
+    .form #id_folder {margin-right: 10px;width: 50%;}
+    .form input {font-style: normal;}
+    .form label {display: block; font-style: normal;}
+    .form select {min-width: 100px; height: 30px;}
+    .form .errorlist {padding-left: 0; margin: 10px 0 0 0;}
+    .form .errorlist li {list-style-type: none; color: red;}
+    .non-field-errors .form-error {color: red; margin-bottom: 10px;}
+    .note-text { padding-top: 30px;}
+    </style>
+</%block>
+
+<%block name="pagetitle">${_("Live Class")}</%block>
+
+<main class="bootstrap-iso" id="main" aria-label="Content" tabindex="-1">
+    <div class="container-fluid">
+
+        <!-- Form Row -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+
+                        <div class="text-center p-4">
+                            <h2 class="mb-4">${live_class.name}</h2>
+
+                            % if expired:
+                                <h4 class="text-danger">${_("The session you are trying to visit is expired.")}</h4>
+                            % else:
+                                <div class="mb-4"><i class="las la-lg la-chalkboard-teacher la-4x text-danger"></i></div>
+                                % if is_teacher:
+                                    % if live_class.stage == LiveClass.SCHEDULED:
+                                        <h4>${_("Please wait, your live class will start at scheduled time.")}</h4>
+                                    % else:
+                                        <h4>${_("Your live class already started.")}</h4>
+                                    % endif
+                                % else:
+                                    % if live_class.stage == LiveClass.RUNNING:
+                                        <h4>${_("Class running. Please Join.")}</h4>
+                                    % else:
+                                        <h4>${_("Please wait for the instructor to start this session.")}</h4>
+                                    % endif
+                                % endif
+                            % endif
+
+                            <p class="text-muted">${_("Starts")}: ${live_class.display_time}</p>
+
+                            <a class="btn btn-primary text-white" href="/dashboard">${_("Go to Dashboard")}</a>
+                            <a class="btn btn-success text-white" href="" id="startClassBtn" hidden>
+                                % if is_teacher:
+                                    % if live_class.stage == LiveClass.SCHEDULED:
+                                        ${_("Start Class")}
+                                    % else:
+                                        ${_("Re-Join Class")}
+                                    % endif
+                                % else:
+                                    ${_("Join Class")}
+                                % endif
+                            </a>
+
+                            &nbsp
+                            <p class="note-text"><strong>${_("Note:")}</strong> ${_("Using the incognito or private mode of the browser will result in no attendance for the class.")}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
+
+<%block name="js_extra">
+    <!-- Page level plugins -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script type="text/javascript" src="${static.url('js/vendor/timepicker/jquery.timepicker.min.js')}"></script>
+
+    <!-- Page level custom js -->
+    <script>
+
+    $(function () {
+
+        // ****** Long polling to get session status
+        % if long_poll:
+        var isActive = true;
+        % else:
+        var isActive = false;
+        % endif
+
+        % if join_url:
+        var canStartClass = true;
+        var joinUrl = "${join_url}";
+        % else:
+        var canStartClass = false;
+        % endif
+
+        function pollServer() {
+            if (isActive) {
+
+                window.setTimeout(function () {
+                    $.ajax({
+                        url: "${reverse('live_class_status', args=[live_class.id])}",
+                        type: "POST",
+                        success: function (res) {
+                            //SUCCESS LOGIC
+                            isActive = res.continue_polling;
+                            if (isActive){
+                                pollServer();
+                            } else {
+                                if(res.join_url) {
+                                    showStartClassBtn(res.join_url);
+                                } else {
+                                    swal({title: res.error, type: 'error'});
+                                }
+                            }
+                        },
+                        error: function () {
+                            //ERROR HANDLING
+                            pollServer();
+                        }});
+                }, 5000);
+            }
+        }
+
+        function showStartClassBtn(joinUrl) {
+            var startBtn = document.getElementById('startClassBtn');
+            startBtn.href = joinUrl;
+            startBtn.removeAttribute('hidden');
+        }
+
+        $(document).ready(function () {
+            pollServer();
+            if(canStartClass){
+                showStartClassBtn(joinUrl);
+            }
+        });
+
+
+    });
+    </script>
+</%block>
+
